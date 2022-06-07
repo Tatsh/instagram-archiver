@@ -107,8 +107,8 @@ def main(output_dir: Optional[Union[Path, str]],
                 r = session.get('https://www.instagram.com/graphql/query/',
                                 params=params)
                 r.raise_for_status()
-                media = r.json(
-                )['data']['user']['edge_owner_to_timeline_media']
+                media = (
+                    r.json()['data']['user']['edge_owner_to_timeline_media'])
                 page_info = media['page_info']
                 save_stuff(media['edges'])
         sys.argv = [sys.argv[0]]
@@ -116,8 +116,7 @@ def main(output_dir: Optional[Union[Path, str]],
         if len(video_urls) > 0:
             with yt_dlp.YoutubeDL({
                     **ydl_opts,
-                    **dict(download_archive=None,
-                           http_headers=SHARED_HEADERS,
+                    **dict(http_headers=SHARED_HEADERS,
                            logger=YoutubeDLLogger(),
                            verbose=debug)
             }) as ydl:
