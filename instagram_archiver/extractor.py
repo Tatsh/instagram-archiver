@@ -1,9 +1,10 @@
-from typing import Any, Mapping, Optional, cast
+from typing import Any, Mapping
 
 from bs4 import BeautifulSoup as Soup
 from yt_dlp.extractor.instagram import InstagramIE
-from yt_dlp.utils import (float_or_none, format_field, int_or_none,
-                          lowercase_escape, str_to_int, traverse_obj)
+from yt_dlp.utils import float_or_none, int_or_none, traverse_obj
+
+from instagram_archiver.ig_typing import MediaInfoItem
 
 from .constants import EXTRACT_VIDEO_INFO_JS
 from .utils import call_node_json
@@ -14,7 +15,7 @@ class ImprovedInstagramIE(InstagramIE):
                   r'(?:p|tv|reel)/(?P<id>[^/?#&]+))')
 
     @classmethod
-    def ie_key(cls):
+    def ie_key(cls) -> str:
         return 'ImprovedInstagram'
 
     def _real_extract(self, url: str) -> Mapping[str, Any]:
@@ -39,184 +40,54 @@ class ImprovedInstagramIE(InstagramIE):
         assert len(xig_js) > 0
         data = call_node_json(EXTRACT_VIDEO_INFO_JS + xig_js)
         props = data['hostableView']['props']
-        media_id = props['media_id']
-        info = self._download_json(
-            f'https://i.instagram.com/api/v1/media/{media_id}/info/',
-            video_id)['items'][0]
-        best_video = sorted(info['video_versions'],
-                            key=lambda x: x['height'] * x['width'],
-                            reverse=True)[0]
-        shared_data = {
-            'entry_data': {
-                'PostPage': [{
-                    'media': {
-                        'owner':
-                        info['user'],
-                        'caption':
-                        traverse_obj(info, ('caption', 'text'),
-                                     expected_type=str),
-                        'video_url':
-                        best_video['url'],
-                        'height':
-                        best_video['height'],
-                        'width':
-                        best_video['width'],
-                        'edge_media_to_parent_comment': {
-                            'edges': []
-                        },
-                        'comments': {
-                            'preview_comment': {
-                                'to_comment': {
-                                    'to_parent_comment':
-                                    info.get('comment_count', None)
-                                }
-                            }
-                        },
-                        'likes': {
-                            'preview_like': info.get('like_count', None)
-                        },
-                        'taken_at_timestamp':
-                        info['taken_at'],
-                        'display_resources': [{
-                            'config_width': x['width'],
-                            'config_height': x['height'],
-                            'url': x['url']
-                        } for x in info.get('image_versions2', {}).get(
-                            'candidates', [])],
-                        'dash_info': {
-                            'video_dash_manifest':
-                            info.get('video_dash_manifest', None)
-                        }
-                    }
-                }]
-            }
-        }
-        media = traverse_obj(shared_data,
-                             ('entry_data', 'PostPage', 0, 'media'),
-                             expected_type=dict)
-        # _sharedData.entry_data.PostPage is empty when authenticated (see
-        # https://github.com/ytdl-org/youtube-dl/pull/22880)
-        if not media:
-            additional_data = self._parse_json(self._search_regex(
-                (r'window\.__additionalDataLoaded\s*\(\s*[^,]+,\s*({.+?})\s*'
-                 r'\);'),
-                webpage,
-                'additional data',
-                default='{}'),
-                                               video_id,
-                                               fatal=False)
-            product_item = traverse_obj(additional_data, ('items', 0),
-                                        expected_type=dict)
-            if product_item:
-                return self._extract_product(product_item)
-            media = traverse_obj(additional_data,
-                                 ('graphql', 'shortcode_media'),
-                                 'shortcode_media',
-                                 expected_type=dict) or {}
-        if not media and 'www.instagram.com/accounts/login' in urlh.geturl():
-            self.raise_login_required(
-                'You need to log in to access this content')
+        info: MediaInfoItem = self._download_json(
+            ('https://i.instagram.com/api/v1/media/'
+             f'{props["media_id"]}/info/'), video_id)['items'][0]
         username = traverse_obj(
-            media, ('owner', 'username')) or self._search_regex(
-                r'"owner"\s*:\s*{\s*"username"\s*:\s*"(.+?)"',
-                webpage,
-                'username',
-                fatal=False)
-        description = (traverse_obj(
-            media, ('edge_media_to_caption', 'edges', 0, 'node', 'text'),
-            expected_type=str) or media.get('caption'))
-        if not description:
-            description = self._search_regex(r'"caption"\s*:\s*"(.+?)"',
-                                             webpage,
-                                             'description',
-                                             default=None)
-            if description is not None:
-                description = lowercase_escape(description)
-        video_url = media.get('video_url')
-        if not video_url:
-            nodes = traverse_obj(
-                media, ('edge_sidecar_to_children', 'edges', ..., 'node'),
-                expected_type=dict) or []
-            if nodes:
-                return self.playlist_result(
-                    self._extract_nodes(nodes, True), video_id,
-                    format_field(username, template='Post by %s'), description)
-            video_url = self._og_search_video_url(webpage, secure=False)
+            info,
+            ('user', 'username'),
+            expected_type=str,
+        )
         formats = [{
-            'url': video_url,
-            'width': self._get_dimension('width', media, webpage),
-            'height': self._get_dimension('height', media, webpage),
-        }]
-        dash = traverse_obj(media, ('dash_info', 'video_dash_manifest'))
+            'url': x['url'],
+            'width': x['width'],
+            'height': x['height'],
+        } for x in info['video_versions']]
+        dash = info.get('video_dash_manifest')
         if dash:
             formats.extend(
                 self._parse_mpd_formats(self._parse_xml(dash, video_id),
                                         mpd_id='dash'))
         self._sort_formats(formats)
-        comment_data = traverse_obj(media,
-                                    ('edge_media_to_parent_comment', 'edges'))
-        comments = [{
-            'author':
-            traverse_obj(comment_dict, ('node', 'owner', 'username')),
-            'author_id':
-            traverse_obj(comment_dict, ('node', 'owner', 'id')),
-            'id':
-            traverse_obj(comment_dict, ('node', 'id')),
-            'text':
-            traverse_obj(comment_dict, ('node', 'text')),
-            'timestamp':
-            traverse_obj(comment_dict, ('node', 'created_at'),
-                         expected_type=int_or_none),
-        } for comment_dict in comment_data] if comment_data else None
-
-        display_resources = (media.get('display_resources')
-                             or [{
-                                 'src': media.get(key)
-                             } for key in ('display_src', 'display_url')]
-                             or [{
-                                 'src': self._og_search_thumbnail(webpage)
-                             }])
-        thumbnails = [{
-            'url': thumbnail['src'],
-            'width': thumbnail.get('config_width'),
-            'height': thumbnail.get('config_height'),
-        } for thumbnail in display_resources if thumbnail.get('src')]
         return {
             'id':
             video_id,
             'formats':
             formats,
             'title':
-            media.get('title') or f'Video by {username}',
+            f'Video by {username}',
             'description':
-            description,
+            traverse_obj(info, ('caption', 'text'), expected_type=str),
             'duration':
-            float_or_none(cast(Optional[str], media.get('video_duration'))),
+            float_or_none(info.get('video_duration')),
             'timestamp':
-            traverse_obj(media,
-                         'taken_at_timestamp',
-                         'date',
-                         expected_type=int_or_none),
+            traverse_obj(info, 'taken_at', expected_type=int_or_none),
             'uploader_id':
-            traverse_obj(media, ('owner', 'id')),
+            str(traverse_obj(info, ('user', 'pk'), expected_type=int)),
             'uploader':
-            traverse_obj(media, ('owner', 'full_name')),
+            traverse_obj(info, ('user', 'full_name'), expected_type=str),
             'channel':
             username,
             'like_count':
-            self._get_count(media, 'likes', 'preview_like') or str_to_int(
-                self._search_regex(
-                    r'data-log-event="likeCountClick"[^>]*>[^\d]*([\d,\.]+)',
-                    webpage,
-                    'like count',
-                    fatal=False)),
+            traverse_obj(info, 'like_count', expected_type=int_or_none),
             'comment_count':
-            self._get_count(media, 'comments', 'preview_comment', 'to_comment',
-                            'to_parent_comment'),
-            'comments':
-            comments,
-            'thumbnails':
-            thumbnails,
+            traverse_obj(info, 'comment_count', expected_type=int_or_none),
+            'thumbnails': [{
+                'url': thumbnail['url'],
+                'width': thumbnail.get('width'),
+                'height': thumbnail.get('height'),
+            } for thumbnail in info.get('image_versions2', {}).get(
+                'candidates', []) if thumbnail.get('url')],
             'http_headers': {
                 'Referer': 'https://www.instagram.com/',
             }
