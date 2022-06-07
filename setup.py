@@ -12,8 +12,7 @@ with open('README.md') as f:
               ]
           },
           install_requires=[
-              'click>=8.0.0', 'loguru>=0.5.3', 'ratelimiter>=1.2.0',
-              'requests', 'yt-dlp'
+              'click>=8.0.0', 'loguru>=0.5.3', 'requests', 'yt-dlp'
           ],
           license='MIT',
           long_description=f.read(),
