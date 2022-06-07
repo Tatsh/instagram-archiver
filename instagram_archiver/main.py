@@ -6,7 +6,8 @@ import json
 import sys
 
 from bs4 import BeautifulSoup as Soup
-from ratelimiter import RateLimiter
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from yt_dlp.cookies import extract_cookies_from_browser
 import click
 import requests
@@ -38,6 +39,11 @@ def main(output_dir: Optional[Union[Path, str]],
         makedirs(output_dir, exist_ok=True)
     chdir(output_dir)
     with requests.Session() as session:
+        session.mount(
+            'https://',
+            HTTPAdapter(
+                max_retries=Retry(backoff_factor=2.5,
+                                  status_forcelist=[429, 500, 502, 503, 504])))
         session.headers.update({
             **SHARED_HEADERS,
             **dict(cookie='; '.join(f'{c.name}={c.value}' \
@@ -89,28 +95,28 @@ def main(output_dir: Optional[Union[Path, str]],
                     if not isfile(name):
                         r = session.get(edge['node']['display_url'])
                         r.raise_for_status()
-                        write_if_new(f'{edge["node"]["id"]}.{ext}', r.content,
-                                     'wb')
+                        write_if_new(
+                            f'{edge["node"]["id"]}.{ext}',
+                            r.content,
+                            'wb',
+                        )
                     write_if_new(f'{edge["node"]["id"]}.json',
                                  json.dumps(edge['node']))
 
         save_stuff(user_info['edge_owner_to_timeline_media']['edges'])
         page_info = (user_info['edge_owner_to_timeline_media']['page_info'])
-        rate_limiter = RateLimiter(max_calls=1, period=5)
         while page_info['has_next_page']:
-            with rate_limiter:
-                params = dict(query_hash='69cba40317214236af40e7efa697781d',
-                              variables=json.dumps(
-                                  dict(id=user_info['id'],
-                                       first=12,
-                                       after=page_info['end_cursor'])))
-                r = session.get('https://www.instagram.com/graphql/query/',
-                                params=params)
-                r.raise_for_status()
-                media = (
-                    r.json()['data']['user']['edge_owner_to_timeline_media'])
-                page_info = media['page_info']
-                save_stuff(media['edges'])
+            params = dict(query_hash='69cba40317214236af40e7efa697781d',
+                          variables=json.dumps(
+                              dict(id=user_info['id'],
+                                   first=12,
+                                   after=page_info['end_cursor'])))
+            r = session.get('https://www.instagram.com/graphql/query/',
+                            params=params)
+            r.raise_for_status()
+            media = r.json()['data']['user']['edge_owner_to_timeline_media']
+            page_info = media['page_info']
+            save_stuff(media['edges'])
         sys.argv = [sys.argv[0]]
         ydl_opts = yt_dlp.parse_options()[-1]
         if len(video_urls) > 0:
