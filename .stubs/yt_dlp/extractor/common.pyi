@@ -36,19 +36,12 @@ class InfoExtractor:
                       fatal: Optional[bool] = ...) -> Optional[str]:
         ...
 
-    def _extract_product(self, item: Mapping[str, Any]) -> Mapping[str, Any]:
-        ...
-
     def raise_login_required(self, message: str) -> NoReturn:
         ...
 
     def _og_search_video_url(self,
                              webpage: str,
                              secure: Optional[bool] = ...) -> Optional[str]:
-        ...
-
-    def _get_dimension(self, which: str, data: Mapping[str, Any],
-                       content: str) -> Optional[int]:
         ...
 
     def playlist_result(self, items: Sequence[Mapping[str,
@@ -66,7 +59,4 @@ class InfoExtractor:
         ...
 
     def _og_search_thumbnail(self, webpage: str) -> Optional[str]:
-        ...
-
-    def _get_count(self, obj: Mapping[str, Any], *keys: str) -> Optional[int]:
         ...
