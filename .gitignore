@@ -1,0 +1,7 @@
+/.coverage
+/.directory
+/.pytest_cache/
+/build/
+/dist/
+/htmlcov/
+/MANIFEST

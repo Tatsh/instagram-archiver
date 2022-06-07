@@ -1,0 +1,16 @@
+{
+  "configurations": [
+    {
+      "args": ["-x"],
+      "console": "integratedTerminal",
+      "env": {
+        "_PYTEST_RAISE": "1"
+      },
+      "name": "Pytest",
+      "program": "~/.virtualenvs/xirvik-tools/bin/pytest",
+      "request": "launch",
+      "type": "python"
+    }
+  ],
+  "version": "0.2.0"
+}
