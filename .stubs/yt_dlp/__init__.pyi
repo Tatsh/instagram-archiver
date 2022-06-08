@@ -26,3 +26,6 @@ class YoutubeDL:
 
     def extract_info(self, url: str, ie_key: Optional[str] = ...) -> Any:
         ...
+
+    def in_download_archive(self, info: Mapping[str, str]) -> bool:
+        ...

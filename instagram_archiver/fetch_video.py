@@ -36,9 +36,13 @@ def main(output_dir: Optional[Union[Path, str]],
         ydl.add_info_extractor(ImprovedInstagramIE())
         failed_urls = []
         for url in urls:
-            if not ydl.extract_info(url, ie_key='ImprovedInstagram'):
+            if (not ydl.in_download_archive(
+                    dict(id=url.split('/')[-1],
+                         extractor_key='improvedinstagram'))
+                    and not ydl.extract_info(url, ie_key='ImprovedInstagram')):
                 failed_urls.append(url)
         if len(failed_urls) > 0:
-            logger.error('Failed URLS:')
-            for url in failed_urls:
-                logger.error(f'  {url}')
+            logger.error('Some video URIs failed. Check failed.txt.')
+            with open('failed.txt', 'w') as f:
+                for url in failed_urls:
+                    f.write(f'{url}\n')
