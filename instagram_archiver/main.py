@@ -6,6 +6,7 @@ import json
 import sys
 
 from bs4 import BeautifulSoup as Soup
+from loguru import logger
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from yt_dlp.cookies import extract_cookies_from_browser
@@ -20,7 +21,11 @@ from .utils import (YoutubeDLLogger, call_node_json, get_extension,
 
 
 @click.command()
-@click.option('-o', '--output-dir', default=None, help='Output directory')
+@click.option('-o',
+              '--output-dir',
+              default=None,
+              help='Output directory',
+              type=click.Path(exists=True))
 @click.option('-b',
               '--browser',
               default='chrome',
@@ -86,8 +91,7 @@ def main(output_dir: Optional[Union[Path, str]],
                 if edge['node']['__typename'] == 'GraphVideo':
                     video_urls.append(
                         f'https://www.instagram.com/p/{shortcode}')
-                elif edge['node']['__typename'] in ('GraphImage',
-                                                    'GraphSidecar'):
+                elif edge['node']['__typename'] == 'GraphImage':
                     r = session.head(edge['node']['display_url'])
                     r.raise_for_status()
                     ext = get_extension(r.headers['content-type'])
@@ -95,13 +99,28 @@ def main(output_dir: Optional[Union[Path, str]],
                     if not isfile(name):
                         r = session.get(edge['node']['display_url'])
                         r.raise_for_status()
-                        write_if_new(
-                            f'{edge["node"]["id"]}.{ext}',
-                            r.content,
-                            'wb',
-                        )
+                        write_if_new(name, r.content, 'wb')
                     write_if_new(f'{edge["node"]["id"]}.json',
                                  json.dumps(edge['node']))
+                elif edge['node']['__typename'] == 'GraphSidecar':
+                    r = session.get('https://i.instagram.com/api/v1/media/'
+                                    f'{edge["node"]["id"]}/info/')
+                    item = r.json()['items'][0]
+                    r.raise_for_status()
+                    write_if_new(f'{edge["node"]["id"]}.json',
+                                 json.dumps(item))
+                    for item in item['carousel_media']:
+                        best = sorted(item['image_versions2']['candidates'],
+                                      key=lambda x: x['width'] * x['height'],
+                                      reverse=True)[0]
+                        r = session.head(best['url'])
+                        r.raise_for_status()
+                        ext = get_extension(r.headers['content-type'])
+                        name = f'{item["id"]}.{ext}'
+                        if not isfile(name):
+                            r = session.get(best['url'])
+                            r.raise_for_status()
+                            write_if_new(name, r.content, 'wb')
 
         save_stuff(user_info['edge_owner_to_timeline_media']['edges'])
         page_info = (user_info['edge_owner_to_timeline_media']['page_info'])
@@ -127,6 +146,12 @@ def main(output_dir: Optional[Union[Path, str]],
                            verbose=debug)
             }) as ydl:
                 ydl.add_info_extractor(ImprovedInstagramIE())
+                failed_urls = []
                 for url in video_urls:
                     if not ydl.extract_info(url, ie_key='ImprovedInstagram'):
-                        raise click.Abort()
+                        failed_urls.append(url)
+                if len(failed_urls) > 0:
+                    logger.error('Some video URIs failed. Check failed.txt.')
+                    with open('failed.txt', 'w') as f:
+                        for url in failed_urls:
+                            f.write(f'{url}\n')
