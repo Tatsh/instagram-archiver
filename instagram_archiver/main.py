@@ -20,6 +20,14 @@ from .utils import (YoutubeDLLogger, call_node_json, get_extension,
                     setup_logging, write_if_new)
 
 
+def highlights_tray(session: requests.Session, user_id: Union[int,
+                                                              str]) -> Any:
+    with session.get(f'https://i.instagram.com/api/v1/highlights/{user_id}/'
+                     'highlights_tray/') as r:
+        r.raise_for_status()
+        return r.json()
+
+
 @click.command()
 @click.option('-o',
               '--output-dir',
@@ -46,9 +54,14 @@ def main(output_dir: Optional[Union[Path, str]],
     with requests.Session() as session:
         session.mount(
             'https://',
-            HTTPAdapter(
-                max_retries=Retry(backoff_factor=2.5,
-                                  status_forcelist=[429, 500, 502, 503, 504])))
+            HTTPAdapter(max_retries=Retry(backoff_factor=2.5,
+                                          status_forcelist=(
+                                              429,
+                                              500,
+                                              502,
+                                              503,
+                                              504,
+                                          ))))
         session.headers.update({
             **SHARED_HEADERS,
             **dict(cookie='; '.join(f'{c.name}={c.value}' \
@@ -83,6 +96,20 @@ def main(output_dir: Optional[Union[Path, str]],
         with open('profile_pic.jpg', 'wb') as f:
             f.write(r.content)
         video_urls = []
+
+        # for item in highlights_tray(session, user_info['id'])['tray']:
+        #     video_urls.append('https://www.instagram.com/stories/highlights/'
+        #                       f'{item["id"].split(":")[-1]}/')
+        # sys.argv = [sys.argv[0]]
+        # ydl_opts = yt_dlp.parse_options()[-1]
+        # with yt_dlp.YoutubeDL({
+        #         **ydl_opts,
+        #         **dict(http_headers=SHARED_HEADERS,
+        #                logger=YoutubeDLLogger(),
+        #                verbose=debug)
+        # }) as ydl:
+        #     for url in video_urls:
+        #         ydl.extract_info(url)
 
         def save_stuff(edges: Any) -> None:
             nonlocal video_urls
