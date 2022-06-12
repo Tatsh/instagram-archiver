@@ -1,3 +1,4 @@
+# pylint: disable=abstract-method
 from typing import Any, Mapping
 
 from bs4 import BeautifulSoup as Soup
@@ -31,9 +32,10 @@ class ImprovedInstagramIE(InstagramIE):
                 video_id,
                 note='Downloading embed webpage')
         xig_js = [
-            c for c in Soup(webpage, 'html5lib').select('script') if c.string
-            and c.string.startswith('requireLazy(["JSScheduler","ServerJS",'
-                                    '"ScheduledApplyEach"],')
+            script for script in Soup(webpage, 'html5lib').select('script')
+            if script.string and script.string.startswith(
+                'requireLazy(["JSScheduler","ServerJS",'
+                '"ScheduledApplyEach"],')
         ][0].string
         assert xig_js is not None
         xig_js = xig_js.strip()

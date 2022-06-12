@@ -47,9 +47,9 @@ def get_extension(mimetype: str) -> Literal['png', 'jpg']:
 T = TypeVar('T')
 
 
-def chunks(l: Sequence[T], n: int) -> Iterator[Iterator[T]]:
-    for i in range(0, len(l), n):
-        yield iter(l[i:i + n])
+def chunks(seq: Sequence[T], n: int) -> Iterator[Iterator[T]]:
+    for i in range(0, len(seq), n):
+        yield iter(seq[i:i + n])
 
 
 class InterceptHandler(logging.Handler):  # pragma: no cover

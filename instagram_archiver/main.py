@@ -64,9 +64,9 @@ def main(output_dir: Optional[Union[Path, str]],
                                           ))))
         session.headers.update({
             **SHARED_HEADERS,
-            **dict(cookie='; '.join(f'{c.name}={c.value}' \
-                for c in extract_cookies_from_browser(browser, profile)
-                    if 'instagram.com' in c.domain))
+            **dict(cookie='; '.join(f'{cookie.name}={cookie.value}' \
+                for cookie in extract_cookies_from_browser(browser, profile)
+                    if 'instagram.com' in cookie.domain))
         })
         r = session.get('https://www.instagram.com')
         r.raise_for_status()
@@ -74,8 +74,9 @@ def main(output_dir: Optional[Union[Path, str]],
         r.raise_for_status()
         try:
             xig_js = [
-                c for c in Soup(r.content, 'html5lib').select('script')
-                if c.string and c.string.startswith(
+                script
+                for script in Soup(r.content, 'html5lib').select('script')
+                if script.string and script.string.startswith(
                     'requireLazy(["JSScheduler","ServerJS",'
                     '"ScheduledApplyEach"],')
             ][0].string
