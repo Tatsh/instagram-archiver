@@ -12,7 +12,7 @@ with open('README.md') as f:
           },
           extras_require={
               'dev': [
-                  'mypy', 'mypy-extensions', 'pylint', 'rope',
+                  'mypy', 'mypy-extensions', 'pylint', 'pylint-quotes', 'rope',
                   'types-beautifulsoup4>=4.11.1', 'types-requests>=2.25.9'
               ]
           },
@@ -24,6 +24,6 @@ with open('README.md') as f:
           long_description_content_type='text/markdown',
           name='instagram-archiver',
           packages=find_packages(),
-          python_requires=">=3.9",
+          python_requires='>=3.9',
           url='https://github.com/Tatsh/patreon-archiver',
           version='0.0.6')
