@@ -15,7 +15,6 @@ import requests
 import yt_dlp
 
 from .constants import EXTRACT_XIGSHAREDDATA_JS, SHARED_HEADERS
-from .extractor import ImprovedInstagramIE
 from .utils import (YoutubeDLLogger, call_node_json, get_extension,
                     setup_logging, write_if_new)
 
@@ -173,14 +172,13 @@ def main(output_dir: Optional[Union[Path, str]],
                            logger=YoutubeDLLogger(),
                            verbose=debug)
             }) as ydl:
-                ydl.add_info_extractor(ImprovedInstagramIE())
                 failed_urls = []
                 for url in video_urls:
                     if (not ydl.in_download_archive(
                             dict(id=url.split('/')[-1],
-                                 extractor_key='improvedinstagram'))
+                                 extractor_key='instagram'))
                             and not ydl.extract_info(
-                                url, ie_key='ImprovedInstagram')):
+                                url, ie_key='Instagram')):
                         failed_urls.append(url)
                 if len(failed_urls) > 0:
                     logger.error('Some video URIs failed. Check failed.txt.')

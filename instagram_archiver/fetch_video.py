@@ -8,7 +8,6 @@ import click
 import yt_dlp
 
 from .constants import SHARED_HEADERS
-from .extractor import ImprovedInstagramIE
 from .utils import YoutubeDLLogger
 
 
@@ -33,13 +32,12 @@ def main(output_dir: Optional[Union[Path, str]],
                    logger=YoutubeDLLogger(),
                    verbose=debug)
     }) as ydl:
-        ydl.add_info_extractor(ImprovedInstagramIE())
         failed_urls = []
         for url in urls:
             if (not ydl.in_download_archive(
                     dict(id=url.split('/')[-1],
-                         extractor_key='improvedinstagram'))
-                    and not ydl.extract_info(url, ie_key='ImprovedInstagram')):
+                         extractor_key='instagram'))
+                    and not ydl.extract_info(url, ie_key='Instagram')):
                 failed_urls.append(url)
         if len(failed_urls) > 0:
             logger.error('Some video URIs failed. Check failed.txt.')
