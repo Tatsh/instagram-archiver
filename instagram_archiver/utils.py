@@ -1,27 +1,14 @@
 from os.path import isfile
 from pathlib import Path
 from types import FrameType
-from typing import (Any, Iterable, Iterator, Literal, Optional, Sequence, Set,
-                    TypeVar, Union)
-import json
+from typing import (Literal, Optional, Union)
 import logging
-import subprocess as sp
 import sys
 
 from loguru import logger
 import click
 
-__all__ = ('UnknownMimetypeError', 'call_node_json', 'chunks', 'get_extension',
-           'write_if_new')
-
-
-def call_node_json(content: str) -> Any:
-    with sp.Popen(('node',),
-                  text=True,
-                  stderr=sp.PIPE,
-                  stdin=sp.PIPE,
-                  stdout=sp.PIPE) as proc:
-        return json.loads(proc.communicate(content, timeout=5)[0].strip())
+__all__ = ('UnknownMimetypeError', 'get_extension', 'write_if_new')
 
 
 def write_if_new(target: Union[Path, str],
@@ -42,14 +29,6 @@ def get_extension(mimetype: str) -> Literal['png', 'jpg']:
     if mimetype == 'image/png':
         return 'png'
     raise UnknownMimetypeError(mimetype)
-
-
-T = TypeVar('T')
-
-
-def chunks(seq: Sequence[T], n: int) -> Iterator[Iterator[T]]:
-    for i in range(0, len(seq), n):
-        yield iter(seq[i:i + n])
 
 
 class InterceptHandler(logging.Handler):  # pragma: no cover
@@ -87,13 +66,6 @@ def setup_logging(debug: Optional[bool] = False) -> None:
             level='INFO',
             sink=sys.stderr,
         ),))
-
-
-def unique_iter(seq: Iterable[T]) -> Iterator[T]:
-    """https://stackoverflow.com/a/480227/374110"""
-    seen: Set[T] = set()
-    seen_add = seen.add
-    return (x for x in seq if not (x in seen or seen_add(x)))
 
 
 class YoutubeDLLogger:

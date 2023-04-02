@@ -1,11 +1,11 @@
 from os import chdir, makedirs
 from os.path import isfile
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 import json
+import re
 import sys
 
-from bs4 import BeautifulSoup as Soup
 from loguru import logger
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -14,13 +14,12 @@ import click
 import requests
 import yt_dlp
 
-from .constants import EXTRACT_XIGSHAREDDATA_JS, SHARED_HEADERS
-from .utils import (YoutubeDLLogger, call_node_json, get_extension,
-                    setup_logging, write_if_new)
+from .constants import SHARED_HEADERS
+from .utils import (YoutubeDLLogger, get_extension, setup_logging,
+                    write_if_new)
 
 
-def highlights_tray(session: requests.Session, user_id: Union[int,
-                                                              str]) -> Any:
+def highlights_tray(session: requests.Session, user_id: int | str) -> Any:
     with session.get(f'https://i.instagram.com/api/v1/highlights/{user_id}/'
                      'highlights_tray/') as r:
         r.raise_for_status()
@@ -40,7 +39,7 @@ def highlights_tray(session: requests.Session, user_id: Union[int,
 @click.option('-p', '--profile', default='Default', help='Browser profile')
 @click.option('-d', '--debug', is_flag=True, help='Enable debug output')
 @click.argument('username')
-def main(output_dir: Optional[Union[Path, str]],
+def main(output_dir: Path | str | None,
          browser: str,
          profile: str,
          username: str,
@@ -71,19 +70,9 @@ def main(output_dir: Optional[Union[Path, str]],
         r.raise_for_status()
         r = session.get(f'https://www.instagram.com/{username}/')
         r.raise_for_status()
-        try:
-            xig_js = [
-                script
-                for script in Soup(r.content, 'html5lib').select('script')
-                if script.string and script.string.startswith(
-                    'requireLazy(["JSScheduler","ServerJS",'
-                    '"ScheduledApplyEach"],')
-            ][0].string
-        except IndexError as e:
-            raise click.Abort() from e
-        assert xig_js is not None
-        data = call_node_json(EXTRACT_XIGSHAREDDATA_JS + xig_js)
-        session.headers.update({'x-csrftoken': data['config']['csrf_token']})
+        m = re.search(r'"config":{"csrf_token":"([^"]+)"', r.text)
+        assert m is not None
+        session.headers.update({'x-csrftoken': m.group(1)})
         r = session.get(
             'https://i.instagram.com/api/v1/users/web_profile_info/',
             params={'username': username})
@@ -150,7 +139,7 @@ def main(output_dir: Optional[Union[Path, str]],
                             write_if_new(name, r.content, 'wb')
 
         save_stuff(user_info['edge_owner_to_timeline_media']['edges'])
-        page_info = (user_info['edge_owner_to_timeline_media']['page_info'])
+        page_info = user_info['edge_owner_to_timeline_media']['page_info']
         while page_info['has_next_page']:
             params = dict(query_hash='69cba40317214236af40e7efa697781d',
                           variables=json.dumps(
@@ -177,8 +166,7 @@ def main(output_dir: Optional[Union[Path, str]],
                     if (not ydl.in_download_archive(
                             dict(id=url.split('/')[-1],
                                  extractor_key='instagram'))
-                            and not ydl.extract_info(
-                                url, ie_key='Instagram')):
+                            and not ydl.extract_info(url, ie_key='Instagram')):
                         failed_urls.append(url)
                 if len(failed_urls) > 0:
                     logger.error('Some video URIs failed. Check failed.txt.')
