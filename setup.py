@@ -13,7 +13,7 @@ with open('README.md') as f:
           extras_require={
               'dev': [
                   'mypy', 'mypy-extensions', 'pylint', 'pylint-quotes', 'rope',
-                  'types-beautifulsoup4>=4.11.1', 'types-requests>=2.25.9'
+                  'types-requests>=2.25.9'
               ]
           },
           install_requires=[
