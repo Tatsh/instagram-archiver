@@ -4,12 +4,7 @@ with open('README.md') as f:
     setup(author='Andrew Udvare',
           author_email='audvare@gmail.com',
           description='Archive Instagram content.',
-          entry_points={
-              'console_scripts': [
-                  'ia = instagram_archiver:main',
-                  'ia-fetch-video = instagram_archiver:fetch_video'
-              ]
-          },
+          entry_points={'console_scripts': ['ia = instagram_archiver:main']},
           extras_require={
               'dev': [
                   'mypy', 'mypy-extensions', 'pylint', 'pylint-quotes', 'rope',
@@ -25,5 +20,5 @@ with open('README.md') as f:
           name='instagram-archiver',
           packages=find_packages(),
           python_requires='>=3.9',
-          url='https://github.com/Tatsh/patreon-archiver',
-          version='0.0.6')
+          url='https://github.com/Tatsh/instgram-archiver',
+          version='0.0.5')
