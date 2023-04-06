@@ -163,13 +163,12 @@ def main(output_dir: Path | str | None,
                     display_url = edge['node']['display_url']
                     if is_saved(display_url):
                         continue
+                    r = session.get(display_url)
+                    r.raise_for_status()
                     ext = get_extension(r.headers['content-type'])
                     name = f'{edge["node"]["id"]}.{ext}'
-                    if not isfile(name):
-                        r = session.get(display_url)
-                        r.raise_for_status()
-                        write_if_new(name, r.content, 'wb')
-                        save_to_log(r.url)
+                    write_if_new(name, r.content, 'wb')
+                    save_to_log(r.url)
                     write_if_new(f'{edge["node"]["id"]}.json',
                                  json.dumps(edge['node']))
                 elif edge['node']['__typename'] == 'GraphSidecar':
@@ -194,13 +193,12 @@ def main(output_dir: Path | str | None,
                         best_url = best['url']
                         if is_saved(best_url):
                             continue
+                        r = session.get(best_url)
+                        r.raise_for_status()
                         ext = get_extension(r.headers['content-type'])
                         name = f'{item["id"]}.{ext}'
-                        if not isfile(name):
-                            r = session.get(best_url)
-                            r.raise_for_status()
-                            write_if_new(name, r.content, 'wb')
-                            save_to_log(r.url)
+                        write_if_new(name, r.content, 'wb')
+                        save_to_log(r.url)
 
         save_stuff(user_info['edge_owner_to_timeline_media']['edges'])
         page_info = user_info['edge_owner_to_timeline_media']['page_info']
