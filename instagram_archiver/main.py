@@ -1,13 +1,16 @@
-from os import chdir, makedirs
+from contextlib import ExitStack, contextmanager
+from os import chdir as os_chdir, getcwd, makedirs
 from os.path import isfile
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 import json
 import re
+import sqlite3
 import sys
 
 from loguru import logger
 from requests.adapters import HTTPAdapter
+from urllib.parse import urlparse
 from urllib3.util.retry import Retry
 from yt_dlp.cookies import extract_cookies_from_browser
 import click
@@ -18,12 +21,38 @@ from .constants import SHARED_HEADERS
 from .utils import (YoutubeDLLogger, get_extension, setup_logging,
                     write_if_new)
 
+LOG_SCHEMA = '''
+CREATE TABLE log (
+    url TEXT PRIMARY KEY NOT NULL,
+    date TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+'''
+
 
 def highlights_tray(session: requests.Session, user_id: int | str) -> Any:
     with session.get(f'https://i.instagram.com/api/v1/highlights/{user_id}/'
                      'highlights_tray/') as r:
         r.raise_for_status()
         return r.json()
+
+
+@contextmanager
+def get_cursor(conn: sqlite3.Connection) -> Iterator[sqlite3.Cursor]:
+    cur = conn.cursor()
+    try:
+        yield cur
+    finally:
+        cur.close()
+
+
+@contextmanager
+def chdir(path: str | Path) -> Iterator[None]:
+    old_path = getcwd()
+    os_chdir(path)
+    try:
+        yield
+    finally:
+        os_chdir(old_path)
 
 
 @click.command()
@@ -48,8 +77,16 @@ def main(output_dir: Path | str | None,
     if output_dir is None:
         output_dir = Path('.', username)
         makedirs(output_dir, exist_ok=True)
-    chdir(output_dir)
-    with requests.Session() as session:
+    with ExitStack() as stack:
+        stack.enter_context(chdir(output_dir))
+        log_db = Path('.log.db')
+        existed = log_db.exists()
+        conn = stack.enter_context(sqlite3.connect('.log.db'))
+        cur = stack.enter_context(get_cursor(conn))
+        session = stack.enter_context(requests.Session())
+        if not existed or (existed and log_db.stat().st_size == 0):
+            logger.debug('Creating schema')
+            cur.execute(LOG_SCHEMA)
         session.mount(
             'https://',
             HTTPAdapter(max_retries=Retry(backoff_factor=2.5,
@@ -60,6 +97,15 @@ def main(output_dir: Path | str | None,
                                               503,
                                               504,
                                           ))))
+
+        def clean_url(url: str) -> str:
+            parsed = urlparse(url)
+            return f'https://{parsed.netloc}{parsed.path}'
+
+        def save_to_log(url: str) -> None:
+            cur.execute('INSERT INTO log (url) VALUES (?)', (clean_url(url),))
+            conn.commit()
+
         session.headers.update({
             **SHARED_HEADERS,
             **dict(cookie='; '.join(f'{cookie.name}={cookie.value}' \
@@ -100,6 +146,12 @@ def main(output_dir: Path | str | None,
         #     for url in video_urls:
         #         ydl.extract_info(url)
 
+        def is_saved(url: str) -> bool:
+            cur.execute('SELECT COUNT(url) FROM log WHERE url = ?',
+                        (clean_url(url),))
+            count, = cur.fetchone()
+            return count == 1
+
         def save_stuff(edges: Any) -> None:
             nonlocal video_urls
             for edge in edges:
@@ -108,35 +160,47 @@ def main(output_dir: Path | str | None,
                     video_urls.append(
                         f'https://www.instagram.com/p/{shortcode}')
                 elif edge['node']['__typename'] == 'GraphImage':
-                    r = session.head(edge['node']['display_url'])
-                    r.raise_for_status()
+                    display_url = edge['node']['display_url']
+                    if is_saved(display_url):
+                        continue
                     ext = get_extension(r.headers['content-type'])
                     name = f'{edge["node"]["id"]}.{ext}'
                     if not isfile(name):
-                        r = session.get(edge['node']['display_url'])
+                        r = session.get(display_url)
                         r.raise_for_status()
                         write_if_new(name, r.content, 'wb')
+                        save_to_log(r.url)
                     write_if_new(f'{edge["node"]["id"]}.json',
                                  json.dumps(edge['node']))
                 elif edge['node']['__typename'] == 'GraphSidecar':
-                    r = session.get('https://i.instagram.com/api/v1/media/'
-                                    f'{edge["node"]["id"]}/info/')
-                    item = r.json()['items'][0]
+                    media_info_url = ('https://i.instagram.com/api/v1/media/'
+                                      f'{edge["node"]["id"]}/info/')
+                    if is_saved(media_info_url):
+                        continue
+                    r = session.get(media_info_url)
                     r.raise_for_status()
+                    save_to_log(media_info_url)
+                    try:
+                        item = r.json()['items'][0]
+                    except json.JSONDecodeError as e:
+                        raise click.Abort('Are you logged in?' if '/login' in
+                                          r.url else None) from e
                     write_if_new(f'{edge["node"]["id"]}.json',
                                  json.dumps(item))
                     for item in item['carousel_media']:
                         best = sorted(item['image_versions2']['candidates'],
                                       key=lambda x: x['width'] * x['height'],
                                       reverse=True)[0]
-                        r = session.head(best['url'])
-                        r.raise_for_status()
+                        best_url = best['url']
+                        if is_saved(best_url):
+                            continue
                         ext = get_extension(r.headers['content-type'])
                         name = f'{item["id"]}.{ext}'
                         if not isfile(name):
-                            r = session.get(best['url'])
+                            r = session.get(best_url)
                             r.raise_for_status()
                             write_if_new(name, r.content, 'wb')
+                            save_to_log(r.url)
 
         save_stuff(user_info['edge_owner_to_timeline_media']['edges'])
         page_info = user_info['edge_owner_to_timeline_media']['page_info']
@@ -157,16 +221,18 @@ def main(output_dir: Path | str | None,
         if len(video_urls) > 0:
             with yt_dlp.YoutubeDL({
                     **ydl_opts,
-                    **dict(http_headers=SHARED_HEADERS,
+                    **dict(download_archive=None,
+                           http_headers=SHARED_HEADERS,
                            logger=YoutubeDLLogger(),
                            verbose=debug)
             }) as ydl:
                 failed_urls = []
                 for url in video_urls:
-                    if (not ydl.in_download_archive(
-                            dict(id=url.split('/')[-1],
-                                 extractor_key='instagram'))
-                            and not ydl.extract_info(url, ie_key='Instagram')):
+                    if is_saved(url):
+                        continue
+                    if ydl.extract_info(url, ie_key='Instagram'):
+                        save_to_log(url)
+                    else:
                         failed_urls.append(url)
                 if len(failed_urls) > 0:
                     logger.error('Some video URIs failed. Check failed.txt.')
