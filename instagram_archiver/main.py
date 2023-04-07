@@ -1,6 +1,5 @@
 from contextlib import ExitStack, contextmanager
 from os import chdir as os_chdir, getcwd, makedirs
-from os.path import isfile
 from pathlib import Path
 from typing import Any, Iterator
 import json
@@ -106,6 +105,12 @@ def main(output_dir: Path | str | None,
             cur.execute('INSERT INTO log (url) VALUES (?)', (clean_url(url),))
             conn.commit()
 
+        def is_saved(url: str) -> bool:
+            cur.execute('SELECT COUNT(url) FROM log WHERE url = ?',
+                        (clean_url(url),))
+            count, = cur.fetchone()
+            return count == 1
+
         session.headers.update({
             **SHARED_HEADERS,
             **dict(cookie='; '.join(f'{cookie.name}={cookie.value}' \
@@ -126,10 +131,11 @@ def main(output_dir: Path | str | None,
         with open('web_profile_info.json', 'wb') as f:
             f.write(r.content)
         user_info = r.json()['data']['user']
-        r = session.get(user_info['profile_pic_url_hd'])
-        r.raise_for_status()
-        with open('profile_pic.jpg', 'wb') as f:
-            f.write(r.content)
+        if not is_saved(user_info['profile_pic_url_hd']):
+            r = session.get(user_info['profile_pic_url_hd'])
+            r.raise_for_status()
+            with open('profile_pic.jpg', 'wb') as f:
+                f.write(r.content)
         video_urls = []
 
         # for item in highlights_tray(session, user_info['id'])['tray']:
@@ -145,12 +151,6 @@ def main(output_dir: Path | str | None,
         # }) as ydl:
         #     for url in video_urls:
         #         ydl.extract_info(url)
-
-        def is_saved(url: str) -> bool:
-            cur.execute('SELECT COUNT(url) FROM log WHERE url = ?',
-                        (clean_url(url),))
-            count, = cur.fetchone()
-            return count == 1
 
         def save_stuff(edges: Any) -> None:
             nonlocal video_urls
