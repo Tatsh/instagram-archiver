@@ -136,6 +136,7 @@ def main(output_dir: Path | str | None,
             r.raise_for_status()
             with open('profile_pic.jpg', 'wb') as f:
                 f.write(r.content)
+            save_to_log(user_info['profile_pic_url_hd'])
         video_urls = []
 
         # for item in highlights_tray(session, user_info['id'])['tray']:
