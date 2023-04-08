@@ -2,9 +2,9 @@ from typing import Final, Mapping
 
 __all__ = ('SHARED_HEADERS', 'USER_AGENT')
 
-USER_AGENT: Final[str] = ('Mozilla/5.0 (X11; Linux x86_64) '
-                          'AppleWebKit/537.36 (KHTML, like Gecko) '
-                          'Chrome/112.0.0.0 Safari/537.36')
+USER_AGENT: Final[str] = (
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
+    'Chrome/112.0.0.0 Safari/537.36')
 SHARED_HEADERS: Final[Mapping[str, str]] = {
     'accept':
     ('text/html,application/xhtml+xml,application/xml;q=0.9,image/jxl,'
@@ -31,3 +31,9 @@ SHARED_HEADERS: Final[Mapping[str, str]] = {
     'x-ig-app-id':
     '936619743392459'
 }
+LOG_SCHEMA = '''
+CREATE TABLE log (
+    url TEXT PRIMARY KEY NOT NULL,
+    date TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+'''

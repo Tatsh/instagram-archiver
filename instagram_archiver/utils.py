@@ -1,18 +1,36 @@
+from contextlib import contextmanager
+import json
+from os import chdir as os_chdir, getcwd
 from os.path import isfile
 from pathlib import Path
 from types import FrameType
-from typing import (Literal, Optional, Union)
+from typing import Any, Iterator, Literal, Optional, Union
 import logging
 import sys
 
 from loguru import logger
 import click
 
-__all__ = ('UnknownMimetypeError', 'get_extension', 'write_if_new')
+__all__ = ('UnknownMimetypeError', 'chdir', 'get_extension',
+           'json_dumps_formatted', 'write_if_new')
 
 
-def write_if_new(target: Union[Path, str],
-                 content: Union[str, bytes],
+def json_dumps_formatted(obj: Any) -> str:
+    return json.dumps(obj, sort_keys=True, indent=2)
+
+
+@contextmanager
+def chdir(path: str | Path) -> Iterator[None]:
+    old_path = getcwd()
+    os_chdir(path)
+    try:
+        yield
+    finally:
+        chdir(old_path)
+
+
+def write_if_new(target: Path | str,
+                 content: str | bytes,
                  mode: str = 'w') -> None:
     if not isfile(target):
         with click.open_file(str(target), mode) as f:
