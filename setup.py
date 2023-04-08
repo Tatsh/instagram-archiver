@@ -22,4 +22,4 @@ with open('README.md') as f:
           packages=find_packages(),
           python_requires='>=3.9',
           url='https://github.com/Tatsh/instagram-archiver',
-          version='0.1.0')
+          version='0.2.0')
