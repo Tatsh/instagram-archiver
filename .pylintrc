@@ -9,6 +9,7 @@ load-plugins=pylint_quotes
 disable=missing-class-docstring,
         missing-function-docstring,
         missing-module-docstring,
+        too-many-instance-attributes,
         unspecified-encoding,
         use-dict-literal
 
