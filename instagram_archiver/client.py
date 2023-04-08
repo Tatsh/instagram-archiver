@@ -250,3 +250,4 @@ class InstagramClient:
                         with open('failed.txt', 'w') as f:
                             for url in failed_urls:
                                 f.write(f'{url}\n')
+        self._video_urls = []
