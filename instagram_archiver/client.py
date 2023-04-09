@@ -2,7 +2,7 @@ from inspect import Traceback
 from os import makedirs, utime
 from pathlib import Path
 from pprint import pprint as pp
-from typing import Any, Mapping, Sequence, Type
+from typing import Any, Mapping, Type
 from urllib.parse import urlparse
 import json
 import re
@@ -19,6 +19,11 @@ import yt_dlp
 
 from .constants import LOG_SCHEMA, SHARED_HEADERS
 from .utils import YoutubeDLLogger, chdir, get_extension, json_dumps_formatted, write_if_new
+
+__all__ = ('InstagramClient',)
+
+CALLS_PER_MINUTE = 10
+YT_DLP_SLEEP_INTERVAL = 60 / CALLS_PER_MINUTE
 
 
 def _clean_url(url: str) -> str:
@@ -37,15 +42,12 @@ class InstagramClient:
                  log_file: str | Path | None = None,
                  output_dir: str | None = None,
                  disable_log: bool = False,
-                 backoff_factor: float = 2.5,
-                 status_forcelist: Sequence[int] | None = None,
                  browser: str = 'chrome',
                  browser_profile: str = 'Default',
                  debug: bool = False) -> None:
         self._no_log = disable_log
         self._session = requests.Session()
-        self._setup_session(status_forcelist, backoff_factor, browser,
-                            browser_profile)
+        self._setup_session(browser, browser_profile)
         self._output_dir = Path(output_dir or Path('.').resolve() / username)
         makedirs(self._output_dir, exist_ok=True)
         self._log_db = Path(log_file or self._output_dir / '.log.db')
@@ -63,16 +65,19 @@ class InstagramClient:
             self._cursor.execute(LOG_SCHEMA)
 
     def _setup_session(self,
-                       status_forcelist: Sequence[int] | None = None,
-                       backoff_factor: float = 2.5,
                        browser: str = 'chrome',
                        browser_profile: str = 'Default') -> None:
         self._session.mount(
             'https://',
-            HTTPAdapter(
-                max_retries=Retry(backoff_factor=backoff_factor,
-                                  status_forcelist=status_forcelist or (
-                                      429, 500, 502, 503, 504))))
+            HTTPAdapter(max_retries=Retry(backoff_factor=2.5,
+                                          redirect=0,
+                                          status=0,
+                                          respect_retry_after_header=False,
+                                          status_forcelist=frozenset((413, 429,
+                                                                      500, 502,
+                                                                      503,
+                                                                      504)),
+                                          total=5)))
         self._session.headers.update({
             **SHARED_HEADERS,
             **dict(cookie='; '.join(f'{cookie.name}={cookie.value}' \
@@ -232,10 +237,15 @@ class InstagramClient:
                         **dict(download_archive=None,
                                http_headers=SHARED_HEADERS,
                                logger=YoutubeDLLogger(),
+                               max_sleep_interval=YT_DLP_SLEEP_INTERVAL,
+                               sleep_interval=YT_DLP_SLEEP_INTERVAL,
+                               sleep_interval_requests=YT_DLP_SLEEP_INTERVAL,
+                               sleep_interval_subtitles=YT_DLP_SLEEP_INTERVAL,
                                verbose=self._debug)
                 }) as ydl:
                     failed_urls = []
-                    for url in self._video_urls:
+                    while (self._video_urls
+                           and (url := self._video_urls.pop())):
                         if self._is_saved(url):
                             continue
                         if ydl.extract_info(url, ie_key='Instagram'):
@@ -250,4 +260,3 @@ class InstagramClient:
                         with open('failed.txt', 'w') as f:
                             for url in failed_urls:
                                 f.write(f'{url}\n')
-        self._video_urls = []

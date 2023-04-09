@@ -39,9 +39,10 @@ def main(output_dir: str | None,
                              disable_log=no_log) as client:
             client.process()
     except RetryError as e:
-        click.echo(str(e), file=sys.stderr)
-        click.echo('You should wait a few hours before trying again.',
-                   file=sys.stderr)
+        click.echo(
+            'Open your browser and login if necessary. If you are logged in and this continues, '
+            'try waiting at least 12 hours.',
+            file=sys.stderr)
         raise click.Abort() from e
     except AuthenticationError as e:
         click.echo(
