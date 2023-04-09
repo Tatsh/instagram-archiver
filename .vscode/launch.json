@@ -7,7 +7,7 @@
         "_PYTEST_RAISE": "1"
       },
       "name": "Pytest",
-      "program": "~/.virtualenvs/xirvik-tools/bin/pytest",
+      "program": "~/.virtualenvs/instagram-archiver/bin/pytest",
       "request": "launch",
       "type": "python"
     }
