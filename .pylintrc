@@ -33,18 +33,18 @@ ignore-imports=no
 [BASIC]
 class-attribute-naming-style=snake_case
 good-names=e,
+           f,
+           g,
            i,
            id,
            j,
            k,
-           f,
-           g,
            m,
+           n,
+           r,
            x,
            y,
-           z,
-           n,
-           r
+           z
 include-naming-hint=yes
 inlinevar-naming-style=snake_case
 
