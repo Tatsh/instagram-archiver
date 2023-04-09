@@ -64,18 +64,14 @@ class InstagramClient:
             logger.debug('Creating schema')
             self._cursor.execute(LOG_SCHEMA)
 
-    def _setup_session(self,
-                       browser: str = 'chrome',
-                       browser_profile: str = 'Default') -> None:
+    def _setup_session(self, browser: str = 'chrome', browser_profile: str = 'Default') -> None:
         self._session.mount(
             'https://',
             HTTPAdapter(max_retries=Retry(backoff_factor=2.5,
                                           redirect=0,
                                           status=0,
                                           respect_retry_after_header=False,
-                                          status_forcelist=frozenset((413, 429,
-                                                                      500, 502,
-                                                                      503,
+                                          status_forcelist=frozenset((413, 429, 500, 502, 503,
                                                                       504)),
                                           total=5)))
         self._session.headers.update({
@@ -84,8 +80,7 @@ class InstagramClient:
                 for cookie in extract_cookies_from_browser(browser, browser_profile)
                     if 'instagram.com' in cookie.domain))
         })
-        r = self._get_rate_limited('https://www.instagram.com',
-                                   return_json=False)
+        r = self._get_rate_limited('https://www.instagram.com', return_json=False)
         m = re.search(r'"config":{"csrf_token":"([^"]+)"', r.text)
         assert m is not None
         self._session.headers.update({'x-csrftoken': m.group(1)})
@@ -93,15 +88,13 @@ class InstagramClient:
     def _save_to_log(self, url: str) -> None:
         if self._no_log:
             return
-        self._cursor.execute('INSERT INTO log (url) VALUES (?)',
-                             (_clean_url(url),))
+        self._cursor.execute('INSERT INTO log (url) VALUES (?)', (_clean_url(url),))
         self._connection.commit()
 
     def _is_saved(self, url: str) -> bool:
         if self._no_log:
             return False
-        self._cursor.execute('SELECT COUNT(url) FROM log WHERE url = ?',
-                             (_clean_url(url),))
+        self._cursor.execute('SELECT COUNT(url) FROM log WHERE url = ?', (_clean_url(url),))
         count: int
         count, = self._cursor.fetchone()
         return count == 1
@@ -110,9 +103,7 @@ class InstagramClient:
         def key(x: Mapping[str, int]) -> int:
             return x['width'] * x['height']
 
-        best = sorted(sub_item['image_versions2']['candidates'],
-                      key=key,
-                      reverse=True)[0]
+        best = sorted(sub_item['image_versions2']['candidates'], key=key, reverse=True)[0]
         if self._is_saved(best['url']):
             return
         r = self._get_rate_limited(best['url'], return_json=False)
@@ -160,14 +151,12 @@ class InstagramClient:
                         shortcode = parent_edge['node']['shortcode']
                     else:
                         raise ValueError('Unknown shortcode') from e
-                self._video_urls.append(
-                    f'https://www.instagram.com/p/{shortcode}')
+                self._video_urls.append(f'https://www.instagram.com/p/{shortcode}')
             elif edge['node']['__typename'] == 'GraphImage':
                 self._save_media(edge)
             elif edge['node']['__typename'] == 'GraphSidecar':
                 logger.debug('Recursion into child edges')
-                self._save_stuff(
-                    edge['node']['edge_sidecar_to_children']['edges'], edge)
+                self._save_stuff(edge['node']['edge_sidecar_to_children']['edges'], edge)
 
     @sleep_and_retry
     @limits(calls=10, period=60)
@@ -182,51 +171,43 @@ class InstagramClient:
             return r.json() if return_json else r
 
     def _highlights_tray(self, user_id: int | str) -> Any:
-        return self._get_rate_limited(
-            f'https://i.instagram.com/api/v1/highlights/{user_id}/'
-            'highlights_tray/')
+        return self._get_rate_limited(f'https://i.instagram.com/api/v1/highlights/{user_id}/'
+                                      'highlights_tray/')
 
     def __enter__(self) -> 'InstagramClient':
         return self
 
-    def __exit__(self, _: Type[BaseException], __: BaseException,
-                 ___: Traceback) -> None:
+    def __exit__(self, _: Type[BaseException], __: BaseException, ___: Traceback) -> None:
         self._cursor.close()
         self._connection.close()
 
     def process(self) -> None:
         with chdir(self._output_dir):
-            r = self._get_rate_limited(
-                f'https://www.instagram.com/{self._username}/',
-                return_json=False)
-            r = self._get_rate_limited(
-                'https://i.instagram.com/api/v1/users/web_profile_info/',
-                params={'username': self._username})
+            r = self._get_rate_limited(f'https://www.instagram.com/{self._username}/',
+                                       return_json=False)
+            r = self._get_rate_limited('https://i.instagram.com/api/v1/users/web_profile_info/',
+                                       params={'username': self._username})
             with open('web_profile_info.json', 'w') as f:
                 json.dump(r, f, indent=2, sort_keys=True)
             user_info = r['data']['user']
             if not self._is_saved(user_info['profile_pic_url_hd']):
-                r = self._get_rate_limited(user_info['profile_pic_url_hd'],
-                                           return_json=False)
+                r = self._get_rate_limited(user_info['profile_pic_url_hd'], return_json=False)
                 with open('profile_pic.jpg', 'wb') as f:
                     f.write(r.content)
                 self._save_to_log(user_info['profile_pic_url_hd'])
             for item in self._highlights_tray(user_info['id'])['tray']:
-                self._video_urls.append(
-                    'https://www.instagram.com/stories/highlights/'
-                    f'{item["id"].split(":")[-1]}/')
-            self._save_stuff(
-                user_info['edge_owner_to_timeline_media']['edges'])
+                self._video_urls.append('https://www.instagram.com/stories/highlights/'
+                                        f'{item["id"].split(":")[-1]}/')
+            self._save_stuff(user_info['edge_owner_to_timeline_media']['edges'])
             page_info = user_info['edge_owner_to_timeline_media']['page_info']
             while page_info['has_next_page']:
                 params = dict(query_hash='69cba40317214236af40e7efa697781d',
                               variables=json.dumps(
-                                  dict(id=user_info['id'],
-                                       first=12,
+                                  dict(id=user_info['id'], first=12,
                                        after=page_info['end_cursor'])))
                 media = self._get_rate_limited(
-                    'https://www.instagram.com/graphql/query/', params=params
-                )['data']['user']['edge_owner_to_timeline_media']
+                    'https://www.instagram.com/graphql/query/',
+                    params=params)['data']['user']['edge_owner_to_timeline_media']
                 page_info = media['page_info']
                 self._save_stuff(media['edges'])
             sys.argv = [sys.argv[0]]
@@ -244,8 +225,7 @@ class InstagramClient:
                                verbose=self._debug)
                 }) as ydl:
                     failed_urls = []
-                    while (self._video_urls
-                           and (url := self._video_urls.pop())):
+                    while (self._video_urls and (url := self._video_urls.pop())):
                         if self._is_saved(url):
                             continue
                         if ydl.extract_info(url, ie_key='Instagram'):
@@ -255,8 +235,7 @@ class InstagramClient:
                         else:
                             failed_urls.append(url)
                     if len(failed_urls) > 0:
-                        logger.error(
-                            'Some video URIs failed. Check failed.txt.')
+                        logger.error('Some video URIs failed. Check failed.txt.')
                         with open('failed.txt', 'w') as f:
                             for url in failed_urls:
                                 f.write(f'{url}\n')

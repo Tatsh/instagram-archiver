@@ -11,8 +11,8 @@ import sys
 from loguru import logger
 import click
 
-__all__ = ('UnknownMimetypeError', 'chdir', 'get_extension',
-           'json_dumps_formatted', 'write_if_new')
+__all__ = ('UnknownMimetypeError', 'chdir', 'get_extension', 'json_dumps_formatted',
+           'write_if_new')
 
 
 def json_dumps_formatted(obj: Any) -> str:
@@ -29,9 +29,7 @@ def chdir(path: str | Path) -> Iterator[None]:
         chdir(old_path)
 
 
-def write_if_new(target: Path | str,
-                 content: str | bytes,
-                 mode: str = 'w') -> None:
+def write_if_new(target: Path | str, content: str | bytes, mode: str = 'w') -> None:
     if not isfile(target):
         with click.open_file(str(target), mode) as f:
             f.write(content)
@@ -64,8 +62,7 @@ class InterceptHandler(logging.Handler):  # pragma: no cover
         while frame and frame.f_code.co_filename == logging.__file__:
             frame = frame.f_back
             depth += 1
-        logger.opt(depth=depth, exception=record.exc_info).log(
-            level, record.getMessage())
+        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
 
 
 def setup_log_intercept_handler() -> None:  # pragma: no cover

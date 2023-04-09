@@ -13,15 +13,10 @@ from .utils import setup_logging
               default=None,
               help='Output directory',
               type=click.Path(exists=True))
-@click.option('-b',
-              '--browser',
-              default='chrome',
-              help='Browser to read cookies from')
+@click.option('-b', '--browser', default='chrome', help='Browser to read cookies from')
 @click.option('-p', '--profile', default='Default', help='Browser profile')
 @click.option('-d', '--debug', is_flag=True, help='Enable debug output')
-@click.option('--no-log',
-              is_flag=True,
-              help='Ignore log (re-fetch everything)')
+@click.option('--no-log', is_flag=True, help='Ignore log (re-fetch everything)')
 @click.argument('username')
 def main(output_dir: str | None,
          browser: str,
@@ -55,5 +50,4 @@ def main(output_dir: str | None,
             logger.exception(e)
         else:
             click.echo('Run with --debug for more information')
-        raise click.Abort(
-            f'{e} (run with --debug for more information)') from e
+        raise click.Abort(f'{e} (run with --debug for more information)') from e
