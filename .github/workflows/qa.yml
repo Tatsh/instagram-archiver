@@ -1,0 +1,45 @@
+name: QA
+'on':
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install mypy pylint pylint-quotes pytest pytest-cov coveralls pytest-mock types-requests
+      - name: Lint with mypy
+        run: mypy .
+      - name: Lint with pylint
+        run: pylint instagram_archiver
+      - run: yarn
+      - name: Check spelling
+        run: ./node_modules/.bin/cspell --no-progress './**/*'  './**/.*'
+      - name: Check formatting
+        run: |
+          ./node_modules/.bin/prettier -c \
+            './**/*.yml' \
+            './**/*.cfg' \
+            './.prettierrc' \
+            './.style.yapf' \
+            './**/*.ini' \
+            './**/*.toml' \
+            './**/*.md'
+          yapf -rd instagram_archiver
+    strategy:
+      matrix:
+        python-version:
+          - '3.10'
+          - '3.11'
