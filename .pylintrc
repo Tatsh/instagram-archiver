@@ -1,7 +1,6 @@
 [MAIN]
-ignore=.git
-ignore-patterns=.*\.pyi,
-                .*\.egg-info
+ignore=.git,node_modules
+ignore-patterns=.*\.pyi
 jobs=0
 load-plugins=pylint_quotes
 
