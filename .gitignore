@@ -1,7 +1,9 @@
 /.coverage
 /.directory
 /.pytest_cache/
+/MANIFEST
 /build/
 /dist/
 /htmlcov/
-/MANIFEST
+/node_modules/
+/yarn-error.log
