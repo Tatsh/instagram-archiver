@@ -1,4 +1,4 @@
-from typing import Any, Sequence, TypedDict
+from typing import Any, Collection, TypedDict
 
 
 class MediaInfoItemVideoVersion(TypedDict):
@@ -14,7 +14,7 @@ class MediaInfoItemImageVersions2Candidate(TypedDict):
 
 
 class MediaInfoItemImageVersions2(TypedDict):
-    candidates: Sequence[MediaInfoItemImageVersions2Candidate]
+    candidates: Collection[MediaInfoItemImageVersions2Candidate]
 
 
 class MediaInfoItem(TypedDict):
@@ -23,4 +23,4 @@ class MediaInfoItem(TypedDict):
     user: Any
     video_dash_manifest: str
     video_duration: float
-    video_versions: Sequence[MediaInfoItemVideoVersion]
+    video_versions: Collection[MediaInfoItemVideoVersion]

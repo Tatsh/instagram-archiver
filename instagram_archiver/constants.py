@@ -37,4 +37,4 @@ CREATE TABLE log (
 );
 '''
 # Value taken from Instagram's JS under BootloaderConfig
-RETRY_ABORT_NUM = 2
+RETRY_ABORT_NUM: Final[int] = 2

@@ -4,7 +4,7 @@ from os import chdir as os_chdir, getcwd
 from os.path import isfile
 from pathlib import Path
 from types import FrameType
-from typing import Any, Iterator, Literal, Optional, Union
+from typing import Any, Iterator, Literal
 import logging
 import sys
 
@@ -49,14 +49,14 @@ def get_extension(mimetype: str) -> Literal['png', 'jpg']:
 class InterceptHandler(logging.Handler):  # pragma: no cover
     """Intercept handler taken from Loguru's documentation."""
     def emit(self, record: logging.LogRecord) -> None:
-        level: Union[str, int]
+        level: str | int
         # Get corresponding Loguru level if it exists
         try:
             level = logger.level(record.levelname).name
         except ValueError:
             level = record.levelno
         # Find caller from where originated the logged message
-        frame: Optional[FrameType] = logging.currentframe()
+        frame: FrameType | None = logging.currentframe()
         depth = 2
         while frame and frame.f_code.co_filename == logging.__file__:
             frame = frame.f_back
@@ -69,7 +69,7 @@ def setup_log_intercept_handler() -> None:  # pragma: no cover
     logging.basicConfig(handlers=(InterceptHandler(),), level=0)
 
 
-def setup_logging(debug: Optional[bool] = False) -> None:
+def setup_logging(debug: bool | None = False) -> None:
     """Shared function to enable logging."""
     if debug:  # pragma: no cover
         setup_log_intercept_handler()
