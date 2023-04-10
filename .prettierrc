@@ -1,5 +1,14 @@
 {
   "endOfLine": "lf",
-  "printWidth": 99,
+  "iniSpaceAroundEquals": true,
+  "overrides": [
+    {
+      "files": ["*.yapf"],
+      "options": {
+        "parser": "ini"
+      }
+    }
+  ],
+  "printWidth": 100,
   "singleQuote": true
 }
