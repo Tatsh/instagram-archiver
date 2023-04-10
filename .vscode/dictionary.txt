@@ -44,6 +44,7 @@ lunchy
 maxdepth
 metaclass
 modindex
+mpegts
 msvs
 multirpc
 mutators
@@ -54,6 +55,8 @@ nistp
 objectdb
 oneshot
 optparse
+outro
+outtmpl
 overgeneral
 paren
 parseable

@@ -7,7 +7,6 @@ from urllib.parse import urlparse
 import json
 import re
 import sqlite3
-import sys
 
 from loguru import logger
 from ratelimit import limits, sleep_and_retry
@@ -44,9 +43,12 @@ class InstagramClient:
                  disable_log: bool = False,
                  browser: str = 'chrome',
                  browser_profile: str = 'Default',
-                 debug: bool = False) -> None:
+                 debug: bool = False,
+                 comments: bool = False) -> None:
         self._no_log = disable_log
         self._session = requests.Session()
+        self._browser = browser
+        self._browser_profile = browser_profile
         self._setup_session(browser, browser_profile)
         self._output_dir = Path(output_dir or Path('.').resolve() / username)
         makedirs(self._output_dir, exist_ok=True)
@@ -57,6 +59,11 @@ class InstagramClient:
         self._username = username
         self._video_urls: list[str] = []
         self._debug = debug
+        self._get_comments = comments
+
+    def _add_video_url(self, url: str) -> None:
+        logger.debug(f'Added video URL: {url}')
+        self._video_urls.append(url)
 
     def _setup_db(self) -> None:
         existed = self._log_db.exists()
@@ -113,18 +120,35 @@ class InstagramClient:
         utime(name, (timestamp, timestamp))
         self._save_to_log(r.url)
 
+    def _save_comments(self, edge: Any) -> None:
+        if self._get_comments:
+            comment_url = ('https://www.instagram.com/api/v1/media/'
+                           f'{edge["node"]["id"]}/comments/')
+            shared_params = dict(can_support_threading='true')
+            top_comment_data = comment_data = self._get_rate_limited(
+                comment_url, params={
+                    **shared_params, 'permalink_enabled': 'false'
+                })
+            while comment_data['can_view_more_preview_comments'] and comment_data['next_min_id']:
+                comment_data = self._get_rate_limited(comment_url,
+                                                      params={
+                                                          **shared_params, 'min_id':
+                                                          comment_data['next_min_id']
+                                                      })
+                top_comment_data['comments'].append(comment_data['comments'])
+            comments_json = f'{edge["node"]["id"]}-comments.json'
+            with open(comments_json, 'w+') as f:
+                json.dump(top_comment_data, f, sort_keys=True, indent=2)
+
     def _save_media(self, edge: Any) -> None:
         media_info_url = ('https://i.instagram.com/api/v1/media/'
                           f'{edge["node"]["id"]}/info/')
         if self._is_saved(media_info_url):
             return
-        r = self._get_rate_limited(media_info_url, return_json=False)
-        if '/login' in r.url:
-            raise AuthenticationError('Are you logged in?')
-        media_info = r.json()
-        if media_info['more_available']:
+        media_info = self._get_rate_limited(media_info_url)
+        if media_info['more_available'] or media_info['num_results'] != 1:
             pp(media_info)
-            raise ValueError('Unhandled more_available')
+            raise ValueError('Unhandled more_available set to True')
         timestamp = media_info['items'][0]['taken_at']
         id_json_file = f'{edge["node"]["id"]}.json'
         media_info_json_file = f'{edge["node"]["id"]}-media-info-0000.json'
@@ -151,12 +175,17 @@ class InstagramClient:
                         shortcode = parent_edge['node']['shortcode']
                     else:
                         raise ValueError('Unknown shortcode') from e
-                self._video_urls.append(f'https://www.instagram.com/p/{shortcode}')
+                self._add_video_url(f'https://www.instagram.com/p/{shortcode}')
             elif edge['node']['__typename'] == 'GraphImage':
                 self._save_media(edge)
             elif edge['node']['__typename'] == 'GraphSidecar':
                 logger.debug('Recursion into child edges')
+                if (not edge['node']['comments_disabled']
+                        and edge['node']['edge_media_to_comment']['count']):
+                    self._save_comments(edge)
                 self._save_stuff(edge['node']['edge_sidecar_to_children']['edges'], edge)
+            else:
+                raise ValueError(f'Unknown type "{edge["node"]["__typename"]}"')
 
     @sleep_and_retry
     @limits(calls=10, period=60)
@@ -196,8 +225,8 @@ class InstagramClient:
                     f.write(r.content)
                 self._save_to_log(user_info['profile_pic_url_hd'])
             for item in self._highlights_tray(user_info['id'])['tray']:
-                self._video_urls.append('https://www.instagram.com/stories/highlights/'
-                                        f'{item["id"].split(":")[-1]}/')
+                self._add_video_url('https://www.instagram.com/stories/highlights/'
+                                    f'{item["id"].split(":")[-1]}/')
             self._save_stuff(user_info['edge_owner_to_timeline_media']['edges'])
             page_info = user_info['edge_owner_to_timeline_media']['page_info']
             while page_info['has_next_page']:
@@ -210,27 +239,87 @@ class InstagramClient:
                     params=params)['data']['user']['edge_owner_to_timeline_media']
                 page_info = media['page_info']
                 self._save_stuff(media['edges'])
-            sys.argv = [sys.argv[0]]
-            ydl_opts = yt_dlp.parse_options()[-1]
             if len(self._video_urls) > 0:
-                with yt_dlp.YoutubeDL({
-                        **ydl_opts,
-                        **dict(download_archive=None,
-                               http_headers=SHARED_HEADERS,
-                               logger=YoutubeDLLogger(),
-                               max_sleep_interval=YT_DLP_SLEEP_INTERVAL,
-                               sleep_interval=YT_DLP_SLEEP_INTERVAL,
-                               sleep_interval_requests=YT_DLP_SLEEP_INTERVAL,
-                               sleep_interval_subtitles=YT_DLP_SLEEP_INTERVAL,
-                               verbose=self._debug)
-                }) as ydl:
+                with yt_dlp.YoutubeDL(
+                        dict(allowed_extractors=['Instagram.*'],
+                             allsubtitles=True,
+                             cookiesfrombrowser=[self._browser, self._browser_profile, None, None],
+                             geo_bypass=True,
+                             getcomments=True,
+                             hls_use_mpegts=True,
+                             http_headers=SHARED_HEADERS,
+                             ignore_no_formats_error=True,
+                             logger=YoutubeDLLogger(),
+                             outtmpl=dict(
+                                 default='%(title).128s___src=%(extractor)s___id=%(id)s.%(ext)s',
+                                 pl_thumbnail=''),
+                             overwrites=False,
+                             max_sleep_interval=YT_DLP_SLEEP_INTERVAL,
+                             merge_output_format='mkv',
+                             postprocessors=[
+                                 {
+                                     'api':
+                                     'https://sponsor.ajay.app',
+                                     'categories': [
+                                         'preview', 'selfpromo', 'interaction', 'music_offtopic',
+                                         'sponsor', 'poi_highlight', 'intro', 'outro', 'filler',
+                                         'chapter'
+                                     ],
+                                     'key':
+                                     'SponsorBlock',
+                                     'when':
+                                     'after_filter'
+                                 },
+                                 {
+                                     'format': 'srt',
+                                     'key': 'FFmpegSubtitlesConvertor',
+                                     'when': 'before_dl'
+                                 },
+                                 {
+                                     'already_have_subtitle': True,
+                                     'key': 'FFmpegEmbedSubtitle'
+                                 },
+                                 {
+                                     'force_keyframes': False,
+                                     'key': 'ModifyChapters',
+                                     'remove_chapters_patterns': [],
+                                     'remove_ranges': [],
+                                     'remove_sponsor_segments': [],
+                                     'sponsorblock_chapter_title':
+                                     '[SponsorBlock]: %(category_names)l'
+                                 },
+                                 {
+                                     'add_chapters': True,
+                                     'add_infojson': 'if_exists',
+                                     'add_metadata': True,
+                                     'key': 'FFmpegMetadata'
+                                 },
+                                 {
+                                     'already_have_thumbnail': False,
+                                     'key': 'EmbedThumbnail'
+                                 },
+                                 {
+                                     'key': 'FFmpegConcat',
+                                     'only_multi_video': True,
+                                     'when': 'playlist'
+                                 },
+                             ],
+                             restrictfilenames=True,
+                             skip_unavailable_fragments=True,
+                             sleep_interval=YT_DLP_SLEEP_INTERVAL,
+                             sleep_interval_requests=YT_DLP_SLEEP_INTERVAL,
+                             sleep_interval_subtitles=YT_DLP_SLEEP_INTERVAL,
+                             subtitleslangs=['all'],
+                             writeautomaticsub=True,
+                             writesubtitles=True,
+                             writeinfojson=True,
+                             writethumbnail=True,
+                             verbose=self._debug)) as ydl:
                     failed_urls = []
                     while (self._video_urls and (url := self._video_urls.pop())):
                         if self._is_saved(url):
                             continue
-                        if ydl.extract_info(url, ie_key='Instagram'):
-                            self._save_to_log(url)
-                        elif ydl.extract_info(url, ie_key='InstagramStory'):
+                        if ydl.extract_info(url):
                             self._save_to_log(url)
                         else:
                             failed_urls.append(url)

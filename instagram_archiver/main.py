@@ -17,13 +17,19 @@ from .utils import setup_logging
 @click.option('-p', '--profile', default='Default', help='Browser profile')
 @click.option('-d', '--debug', is_flag=True, help='Enable debug output')
 @click.option('--no-log', is_flag=True, help='Ignore log (re-fetch everything)')
+@click.option('-C',
+              '--include-comments',
+              is_flag=True,
+              help='Also download all comments (extends '
+              'download time significantly).')
 @click.argument('username')
 def main(output_dir: str | None,
          browser: str,
          profile: str,
          username: str,
          debug: bool = False,
-         no_log: bool = False) -> None:
+         no_log: bool = False,
+         include_comments: bool = False) -> None:
     setup_logging(debug)
     try:
         with InstagramClient(username=username,
@@ -31,7 +37,8 @@ def main(output_dir: str | None,
                              browser_profile=profile,
                              browser=browser,
                              debug=debug,
-                             disable_log=no_log) as client:
+                             disable_log=no_log,
+                             comments=include_comments) as client:
             client.process()
     except RetryError as e:
         click.echo(
