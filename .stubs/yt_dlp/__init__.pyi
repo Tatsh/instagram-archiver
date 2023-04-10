@@ -1,10 +1,9 @@
-from typing import Any, Iterable, List, Mapping, Optional, Sequence, Tuple
+from typing import Any, Iterable, Mapping, Optional, Sequence
 from yt_dlp.extractor.common import InfoExtractor
 
 
 def parse_options(
-    argv: Optional[List[str]] = ...
-) -> Tuple[Any, Any, Iterable[str], Mapping[str, Any]]:
+        argv: Optional[list[str]] = ...) -> tuple[Any, Any, Iterable[str], Mapping[str, Any]]:
     ...
 
 

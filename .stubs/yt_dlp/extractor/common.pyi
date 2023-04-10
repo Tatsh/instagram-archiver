@@ -6,17 +6,13 @@ class InfoExtractor:
     def _match_valid_url(cls, url: str) -> Match[str]:
         ...
 
-    def _download_webpage_handle(self, url: str,
-                                 video_id: str) -> Tuple[str, Any]:
+    def _download_webpage_handle(self, url: str, video_id: str) -> Tuple[str, Any]:
         ...
 
     def report_warning(self, s: str) -> None:
         ...
 
-    def _download_webpage(self,
-                          url: str,
-                          video_id: str,
-                          note: Optional[str] = ...) -> str:
+    def _download_webpage(self, url: str, video_id: str, note: Optional[str] = ...) -> str:
         ...
 
     def _download_json(self, url: str, video_id: str) -> Any:
@@ -39,14 +35,11 @@ class InfoExtractor:
     def raise_login_required(self, message: str) -> NoReturn:
         ...
 
-    def _og_search_video_url(self,
-                             webpage: str,
-                             secure: Optional[bool] = ...) -> Optional[str]:
+    def _og_search_video_url(self, webpage: str, secure: Optional[bool] = ...) -> Optional[str]:
         ...
 
-    def playlist_result(self, items: Sequence[Mapping[str,
-                                                      Any]], video_id: str,
-                        s: str, desc: Optional[str]) -> Mapping[str, Any]:
+    def playlist_result(self, items: Sequence[Mapping[str, Any]], video_id: str, s: str,
+                        desc: Optional[str]) -> Mapping[str, Any]:
         ...
 
     def _parse_mpd_formats(self, *args: Any, **kwargs: Any) -> Sequence[Any]:

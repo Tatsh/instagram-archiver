@@ -11,8 +11,7 @@ import sys
 from loguru import logger
 import click
 
-__all__ = ('UnknownMimetypeError', 'chdir', 'get_extension', 'json_dumps_formatted',
-           'write_if_new')
+__all__ = ('UnknownMimetypeError', 'chdir', 'get_extension', 'json_dumps_formatted', 'write_if_new')
 
 
 def json_dumps_formatted(obj: Any) -> str:

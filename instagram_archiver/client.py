@@ -17,7 +17,7 @@ from yt_dlp.cookies import extract_cookies_from_browser
 import requests
 import yt_dlp
 
-from .constants import LOG_SCHEMA, SHARED_HEADERS
+from .constants import LOG_SCHEMA, RETRY_ABORT_NUM, SHARED_HEADERS
 from .utils import YoutubeDLLogger, chdir, get_extension, json_dumps_formatted, write_if_new
 
 __all__ = ('InstagramClient',)
@@ -67,13 +67,13 @@ class InstagramClient:
     def _setup_session(self, browser: str = 'chrome', browser_profile: str = 'Default') -> None:
         self._session.mount(
             'https://',
-            HTTPAdapter(max_retries=Retry(backoff_factor=2.5,
-                                          redirect=0,
-                                          status=0,
-                                          respect_retry_after_header=False,
-                                          status_forcelist=frozenset((413, 429, 500, 502, 503,
-                                                                      504)),
-                                          total=5)))
+            HTTPAdapter(max_retries=Retry(
+                backoff_factor=1.5,  # wait times are normally 1 and 3 seconds
+                redirect=0,
+                status=0,
+                respect_retry_after_header=False,
+                status_forcelist=frozenset((413, 429, 500, 502, 503, 504)),
+                total=RETRY_ABORT_NUM)))
         self._session.headers.update({
             **SHARED_HEADERS,
             **dict(cookie='; '.join(f'{cookie.name}={cookie.value}' \
