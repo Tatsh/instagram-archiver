@@ -17,28 +17,16 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: install deps
         run: |
-          python -m pip install --upgrade pip
-          pip install -e .
-          pip install mypy pylint pylint-quotes pytest pytest-cov coveralls pytest-mock \
-            types-requests toml yapf
+          yarn
+          yarn install-python-deps
       - name: Lint with mypy
-        run: mypy .
+        run: yarn mypy
       - name: Lint with pylint
-        run: pylint instagram_archiver
-      - run: yarn
+        run: yarn pylint
       - name: Check spelling
-        run: ./node_modules/.bin/cspell --no-progress './**/*'  './**/.*'
+        run: yarn check-spelling
       - name: Check formatting
-        run: |
-          ./node_modules/.bin/prettier -c \
-            './**/*.cfg' \
-            './**/*.ini' \
-            './**/*.md' \
-            './**/*.toml' \
-            './**/*.yml' \
-            './.prettierrc' \
-            './.style.yapf'
-          yapf -rd instagram_archiver
+        run: yarn check-formatting
     strategy:
       matrix:
         python-version:
