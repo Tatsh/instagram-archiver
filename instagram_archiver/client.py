@@ -113,10 +113,14 @@ class InstagramClient:
         best = sorted(sub_item['image_versions2']['candidates'], key=key, reverse=True)[0]
         if self._is_saved(best['url']):
             return
-        r = self._get_rate_limited(best['url'], return_json=False)
+        r = self._session.head(best['url'])
+        r.raise_for_status()
         ext = get_extension(r.headers['content-type'])
         name = f'{sub_item["id"]}.{ext}'
-        write_if_new(name, r.content, 'wb')
+        with open(name, 'wb') as f:
+            for content in (self._session.get(best['url'],
+                                              stream=True).iter_content(chunk_size=512)):
+                f.write(content)
         utime(name, (timestamp, timestamp))
         self._save_to_log(r.url)
 
@@ -249,6 +253,7 @@ class InstagramClient:
                              hls_use_mpegts=True,
                              http_headers=SHARED_HEADERS,
                              ignore_no_formats_error=True,
+                             ignoreerrors=True,
                              logger=YoutubeDLLogger(),
                              outtmpl=dict(
                                  default='%(title).128s___src=%(extractor)s___id=%(id)s.%(ext)s',
