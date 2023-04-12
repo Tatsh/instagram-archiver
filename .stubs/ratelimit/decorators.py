@@ -1,4 +1,7 @@
-from typing import Any, Callable
+from typing import Callable, ParamSpec, TypeVar
+
+P = ParamSpec('P')
+T = TypeVar('T')
 
 
 class RateLimitDecorator:
@@ -9,12 +12,9 @@ class RateLimitDecorator:
                  raise_on_limit: bool = ...) -> None:
         ...
 
-    def __call__(self, func: Any) -> Callable[..., Any]:
+    def __call__(self, func: Callable[P, T]) -> Callable[P, T]:
         ...
 
 
-limits = RateLimitDecorator
-
-
-def sleep_and_retry(func: Callable[..., Any]) -> Callable[..., Any]:
+def sleep_and_retry(func: Callable[P, T]) -> Callable[P, T]:
     ...
