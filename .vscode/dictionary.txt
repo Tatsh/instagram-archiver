@@ -26,6 +26,7 @@ distutils
 docstrings
 ecda
 epub
+excinfo
 execfile
 flabel
 fstr
@@ -108,6 +109,7 @@ timedelta
 timeformat
 tkinter
 toctree
+tryfirst
 typecheck
 udvare
 unexpectedru
