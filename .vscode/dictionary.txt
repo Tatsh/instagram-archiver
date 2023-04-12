@@ -39,6 +39,7 @@ idiv
 ignoreerrors
 infojson
 inlinevar
+isort
 itertools
 khtml
 labelsize
