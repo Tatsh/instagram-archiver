@@ -2,7 +2,7 @@ from inspect import Traceback
 from os import makedirs, utime
 from pathlib import Path
 from pprint import pprint as pp
-from typing import Any, Mapping, Type
+from typing import Collection, Literal, Mapping, Type, TypeVar, overload
 from urllib.parse import urlparse
 import json
 import re
@@ -17,12 +17,16 @@ import requests
 import yt_dlp
 
 from .constants import LOG_SCHEMA, RETRY_ABORT_NUM, SHARED_HEADERS
-from .utils import YoutubeDLLogger, chdir, get_extension, json_dumps_formatted, write_if_new
+from .ig_typing import (CarouselMedia, Comments, Edge, HighlightsTray, MediaInfo, MediaInfoItem,
+                        MediaInfoItemImageVersions2Candidate, UserInfo, WebProfileInfo)
+from .utils import (YoutubeDLLogger, chdir, get_extension, json_dumps_formatted, write_if_new)
 
 __all__ = ('InstagramClient',)
 
 CALLS_PER_MINUTE = 10
 YT_DLP_SLEEP_INTERVAL = 60 / CALLS_PER_MINUTE
+
+T = TypeVar('T')
 
 
 def _clean_url(url: str) -> str:
@@ -106,8 +110,9 @@ class InstagramClient:
         count, = self._cursor.fetchone()
         return count == 1
 
-    def _save_image_versions2(self, sub_item: Any, timestamp: int) -> None:
-        def key(x: Mapping[str, int]) -> int:
+    def _save_image_versions2(self, sub_item: CarouselMedia | MediaInfoItem,
+                              timestamp: int) -> None:
+        def key(x: MediaInfoItemImageVersions2Candidate) -> int:
             return x['width'] * x['height']
 
         best = sorted(sub_item['image_versions2']['candidates'], key=key, reverse=True)[0]
@@ -124,32 +129,35 @@ class InstagramClient:
         utime(name, (timestamp, timestamp))
         self._save_to_log(r.url)
 
-    def _save_comments(self, edge: Any) -> None:
+    def _save_comments(self, edge: Edge) -> None:
         if self._get_comments:
             comment_url = ('https://www.instagram.com/api/v1/media/'
                            f'{edge["node"]["id"]}/comments/')
             shared_params = dict(can_support_threading='true')
             top_comment_data = comment_data = self._get_rate_limited(
-                comment_url, params={
+                comment_url,
+                params={
                     **shared_params, 'permalink_enabled': 'false'
-                })
+                },
+                cast_to=Comments)
             while comment_data['can_view_more_preview_comments'] and comment_data['next_min_id']:
                 comment_data = self._get_rate_limited(comment_url,
                                                       params={
                                                           **shared_params, 'min_id':
                                                           comment_data['next_min_id']
-                                                      })
+                                                      },
+                                                      cast_to=Comments)
                 top_comment_data['comments'].append(comment_data['comments'])
             comments_json = f'{edge["node"]["id"]}-comments.json'
             with open(comments_json, 'w+') as f:
                 json.dump(top_comment_data, f, sort_keys=True, indent=2)
 
-    def _save_media(self, edge: Any) -> None:
+    def _save_media(self, edge: Edge) -> None:
         media_info_url = ('https://i.instagram.com/api/v1/media/'
                           f'{edge["node"]["id"]}/info/')
         if self._is_saved(media_info_url):
             return
-        media_info = self._get_rate_limited(media_info_url)
+        media_info = self._get_rate_limited(media_info_url, cast_to=MediaInfo)
         if media_info['more_available'] or media_info['num_results'] != 1:
             pp(media_info)
             raise ValueError('Unhandled more_available set to True')
@@ -169,14 +177,17 @@ class InstagramClient:
             elif 'image_versions2' in item:
                 self._save_image_versions2(item, timestamp)
 
-    def _save_stuff(self, edges: Any, parent_edge: Any = None) -> None:
+    def _save_stuff(self, edges: Collection[Edge], parent_edge: Edge | None = None) -> None:
         for edge in edges:
             if edge['node']['__typename'] == 'GraphVideo':
                 try:
                     shortcode = edge['node']['shortcode']
                 except KeyError as e:
                     if parent_edge:
-                        shortcode = parent_edge['node']['shortcode']
+                        try:
+                            shortcode = parent_edge['node']['shortcode']
+                        except KeyError as exc:
+                            raise ValueError('Unknown shortcode') from exc
                     else:
                         raise ValueError('Unknown shortcode') from e
                 self._add_video_url(f'https://www.instagram.com/p/{shortcode}')
@@ -191,21 +202,43 @@ class InstagramClient:
             else:
                 raise ValueError(f'Unknown type "{edge["node"]["__typename"]}"')
 
-    @sleep_and_retry
-    @limits(calls=10, period=60)
+    @overload
+    def _get_rate_limited(self, url: str, *, cast_to: Type[T]) -> T:
+        pass
+
+    @overload
     def _get_rate_limited(self,
                           url: str,
-                          raise_for_status: bool = True,
-                          return_json: bool = True,
-                          params: Mapping[str, str] | None = None) -> Any:
+                          *,
+                          return_json: Literal[False] = False) -> requests.Response:
+        pass
+
+    @overload
+    def _get_rate_limited(self,
+                          url: str,
+                          *,
+                          params: Mapping[str, str] | None = None,
+                          cast_to: Type[T]) -> T:
+        pass
+
+    @sleep_and_retry
+    @limits(calls=10, period=60)
+    def _get_rate_limited(
+            self,
+            url: str,
+            *,
+            return_json: bool = True,
+            params: Mapping[str, str] | None = None,
+            cast_to: Type[T] | None = None) -> T | requests.Response:  # pylint: disable=unused-argument
         with self._session.get(url, params=params) as r:
-            if raise_for_status:
-                r.raise_for_status()
+            r.raise_for_status()
             return r.json() if return_json else r
 
-    def _highlights_tray(self, user_id: int | str) -> Any:
-        return self._get_rate_limited(f'https://i.instagram.com/api/v1/highlights/{user_id}/'
-                                      'highlights_tray/')
+    def _highlights_tray(self, user_id: int | str) -> HighlightsTray:
+        return self._get_rate_limited(
+            f'https://i.instagram.com/api/v1/highlights/{user_id}/'
+            'highlights_tray/',
+            cast_to=HighlightsTray)
 
     def __enter__(self) -> 'InstagramClient':
         return self
@@ -216,13 +249,14 @@ class InstagramClient:
 
     def process(self) -> None:
         with chdir(self._output_dir):
-            r = self._get_rate_limited(f'https://www.instagram.com/{self._username}/',
-                                       return_json=False)
+            self._get_rate_limited(f'https://www.instagram.com/{self._username}/',
+                                   return_json=False)
             r = self._get_rate_limited('https://i.instagram.com/api/v1/users/web_profile_info/',
-                                       params={'username': self._username})
+                                       params={'username': self._username},
+                                       cast_to=WebProfileInfo)
             with open('web_profile_info.json', 'w') as f:
                 json.dump(r, f, indent=2, sort_keys=True)
-            user_info = r['data']['user']
+            user_info: UserInfo = r['data']['user']
             if not self._is_saved(user_info['profile_pic_url_hd']):
                 r = self._get_rate_limited(user_info['profile_pic_url_hd'], return_json=False)
                 with open('profile_pic.jpg', 'wb') as f:
@@ -240,7 +274,8 @@ class InstagramClient:
                                        after=page_info['end_cursor'])))
                 media = self._get_rate_limited(
                     'https://www.instagram.com/graphql/query/',
-                    params=params)['data']['user']['edge_owner_to_timeline_media']
+                    params=params,
+                    cast_to=WebProfileInfo)['data']['user']['edge_owner_to_timeline_media']
                 page_info = media['page_info']
                 self._save_stuff(media['edges'])
             if len(self._video_urls) > 0:
