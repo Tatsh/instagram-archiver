@@ -18,7 +18,7 @@ import yt_dlp
 
 from .constants import LOG_SCHEMA, RETRY_ABORT_NUM, SHARED_HEADERS
 from .ig_typing import (CarouselMedia, Comments, Edge, HighlightsTray, MediaInfo, MediaInfoItem,
-                        MediaInfoItemImageVersions2Candidate, UserInfo, WebProfileInfo)
+                        MediaInfoItemImageVersions2Candidate, WebProfileInfo)
 from .utils import (YoutubeDLLogger, chdir, get_extension, json_dumps_formatted, write_if_new)
 
 __all__ = ('InstagramClient',)
