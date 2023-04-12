@@ -1,4 +1,5 @@
-from typing import Any, Iterable, Mapping, Collection
+from typing import Any, Collection, Iterable, Mapping
+
 from yt_dlp.extractor.common import InfoExtractor
 
 
