@@ -259,8 +259,8 @@ class InstagramClient:
             user_info = r['data']['user']
             if not self._is_saved(user_info['profile_pic_url_hd']):
                 with open('profile_pic.jpg', 'wb') as f:
-                    for chunk in (self._session.get(user_info['profile_pic_url_hd'],
-                                                    stream=True).iter_content(chunk_size=512)):
+                    for chunk in self._session.get(user_info['profile_pic_url_hd'],
+                                                   stream=True).iter_content(chunk_size=512):
                         f.write(chunk)
                 self._save_to_log(user_info['profile_pic_url_hd'])
             for item in self._highlights_tray(user_info['id'])['tray']:
@@ -280,83 +280,99 @@ class InstagramClient:
                 page_info = media['page_info']
                 self._save_stuff(media['edges'])
             if len(self._video_urls) > 0:
-                with yt_dlp.YoutubeDL(
-                        dict(allowed_extractors=['Instagram.*'],
-                             allsubtitles=True,
-                             cookiesfrombrowser=[self._browser, self._browser_profile, None, None],
-                             geo_bypass=True,
-                             getcomments=True,
-                             hls_use_mpegts=True,
-                             http_headers=SHARED_HEADERS,
-                             ignore_no_formats_error=True,
-                             ignoreerrors=True,
-                             logger=YoutubeDLLogger(),
-                             outtmpl=dict(
-                                 default='%(title).128s___src=%(extractor)s___id=%(id)s.%(ext)s',
-                                 pl_thumbnail=''),
-                             overwrites=False,
-                             max_sleep_interval=YT_DLP_SLEEP_INTERVAL,
-                             merge_output_format='mkv',
-                             postprocessors=[
-                                 {
-                                     'api':
-                                     'https://sponsor.ajay.app',
-                                     'categories': [
-                                         'preview', 'selfpromo', 'interaction', 'music_offtopic',
-                                         'sponsor', 'poi_highlight', 'intro', 'outro', 'filler',
-                                         'chapter'
-                                     ],
-                                     'key':
-                                     'SponsorBlock',
-                                     'when':
-                                     'after_filter'
-                                 },
-                                 {
-                                     'format': 'srt',
-                                     'key': 'FFmpegSubtitlesConvertor',
-                                     'when': 'before_dl'
-                                 },
-                                 {
-                                     'already_have_subtitle': True,
-                                     'key': 'FFmpegEmbedSubtitle'
-                                 },
-                                 {
-                                     'force_keyframes': False,
-                                     'key': 'ModifyChapters',
-                                     'remove_chapters_patterns': [],
-                                     'remove_ranges': [],
-                                     'remove_sponsor_segments': [],
-                                     'sponsorblock_chapter_title':
-                                     '[SponsorBlock]: %(category_names)l'
-                                 },
-                                 {
-                                     'add_chapters': True,
-                                     'add_infojson': 'if_exists',
-                                     'add_metadata': True,
-                                     'key': 'FFmpegMetadata'
-                                 },
-                                 {
-                                     'already_have_thumbnail': False,
-                                     'key': 'EmbedThumbnail'
-                                 },
-                                 {
-                                     'key': 'FFmpegConcat',
-                                     'only_multi_video': True,
-                                     'when': 'playlist'
-                                 },
-                             ],
-                             restrictfilenames=True,
-                             skip_unavailable_fragments=True,
-                             sleep_interval=YT_DLP_SLEEP_INTERVAL,
-                             sleep_interval_requests=YT_DLP_SLEEP_INTERVAL,
-                             sleep_interval_subtitles=YT_DLP_SLEEP_INTERVAL,
-                             subtitleslangs=['all'],
-                             writeautomaticsub=True,
-                             writesubtitles=True,
-                             writeinfojson=True,
-                             writethumbnail=True,
-                             verbose=self._debug)) as ydl:
-                    failed_urls = []
+                with yt_dlp.YoutubeDL({
+                        'allowed_extractors': ['Instagram.*'],
+                        'allsubtitles':
+                        True,
+                        'cookiesfrombrowser': [self._browser, self._browser_profile, None, None],
+                        'geo_bypass':
+                        True,
+                        'getcomments':
+                        self._get_comments,
+                        'hls_use_mpegts':
+                        True,
+                        'http_headers':
+                        SHARED_HEADERS,
+                        'ignore_no_formats_error':
+                        True,
+                        'ignoreerrors':
+                        True,
+                        'logger':
+                        YoutubeDLLogger(),
+                        'outtmpl': {
+                            'default': '%(title).128s___src=%(extractor)s___id=%(id)s.%(ext)s',
+                            'pl_thumbnail': ''
+                        },
+                        'overwrites':
+                        False,
+                        'max_sleep_interval':
+                        6.0,
+                        'merge_output_format':
+                        'mkv',
+                        'postprocessors': [{
+                            'api':
+                            'https://sponsor.ajay.app',
+                            'categories': [
+                                'preview', 'selfpromo', 'interaction', 'music_offtopic', 'sponsor',
+                                'poi_highlight', 'intro', 'outro', 'filler', 'chapter'
+                            ],
+                            'key':
+                            'SponsorBlock',
+                            'when':
+                            'after_filter'
+                        }, {
+                            'format': 'srt',
+                            'key': 'FFmpegSubtitlesConvertor',
+                            'when': 'before_dl'
+                        }, {
+                            'already_have_subtitle': True,
+                            'key': 'FFmpegEmbedSubtitle'
+                        }, {
+                            'force_keyframes':
+                            False,
+                            'key':
+                            'ModifyChapters',
+                            'remove_chapters_patterns': [],
+                            'remove_ranges': [],
+                            'remove_sponsor_segments': [],
+                            'sponsorblock_chapter_title':
+                            '[SponsorBlock]: %(category_names)'
+                        }, {
+                            'add_chapters': True,
+                            'add_infojson': 'if_exists',
+                            'add_metadata': True,
+                            'key': 'FFmpegMetadata'
+                        }, {
+                            'already_have_thumbnail': False,
+                            'key': 'EmbedThumbnail'
+                        }, {
+                            'key': 'FFmpegConcat',
+                            'only_multi_video': True,
+                            'when': 'playlist'
+                        }],
+                        'restrictfilenames':
+                        True,
+                        'skip_unavailable_fragments':
+                        True,
+                        'sleep_interval':
+                        YT_DLP_SLEEP_INTERVAL,
+                        'sleep_interval_requests':
+                        YT_DLP_SLEEP_INTERVAL,
+                        'sleep_interval_subtitles':
+                        YT_DLP_SLEEP_INTERVAL,
+                        'subtitleslangs': ['all'],
+                        'writeautomaticsub':
+                        True,
+                        'writesubtitles':
+                        True,
+                        'writeinfojson':
+                        True,
+                        'writethumbnail':
+                        True,
+                        'verbose':
+                        self._debug
+                }) as ydl:
+                    failed_urls: list[str] = []
                     while (self._video_urls and (url := self._video_urls.pop())):
                         if self._is_saved(url):
                             continue
