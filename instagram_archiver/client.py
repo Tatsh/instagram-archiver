@@ -256,11 +256,12 @@ class InstagramClient:
                                        cast_to=WebProfileInfo)
             with open('web_profile_info.json', 'w') as f:
                 json.dump(r, f, indent=2, sort_keys=True)
-            user_info: UserInfo = r['data']['user']
+            user_info = r['data']['user']
             if not self._is_saved(user_info['profile_pic_url_hd']):
-                r = self._get_rate_limited(user_info['profile_pic_url_hd'], return_json=False)
                 with open('profile_pic.jpg', 'wb') as f:
-                    f.write(r.content)
+                    for chunk in (self._session.get(user_info['profile_pic_url_hd'],
+                                                    stream=True).iter_content(chunk_size=512)):
+                        f.write(chunk)
                 self._save_to_log(user_info['profile_pic_url_hd'])
             for item in self._highlights_tray(user_info['id'])['tray']:
                 self._add_video_url('https://www.instagram.com/stories/highlights/'
