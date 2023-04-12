@@ -2,7 +2,6 @@ from typing import Any, Collection, Iterable, Mapping
 
 from yt_dlp.extractor.common import InfoExtractor
 
-
 def parse_options(
         argv: list[str] | None = ...) -> tuple[Any, Any, Iterable[str], Mapping[str, Any]]:
     ...

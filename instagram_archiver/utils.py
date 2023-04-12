@@ -1,10 +1,10 @@
 from contextlib import contextmanager
-import json
 from os import chdir as os_chdir, getcwd
 from os.path import isfile
 from pathlib import Path
 from types import FrameType
 from typing import Any, Iterator, Literal
+import json
 import logging
 import sys
 

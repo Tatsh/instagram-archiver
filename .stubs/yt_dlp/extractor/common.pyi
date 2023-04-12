@@ -1,6 +1,5 @@
 from typing import Any, Mapping, Match, NoReturn, Optional, Sequence, Tuple
 
-
 class InfoExtractor:
     @classmethod
     def _match_valid_url(cls, url: str) -> Match[str]:

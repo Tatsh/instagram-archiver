@@ -1,5 +1,6 @@
 # pylint: disable=unused-private-member
 from typing import Any, Literal, Sequence, TypedDict
+
 from typing_extensions import NotRequired
 
 

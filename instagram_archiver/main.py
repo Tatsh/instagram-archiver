@@ -1,7 +1,8 @@
 import sys
-import click
+
 from loguru import logger
 from requests.exceptions import RetryError
+import click
 
 from .client import AuthenticationError, InstagramClient
 from .utils import setup_logging
