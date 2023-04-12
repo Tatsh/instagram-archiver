@@ -14,7 +14,7 @@
     "check-formatting": "prettier -c './**/*.cfg' './**/*.ini' './**/*.md' './**/*.toml' './**/*.yml' ./.prettierrc ./.style.yapf && yapf -rd instagram_archiver",
     "check-spelling": "cspell --no-progress './**/*'  './**/.*'",
     "format": "prettier -w './**/*.cfg' './**/*.ini' './**/*.md' './**/*.toml' './**/*.yml' ./.prettierrc ./.style.yapf && yapf -ri instagram_archiver",
-    "install-python-deps": "poetry install && python -m pip install --upgrade pip && pip install -e . && pip install mypy pylint pylint-quotes pytest pytest-cov coveralls pytest-mock types-requests toml yapf",
+    "install-python-deps": "python -m pip install --upgrade pip && pip install poetry && poetry install && pip install -e . && pip install mypy pylint pylint-quotes pytest pytest-cov coveralls pytest-mock types-requests toml yapf",
     "mypy": "mypy .",
     "pylint": "pylint instagram_archiver",
     "qa": "yarn mypy && yarn pylint && yarn check-spelling && yarn check-formatting"
