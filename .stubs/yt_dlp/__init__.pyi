@@ -66,30 +66,30 @@ class PostprocessorFFmpegConcat(TypedDict):
 
 
 class YoutubeDLOptions(TypedDict, total=False):
-    allowed_extractors: Collection[str]
+    allowed_extractors: Collection[str] | None
     allsubtitles: bool
-    cookiesfrombrowser: list[str | None]
+    cookiesfrombrowser: list[str | None] | None
     geo_bypass: bool
     getcomments: bool
     hls_use_mpegts: bool
-    http_headers: Mapping[str, str]
+    http_headers: Mapping[str, str] | None
     ignoreerrors: bool
     ignore_no_formats_error: bool
     logger: LoggerProto
     max_sleep_interval: float
     merge_output_format: str
-    outtmpl: Mapping[str, str]
+    outtmpl: Mapping[str, str] | None
     overwrites: bool
     postprocessors: list[PostprocessorSponsorBlock | PostprocessorFFmpegSubtitlesConvertor
                          | PostprocessorFFmpegEmbedSubtitle | PostprocessorModifyChapters
                          | PostprocessorFFmpegMetadata | PostprocessorEmbedThumbnail
-                         | PostprocessorFFmpegConcat]
+                         | PostprocessorFFmpegConcat] | None
     restrictfilenames: bool
     skip_unavailable_fragments: bool
     sleep_interval: float
     sleep_interval_requests: float
     sleep_interval_subtitles: float
-    subtitleslangs: Collection[str]
+    subtitleslangs: Collection[str] | None
     verbose: bool
     writeautomaticsub: bool
     writeinfojson: bool
