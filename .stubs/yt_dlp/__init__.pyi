@@ -1,4 +1,5 @@
-from typing import Any, Collection, Literal, Mapping, Protocol, TypedDict
+from inspect import Traceback
+from typing import Any, Collection, Literal, Mapping, Protocol, Type, TypedDict
 import re
 
 SponsorBlockCategories = Literal['preview', 'selfpromo', 'interaction', 'music_offtopic', 'sponsor',
@@ -103,7 +104,7 @@ class YoutubeDL:
     def __enter__(self) -> 'YoutubeDL':
         ...
 
-    def __exit__(self, a: Any, b: Any, c: Any) -> None:
+    def __exit__(self, a: Type[BaseException], b: BaseException, c: Traceback) -> None:
         ...
 
     def extract_info(self, url: str, ie_key: str | None = ...) -> dict[str, Any]:
