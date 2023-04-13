@@ -16,15 +16,12 @@ from yt_dlp.cookies import extract_cookies_from_browser
 import requests
 import yt_dlp
 
-from .constants import LOG_SCHEMA, RETRY_ABORT_NUM, SHARED_HEADERS
+from .constants import LOG_SCHEMA, RETRY_ABORT_NUM, SHARED_HEADERS, SHARED_YT_DLP_OPTIONS
 from .ig_typing import (CarouselMedia, Comments, Edge, HighlightsTray, MediaInfo, MediaInfoItem,
                         MediaInfoItemImageVersions2Candidate, WebProfileInfo)
-from .utils import YoutubeDLLogger, chdir, get_extension, json_dumps_formatted, write_if_new
+from .utils import chdir, get_extension, json_dumps_formatted, write_if_new
 
 __all__ = ('InstagramClient',)
-
-CALLS_PER_MINUTE = 10
-YT_DLP_SLEEP_INTERVAL = 60 / CALLS_PER_MINUTE
 
 T = TypeVar('T')
 
@@ -143,8 +140,9 @@ class InstagramClient:
             while comment_data['can_view_more_preview_comments'] and comment_data['next_min_id']:
                 comment_data = self._get_rate_limited(comment_url,
                                                       params={
-                                                          **shared_params, 'min_id':
-                                                          comment_data['next_min_id']
+                                                          **shared_params,
+                                                          'min_id':
+                                                              comment_data['next_min_id'],
                                                       },
                                                       cast_to=Comments)
                 top_comment_data['comments'].append(comment_data['comments'])
@@ -281,96 +279,14 @@ class InstagramClient:
                 self._save_stuff(media['edges'])
             if len(self._video_urls) > 0:
                 with yt_dlp.YoutubeDL({
-                        'allowed_extractors': ['Instagram.*'],
-                        'allsubtitles':
-                        True,
-                        'cookiesfrombrowser': [self._browser, self._browser_profile, None, None],
-                        'geo_bypass':
-                        True,
-                        'getcomments':
-                        self._get_comments,
-                        'hls_use_mpegts':
-                        True,
-                        'http_headers':
-                        SHARED_HEADERS,
-                        'ignore_no_formats_error':
-                        True,
-                        'ignoreerrors':
-                        True,
-                        'logger':
-                        YoutubeDLLogger(),
-                        'outtmpl': {
-                            'default': '%(title).128s___src=%(extractor)s___id=%(id)s.%(ext)s',
-                            'pl_thumbnail': ''
-                        },
-                        'overwrites':
-                        False,
-                        'max_sleep_interval':
-                        6.0,
-                        'merge_output_format':
-                        'mkv',
-                        'postprocessors': [{
-                            'api':
-                            'https://sponsor.ajay.app',
-                            'categories': [
-                                'preview', 'selfpromo', 'interaction', 'music_offtopic', 'sponsor',
-                                'poi_highlight', 'intro', 'outro', 'filler', 'chapter'
+                        **SHARED_YT_DLP_OPTIONS,  # type: ignore[misc]
+                        **{
+                            'cookiesfrombrowser': [
+                                self._browser, self._browser_profile, None, None
                             ],
-                            'key':
-                            'SponsorBlock',
-                            'when':
-                            'after_filter'
-                        }, {
-                            'format': 'srt',
-                            'key': 'FFmpegSubtitlesConvertor',
-                            'when': 'before_dl'
-                        }, {
-                            'already_have_subtitle': True,
-                            'key': 'FFmpegEmbedSubtitle'
-                        }, {
-                            'force_keyframes':
-                            False,
-                            'key':
-                            'ModifyChapters',
-                            'remove_chapters_patterns': [],
-                            'remove_ranges': [],
-                            'remove_sponsor_segments': [],
-                            'sponsorblock_chapter_title':
-                            '[SponsorBlock]: %(category_names)'
-                        }, {
-                            'add_chapters': True,
-                            'add_infojson': 'if_exists',
-                            'add_metadata': True,
-                            'key': 'FFmpegMetadata'
-                        }, {
-                            'already_have_thumbnail': False,
-                            'key': 'EmbedThumbnail'
-                        }, {
-                            'key': 'FFmpegConcat',
-                            'only_multi_video': True,
-                            'when': 'playlist'
-                        }],
-                        'restrictfilenames':
-                        True,
-                        'skip_unavailable_fragments':
-                        True,
-                        'sleep_interval':
-                        YT_DLP_SLEEP_INTERVAL,
-                        'sleep_interval_requests':
-                        YT_DLP_SLEEP_INTERVAL,
-                        'sleep_interval_subtitles':
-                        YT_DLP_SLEEP_INTERVAL,
-                        'subtitleslangs': ['all'],
-                        'writeautomaticsub':
-                        True,
-                        'writesubtitles':
-                        True,
-                        'writeinfojson':
-                        True,
-                        'writethumbnail':
-                        True,
-                        'verbose':
-                        self._debug
+                            'getcomments': self._get_comments,
+                            'verbose': self._debug
+                        }
                 }) as ydl:
                     failed_urls: list[str] = []
                     while (self._video_urls and (url := self._video_urls.pop())):
