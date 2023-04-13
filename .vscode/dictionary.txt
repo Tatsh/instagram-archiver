@@ -42,6 +42,7 @@ inlinevar
 isort
 itertools
 khtml
+kwallet
 labelsize
 levelname
 levelno
