@@ -1,5 +1,5 @@
 # pylint: disable=unused-private-member
-from typing import Any, Literal, Sequence, TypedDict
+from typing import Literal, Sequence, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -49,12 +49,16 @@ class CarouselMedia(TypedDict):
     id: str
 
 
+class HasID(TypedDict):
+    id: str
+
+
 class MediaInfoItem(TypedDict):
     carousel_media: NotRequired[list[CarouselMedia]]
     image_versions2: MediaInfoItemImageVersions2
     id: str
     taken_at: int
-    user: Any
+    user: HasID
     video_dash_manifest: str
     video_duration: float
     video_versions: Sequence[MediaInfoItemVideoVersion]
@@ -70,7 +74,7 @@ class EdgeMediaToComment(TypedDict):
 
 class Comments(TypedDict):
     can_view_more_preview_comments: bool
-    comments: list[Any]
+    comments: list[HasID]
     next_min_id: str
 
 

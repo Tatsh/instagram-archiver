@@ -3,7 +3,7 @@ from os import chdir as os_chdir, getcwd
 from os.path import isfile
 from pathlib import Path
 from types import FrameType
-from typing import Any, Iterator, Literal
+from typing import Generic, Iterator, Literal, TypeVar
 import json
 import logging
 import sys
@@ -13,9 +13,20 @@ import click
 
 __all__ = ('UnknownMimetypeError', 'chdir', 'get_extension', 'json_dumps_formatted', 'write_if_new')
 
+T = TypeVar('T')
 
-def json_dumps_formatted(obj: Any) -> str:
-    return json.dumps(obj, sort_keys=True, indent=2)
+
+class JSONFormattedString(Generic[T]):
+    def __init__(self, formatted: str, original: T) -> None:
+        self.formatted = formatted
+        self.original_value = original
+
+    def __str__(self) -> str:
+        return self.formatted
+
+
+def json_dumps_formatted(obj: T) -> JSONFormattedString[T]:
+    return JSONFormattedString(json.dumps(obj, sort_keys=True, indent=2), obj)
 
 
 @contextmanager

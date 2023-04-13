@@ -1,5 +1,5 @@
 from inspect import Traceback
-from typing import Any, Collection, Literal, Mapping, Protocol, Type, TypedDict
+from typing import Collection, Literal, Mapping, Protocol, Type, TypedDict
 import re
 
 SponsorBlockCategories = Literal['preview', 'selfpromo', 'interaction', 'music_offtopic', 'sponsor',
@@ -65,6 +65,14 @@ class PostprocessorFFmpegConcat(TypedDict):
     when: str
 
 
+class InfoJSON(TypedDict):
+    _type: str
+    extractor: str
+    extractor_key: str
+    id: str
+    title: str
+
+
 class YoutubeDLOptions(TypedDict, total=False):
     allowed_extractors: Collection[str] | None
     allsubtitles: bool
@@ -107,5 +115,5 @@ class YoutubeDL:
     def __exit__(self, a: Type[BaseException], b: BaseException, c: Traceback) -> None:
         ...
 
-    def extract_info(self, url: str, ie_key: str | None = ...) -> dict[str, Any]:
+    def extract_info(self, url: str, ie_key: str | None = ...) -> InfoJSON:
         ...

@@ -23,6 +23,7 @@ from .utils import chdir, get_extension, json_dumps_formatted, write_if_new
 
 __all__ = ('InstagramClient',)
 
+Browser = Literal['brave', 'chrome', 'chromium', 'edge', 'opera', 'vivaldi', 'firefox', 'safari']
 T = TypeVar('T')
 
 
@@ -42,7 +43,7 @@ class InstagramClient:
                  log_file: str | Path | None = None,
                  output_dir: str | None = None,
                  disable_log: bool = False,
-                 browser: str = 'chrome',
+                 browser: Browser = 'chrome',
                  browser_profile: str = 'Default',
                  debug: bool = False,
                  comments: bool = False) -> None:
@@ -72,7 +73,10 @@ class InstagramClient:
             logger.debug('Creating schema')
             self._cursor.execute(LOG_SCHEMA)
 
-    def _setup_session(self, browser: str = 'chrome', browser_profile: str = 'Default') -> None:
+    def _setup_session(self,
+                       browser: Literal['brave', 'chrome', 'chromium', 'edge', 'opera', 'vivaldi',
+                                        'firefox', 'safari'] = 'chrome',
+                       browser_profile: str = 'Default') -> None:
         self._session.mount(
             'https://',
             HTTPAdapter(max_retries=Retry(
@@ -145,7 +149,7 @@ class InstagramClient:
                                                               comment_data['next_min_id'],
                                                       },
                                                       cast_to=Comments)
-                top_comment_data['comments'].append(comment_data['comments'])
+                top_comment_data['comments'].extend(comment_data['comments'])
             comments_json = f'{edge["node"]["id"]}-comments.json'
             with open(comments_json, 'w+') as f:
                 json.dump(top_comment_data, f, sort_keys=True, indent=2)
@@ -162,8 +166,8 @@ class InstagramClient:
         timestamp = media_info['items'][0]['taken_at']
         id_json_file = f'{edge["node"]["id"]}.json'
         media_info_json_file = f'{edge["node"]["id"]}-media-info-0000.json'
-        write_if_new(id_json_file, json_dumps_formatted(edge['node']))
-        write_if_new(media_info_json_file, json_dumps_formatted(media_info))
+        write_if_new(id_json_file, str(json_dumps_formatted(edge['node'])))
+        write_if_new(media_info_json_file, str(json_dumps_formatted(media_info)))
         for file in (id_json_file, media_info_json_file):
             utime(file, (timestamp, timestamp))
         self._save_to_log(media_info_url)
