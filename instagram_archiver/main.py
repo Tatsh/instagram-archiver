@@ -4,7 +4,7 @@ from loguru import logger
 from requests.exceptions import RetryError
 import click
 
-from .client import AuthenticationError, InstagramClient
+from .client import AuthenticationError, Browser, InstagramClient
 from .utils import setup_logging
 
 
@@ -14,7 +14,12 @@ from .utils import setup_logging
               default=None,
               help='Output directory',
               type=click.Path(exists=True))
-@click.option('-b', '--browser', default='chrome', help='Browser to read cookies from')
+@click.option('-b',
+              '--browser',
+              default='chrome',
+              type=click.Choice(
+                  ['brave', 'chrome', 'chromium', 'edge', 'opera', 'vivaldi', 'firefox', 'safari']),
+              help='Browser to read cookies from')
 @click.option('-p', '--profile', default='Default', help='Browser profile')
 @click.option('-d', '--debug', is_flag=True, help='Enable debug output')
 @click.option('--no-log', is_flag=True, help='Ignore log (re-fetch everything)')
@@ -25,7 +30,7 @@ from .utils import setup_logging
               'download time significantly).')
 @click.argument('username')
 def main(output_dir: str | None,
-         browser: str,
+         browser: Browser,
          profile: str,
          username: str,
          debug: bool = False,

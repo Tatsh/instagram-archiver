@@ -4,7 +4,6 @@ from typing import Collection, Literal, Protocol
 
 from yt_dlp import YoutubeDL
 
-
 class _LinuxKeyring(Enum):
     KWALLET = ...
     GNOMEKEYRING = ...

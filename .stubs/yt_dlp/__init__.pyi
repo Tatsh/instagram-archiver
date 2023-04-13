@@ -115,5 +115,5 @@ class YoutubeDL:
     def __exit__(self, a: Type[BaseException], b: BaseException, c: Traceback) -> None:
         ...
 
-    def extract_info(self, url: str, ie_key: str | None = ...) -> InfoJSON:
+    def extract_info(self, url: str, ie_key: str | None = ...) -> InfoJSON | None:
         ...

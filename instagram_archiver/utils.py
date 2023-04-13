@@ -16,7 +16,7 @@ __all__ = ('UnknownMimetypeError', 'chdir', 'get_extension', 'json_dumps_formatt
 T = TypeVar('T')
 
 
-class JSONFormattedString(Generic[T]):
+class JSONFormattedString(Generic[T]):  # pylint: disable=too-few-public-methods
     def __init__(self, formatted: str, original: T) -> None:
         self.formatted = formatted
         self.original_value = original
