@@ -7,7 +7,6 @@
     "prettier-plugin-toml": "^0.3.1"
   },
   "license": "MIT",
-  "main": "index.js",
   "name": "instagram-archiver",
   "repository": "git@github.com:Tatsh/instagram-archiver.git",
   "scripts": {
