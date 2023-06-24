@@ -295,8 +295,10 @@ class InstagramClient:
                     failed_urls: list[str] = []
                     while (self._video_urls and (url := self._video_urls.pop())):
                         if self._is_saved(url):
+                            logger.debug(f'{url} is already saved')
                             continue
                         if ydl.extract_info(url):
+                            logger.debug(f'Extracting {url}')
                             self._save_to_log(url)
                         else:
                             failed_urls.append(url)
