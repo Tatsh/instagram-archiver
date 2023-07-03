@@ -6,7 +6,7 @@ __all__ = ('LOG_SCHEMA', 'RETRY_ABORT_NUM', 'SHARED_HEADERS', 'SHARED_YT_DLP_OPT
            'YT_DLP_SLEEP_INTERVAL', 'USER_AGENT')
 
 if TYPE_CHECKING:
-    from yt_dlp import YoutubeDLOptions
+    from yt_dlp import YDLOpts
 
 USER_AGENT: Final[str] = ('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
                           'Chrome/112.0.0.0 Safari/537.36')
@@ -33,10 +33,10 @@ CREATE TABLE log (
 );
 '''
 CALLS_PER_MINUTE: Final[int] = 10
-YT_DLP_SLEEP_INTERVAL: Final[float] = 60 / CALLS_PER_MINUTE
+YT_DLP_SLEEP_INTERVAL: Final[int] = 60 // CALLS_PER_MINUTE
 #: Value taken from Instagram's JS under BootloaderConfig
 RETRY_ABORT_NUM: Final[int] = 2
-SHARED_YT_DLP_OPTIONS: 'YoutubeDLOptions' = {
+SHARED_YT_DLP_OPTIONS: 'YDLOpts' = {
     'allowed_extractors': ['Instagram.*'],
     'allsubtitles': True,
     'cookiesfrombrowser': None,
@@ -52,7 +52,7 @@ SHARED_YT_DLP_OPTIONS: 'YoutubeDLOptions' = {
         'pl_thumbnail': ''
     },
     'overwrites': False,
-    'max_sleep_interval': 6.0,
+    'max_sleep_interval': 6,
     'merge_output_format': 'mkv',
     'postprocessors': [{
         'api': 'https://sponsor.ajay.app',
