@@ -1,3 +1,4 @@
+from copy import deepcopy
 from inspect import Traceback
 from os import makedirs, utime
 from pathlib import Path
@@ -282,16 +283,14 @@ class InstagramClient:
                 page_info = media['page_info']
                 self._save_stuff(media['edges'])
             if len(self._video_urls) > 0:
-                with yt_dlp.YoutubeDL({
-                        **SHARED_YT_DLP_OPTIONS,  # type: ignore[misc]
-                        **{
-                            'cookiesfrombrowser': [
-                                self._browser, self._browser_profile, None, None
-                            ],
-                            'getcomments': self._get_comments,
-                            'verbose': self._debug
-                        }
-                }) as ydl:
+                options = deepcopy(SHARED_YT_DLP_OPTIONS)
+                options.update({
+                    'cookiefile': None,
+                    'cookiesfrombrowser': (self._browser, self._browser_profile),
+                    'getcomments': self._get_comments,
+                    'verbose': self._debug
+                })
+                with yt_dlp.YoutubeDL(options) as ydl:
                     failed_urls: list[str] = []
                     while (self._video_urls and (url := self._video_urls.pop())):
                         if self._is_saved(url):
