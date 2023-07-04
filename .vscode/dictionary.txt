@@ -18,6 +18,7 @@ colwidth
 concat
 contextlib
 contextmanager
+cookiefile
 cookiesfrombrowser
 dedented
 delslice
