@@ -1210,6 +1210,18 @@ files = [
 ]
 
 [[package]]
+name = "ratelimit-types"
+version = "0.0.1"
+description = "Typing stubs for ratelimit"
+category = "dev"
+optional = false
+python-versions = ">=3.10,<4"
+files = [
+    {file = "ratelimit_types-0.0.1-py3-none-any.whl", hash = "sha256:b1423a8c1064bbb1bed1b252bc331505688693a8e26cd2ff1023cf045c827b66"},
+    {file = "ratelimit_types-0.0.1.tar.gz", hash = "sha256:965d315eeecce45f510e1a0e298b2b8cc0623e46693343683a5eb130e6722137"},
+]
+
+[[package]]
 name = "readme-renderer"
 version = "40.0"
 description = "readme_renderer is a library for rendering \"readme\" descriptions for Warehouse"
@@ -1851,4 +1863,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<4"
-content-hash = "a5f3154abaac990ed1882626156c3bbc0ff8d8e4633069cb4cc7074f83570dcb"
+content-hash = "104491dd0846c8a147491f13c150565e0c95aab86ae04ec7dfefaff231056066"
