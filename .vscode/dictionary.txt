@@ -12,6 +12,7 @@ bootloader
 builtins
 classmethod
 cmdclass
+codeql
 colenabled
 colorder
 colwidth
