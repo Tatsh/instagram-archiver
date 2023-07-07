@@ -26,8 +26,10 @@ delslice
 dets
 distutils
 docstrings
+docutils
 ecda
 epub
+esbonio
 excinfo
 execfile
 flabel
@@ -72,6 +74,7 @@ paren
 parseable
 pipx
 plabel
+pluggy
 popen
 postprocessors
 prss

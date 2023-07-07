@@ -13,6 +13,18 @@ files = [
 ]
 
 [[package]]
+name = "appdirs"
+version = "1.4.4"
+description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128"},
+    {file = "appdirs-1.4.4.tar.gz", hash = "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41"},
+]
+
+[[package]]
 name = "astroid"
 version = "2.15.5"
 description = "An abstract syntax tree for Python with inference support."
@@ -31,6 +43,25 @@ wrapt = [
     {version = ">=1.11,<2", markers = "python_version < \"3.11\""},
     {version = ">=1.14,<2", markers = "python_version >= \"3.11\""},
 ]
+
+[[package]]
+name = "attrs"
+version = "23.1.0"
+description = "Classes Without Boilerplate"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "attrs-23.1.0-py3-none-any.whl", hash = "sha256:1f28b4522cdc2fb4256ac1a020c78acf9cba2c6b461ccd2c126f3aa8e8335d04"},
+    {file = "attrs-23.1.0.tar.gz", hash = "sha256:6279836d581513a26f1bf235f9acd333bc9115683f14f7e8fae46c98fc50e015"},
+]
+
+[package.extras]
+cov = ["attrs[tests]", "coverage[toml] (>=5.3)"]
+dev = ["attrs[docs,tests]", "pre-commit"]
+docs = ["furo", "myst-parser", "sphinx", "sphinx-notfound-page", "sphinxcontrib-towncrier", "towncrier", "zope-interface"]
+tests = ["attrs[tests-no-zope]", "zope-interface"]
+tests-no-zope = ["cloudpickle", "hypothesis", "mypy (>=1.1.1)", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "pytest-xdist[psutil]"]
 
 [[package]]
 name = "babel"
@@ -197,6 +228,32 @@ files = [
 
 [package.dependencies]
 cffi = ">=1.0.0"
+
+[[package]]
+name = "cattrs"
+version = "23.1.2"
+description = "Composable complex class support for attrs and dataclasses."
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "cattrs-23.1.2-py3-none-any.whl", hash = "sha256:b2bb14311ac17bed0d58785e5a60f022e5431aca3932e3fc5cc8ed8639de50a4"},
+    {file = "cattrs-23.1.2.tar.gz", hash = "sha256:db1c821b8c537382b2c7c66678c3790091ca0275ac486c76f3c8f3920e83c657"},
+]
+
+[package.dependencies]
+attrs = ">=20"
+exceptiongroup = {version = "*", markers = "python_version < \"3.11\""}
+typing_extensions = {version = ">=4.1.0", markers = "python_version < \"3.11\""}
+
+[package.extras]
+bson = ["pymongo (>=4.2.0,<5.0.0)"]
+cbor2 = ["cbor2 (>=5.4.6,<6.0.0)"]
+msgpack = ["msgpack (>=1.0.2,<2.0.0)"]
+orjson = ["orjson (>=3.5.2,<4.0.0)"]
+pyyaml = ["PyYAML (>=6.0,<7.0)"]
+tomlkit = ["tomlkit (>=0.11.4,<0.12.0)"]
+ujson = ["ujson (>=5.4.0,<6.0.0)"]
 
 [[package]]
 name = "certifi"
@@ -563,6 +620,29 @@ files = [
 ]
 
 [[package]]
+name = "esbonio"
+version = "0.16.1"
+description = "A Language Server for Sphinx projects."
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "esbonio-0.16.1-py3-none-any.whl", hash = "sha256:cd5ed65666d7566a38b04cac01dd55b7d74147a016d1b2ac0a0f971a8cd510cc"},
+    {file = "esbonio-0.16.1.tar.gz", hash = "sha256:d5d57c29a793de9b9b1894f9bffdd3bd25a79d430459e3e597424f52e8d02320"},
+]
+
+[package.dependencies]
+appdirs = "*"
+pygls = ">=1.0.0"
+pyspellchecker = "*"
+sphinx = "*"
+
+[package.extras]
+dev = ["black", "flake8", "pre-commit", "tox"]
+test = ["mock", "pytest", "pytest-cov", "pytest-lsp", "pytest-timeout"]
+typecheck = ["mypy", "pytest-lsp", "types-appdirs", "types-docutils", "types-pygments"]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.1.2"
 description = "Backport of PEP 654 (exception groups)"
@@ -792,6 +872,22 @@ win32-setctime = {version = ">=1.0.0", markers = "sys_platform == \"win32\""}
 
 [package.extras]
 dev = ["Sphinx (>=4.1.1)", "black (>=19.10b0)", "colorama (>=0.3.4)", "docutils (==0.16)", "flake8 (>=3.7.7)", "isort (>=5.1.1)", "pytest (>=4.6.2)", "pytest-cov (>=2.7.1)", "sphinx-autobuild (>=0.7.1)", "sphinx-rtd-theme (>=0.4.3)", "tox (>=3.9.0)"]
+
+[[package]]
+name = "lsprotocol"
+version = "2023.0.0a2"
+description = "Python implementation of the Language Server Protocol."
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "lsprotocol-2023.0.0a2-py3-none-any.whl", hash = "sha256:c4f2f77712b50d065b17f9b50d2b88c480dc2ce4bbaa56eea8269dbf54bc9701"},
+    {file = "lsprotocol-2023.0.0a2.tar.gz", hash = "sha256:80aae7e39171b49025876a524937c10be2eb986f4be700ca22ee7d186b8488aa"},
+]
+
+[package.dependencies]
+attrs = ">=21.3.0"
+cattrs = "*"
 
 [[package]]
 name = "markdown-it-py"
@@ -1031,14 +1127,14 @@ testing = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "platformdirs"
-version = "3.8.0"
+version = "3.8.1"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "platformdirs-3.8.0-py3-none-any.whl", hash = "sha256:ca9ed98ce73076ba72e092b23d3c93ea6c4e186b3f1c3dad6edd98ff6ffcca2e"},
-    {file = "platformdirs-3.8.0.tar.gz", hash = "sha256:b0cabcb11063d21a0b261d557acb0a9d2126350e63b70cdf7db6347baea456dc"},
+    {file = "platformdirs-3.8.1-py3-none-any.whl", hash = "sha256:cec7b889196b9144d088e4c57d9ceef7374f6c39694ad1577a0aab50d27ea28c"},
+    {file = "platformdirs-3.8.1.tar.gz", hash = "sha256:f87ca4fcff7d2b0f81c6a748a77973d7af0f4d526f98f308477c3c436c74d528"},
 ]
 
 [package.extras]
@@ -1128,6 +1224,28 @@ files = [
 ]
 
 [[package]]
+name = "pygls"
+version = "1.0.2"
+description = "a pythonic generic language server (pronounced like \"pie glass\")."
+category = "dev"
+optional = false
+python-versions = "<4,>=3.7"
+files = [
+    {file = "pygls-1.0.2-py3-none-any.whl", hash = "sha256:6d278d29fa6559b0f7a448263c85cb64ec6e9369548b02f1a7944060848b21f9"},
+    {file = "pygls-1.0.2.tar.gz", hash = "sha256:888ed63d1f650b4fc64d603d73d37545386ec533c0caac921aed80f80ea946a4"},
+]
+
+[package.dependencies]
+lsprotocol = "*"
+typeguard = ">=3,<4"
+
+[package.extras]
+dev = ["bandit (==1.7.4)", "flake8 (==4.0.1)", "mypy (==0.961)"]
+docs = ["sphinx (==5.0.1)", "sphinx-rtd-theme (==1.0.0)"]
+test = ["pytest (==7.1.2)", "pytest-asyncio (==0.18.3)"]
+ws = ["websockets (>=10.0.0,<11.0.0)"]
+
+[[package]]
 name = "pygments"
 version = "2.15.1"
 description = "Pygments is a syntax highlighting package written in Python."
@@ -1185,6 +1303,18 @@ files = [
 
 [package.dependencies]
 pylint = ">=2.8.0"
+
+[[package]]
+name = "pyspellchecker"
+version = "0.7.2"
+description = "Pure python spell checker based on work by Peter Norvig"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "pyspellchecker-0.7.2-py3-none-any.whl", hash = "sha256:b5ef23437702b8d03626f814b9646779b572d378b325ad252d8a8e616b3d76db"},
+    {file = "pyspellchecker-0.7.2.tar.gz", hash = "sha256:bc51ffb2c18ba26eaa1340756ebf96d0d886ed6a31d6f8e7a0094ad49d24550a"},
+]
 
 [[package]]
 name = "pytest"
@@ -1646,6 +1776,25 @@ rich = ">=12.0.0"
 urllib3 = ">=1.26.0"
 
 [[package]]
+name = "typeguard"
+version = "3.0.2"
+description = "Run-time type checker for Python"
+category = "dev"
+optional = false
+python-versions = ">=3.7.4"
+files = [
+    {file = "typeguard-3.0.2-py3-none-any.whl", hash = "sha256:bbe993854385284ab42fd5bd3bee6f6556577ce8b50696d6cb956d704f286c8e"},
+    {file = "typeguard-3.0.2.tar.gz", hash = "sha256:fee5297fdb28f8e9efcb8142b5ee219e02375509cd77ea9d270b5af826358d5a"},
+]
+
+[package.dependencies]
+typing-extensions = {version = ">=4.4.0", markers = "python_version < \"3.11\""}
+
+[package.extras]
+doc = ["packaging", "sphinx-autodoc-typehints (>=1.2.0)", "sphinx-rtd-theme"]
+test = ["mypy (>=0.991)", "pytest (>=7)"]
+
+[[package]]
 name = "types-requests"
 version = "2.31.0.1"
 description = "Typing stubs for requests"
@@ -1977,4 +2126,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<4"
-content-hash = "ce217717a82d572f3ab4e2f2167a7cfbe6a39125df51ada5242fd396642f8bf5"
+content-hash = "dd755767e33d0a47ec666c1a5958c0b97aea0947ffd2d0e24576246fec294560"
