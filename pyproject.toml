@@ -49,3 +49,11 @@ requires = ["poetry-core"]
 
 [tool.poetry.scripts]
 ia = "instagram_archiver.main:main"
+
+[tool.isort]
+case_sensitive = true
+combine_as_imports = true
+from_first = true
+line_length = 100
+order_by_type = true
+use_parentheses = true
