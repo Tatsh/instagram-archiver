@@ -1062,6 +1062,18 @@ dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
+name = "pluggy-types"
+version = "0.0.1"
+description = "Typing stubs for pluggy"
+category = "dev"
+optional = false
+python-versions = ">=3.10,<4"
+files = [
+    {file = "pluggy_types-0.0.1-py3-none-any.whl", hash = "sha256:d49645bf3d9d986b1df5cca87df3edf0e1a65ad51262df90bb87ecea623680d7"},
+    {file = "pluggy_types-0.0.1.tar.gz", hash = "sha256:0f06e33f2b46d3703f85b8a792c71d7601c8b27e14a26d18f286847cfeaba7b8"},
+]
+
+[[package]]
 name = "pycparser"
 version = "2.21"
 description = "C parser in Python"
@@ -1965,4 +1977,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<4"
-content-hash = "779c518c2405922dd31cc76073f6ca96e8f0320173bbe7636063dec3f92e64e6"
+content-hash = "ce217717a82d572f3ab4e2f2167a7cfbe6a39125df51ada5242fd396642f8bf5"
