@@ -10,10 +10,11 @@
   "name": "instagram-archiver",
   "repository": "git@github.com:Tatsh/instagram-archiver.git",
   "scripts": {
-    "check-formatting": "prettier -c './**/*.ini' './**/*.md' './**/*.toml' './**/*.yml' ./.prettierrc ./.style.yapf && poetry run isort . --check && poetry run yapf -rd instagram_archiver .stubs test",
+    "check-formatting": "prettier -c './**/*.md' './**/*.toml' './**/*.yml' ./.prettierrc  && poetry run isort . --check && poetry run yapf -rd instagram_archiver .stubs test",
     "check-spelling": "cspell --no-progress './**/*'  './**/.*'",
-    "format": "prettier -w './**/*.ini' './**/*.md' './**/*.toml' './**/*.yml' ./.prettierrc ./.style.yapf && poetry run isort . && poetry run yapf -ri instagram_archiver .stubs test",
-    "mypy": "poetry run mypy .",
+    "fix-pluggy": "touch \"$(poetry run python -c 'import inspect, os, pluggy; print(os.path.dirname(inspect.getabsfile(pluggy)))')/py.typed\"",
+    "format": "prettier -w './**/*.md' './**/*.toml' './**/*.yml' ./.prettierrc && poetry run isort . && poetry run yapf -ri instagram_archiver .stubs test",
+    "mypy": "yarn fix-pluggy && poetry run mypy .",
     "pylint": "poetry run pylint instagram_archiver",
     "qa": "yarn mypy && yarn pylint && yarn check-spelling && yarn check-formatting"
   },

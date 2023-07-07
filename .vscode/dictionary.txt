@@ -36,6 +36,7 @@ flabel
 fstr
 fullrows
 genindex
+getabsfile
 getslice
 hsplit
 htmlcov
