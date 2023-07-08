@@ -10,7 +10,7 @@
   "editor.formatOnType": true,
   "editor.inlayHints.enabled": "offUnlessPressed",
   "editor.insertSpaces": true,
-  "editor.rulers": [101],
+  "editor.rulers": [100],
   "editor.tabSize": 2,
   "editor.wordWrapColumn": 100,
   "eslint.lintTask.enable": true,
