@@ -25,9 +25,11 @@ dedented
 delslice
 dets
 distutils
+docparams
 docstrings
 docutils
 ecda
+elif
 epub
 esbonio
 excinfo
@@ -64,6 +66,7 @@ mypy
 needmessage
 netrc
 nistp
+numpy
 objectdb
 offtopic
 oneshot
