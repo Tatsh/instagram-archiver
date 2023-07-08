@@ -36,6 +36,7 @@ def main(output_dir: str | None,
          debug: bool = False,
          no_log: bool = False,
          include_comments: bool = False) -> None:
+    """Entry point."""
     setup_logging(debug)
     try:
         with InstagramClient(username=username,

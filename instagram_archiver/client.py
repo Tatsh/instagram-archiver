@@ -38,6 +38,7 @@ class AuthenticationError(Exception):
 
 
 class InstagramClient:
+    """The client."""
     def __init__(self,
                  *,
                  username: str,
@@ -244,13 +245,16 @@ class InstagramClient:
             cast_to=HighlightsTray)
 
     def __enter__(self) -> 'InstagramClient':
+        """Recommended way to initialise the client."""
         return self
 
     def __exit__(self, _: Type[BaseException], __: BaseException, ___: Traceback) -> None:
+        """Clean up."""
         self._cursor.close()
         self._connection.close()
 
     def process(self) -> None:
+        """Process a post."""
         with chdir(self._output_dir):
             self._get_rate_limited(f'https://www.instagram.com/{self._username}/',
                                    return_json=False)
