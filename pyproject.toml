@@ -108,8 +108,9 @@ disable = [
 [tool.pylint.refactoring]
 max-nested-blocks = 6
 
-# [tool.pylint.variables]
-# allow-global-unused-variables = true
+[tool.pylint.variables]
+allow-global-unused-variables = false
+
 [tool.pytest.ini_options]
 mock_use_standalone_module = true
 
