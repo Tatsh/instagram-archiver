@@ -11,7 +11,8 @@ import sys
 from loguru import logger
 import click
 
-__all__ = ('UnknownMimetypeError', 'chdir', 'get_extension', 'json_dumps_formatted', 'write_if_new')
+__all__ = ('UnknownMimetypeError', 'YoutubeDLLogger', 'chdir', 'get_extension',
+           'json_dumps_formatted', 'setup_logging', 'write_if_new')
 
 T = TypeVar('T')
 
@@ -26,11 +27,13 @@ class JSONFormattedString(Generic[T]):  # pylint: disable=too-few-public-methods
 
 
 def json_dumps_formatted(obj: T) -> JSONFormattedString[T]:
+    """Returns a special object with the formatted version of the JSON str and the original."""
     return JSONFormattedString(json.dumps(obj, sort_keys=True, indent=2), obj)
 
 
 @contextmanager
 def chdir(path: str | Path) -> Iterator[None]:
+    """Context-managing ``chdir``. Changes to old path on exit."""
     old_path = getcwd()
     os_chdir(path)
     try:
@@ -40,16 +43,18 @@ def chdir(path: str | Path) -> Iterator[None]:
 
 
 def write_if_new(target: Path | str, content: str | bytes, mode: str = 'w') -> None:
+    """Write a file only if it will be a new file."""
     if not isfile(target):
         with click.open_file(str(target), mode) as f:
             f.write(content)
 
 
 class UnknownMimetypeError(Exception):
-    pass
+    """Raised when an unknown mimetype is encountered in ``get_extension()``."""
 
 
 def get_extension(mimetype: str) -> Literal['png', 'jpg']:
+    """Gets the appropriate three-letter extension for a mimetype."""
     if mimetype == 'image/jpeg':
         return 'jpg'
     if mimetype == 'image/png':
@@ -94,6 +99,7 @@ def setup_logging(debug: bool | None = False) -> None:
 
 
 class YoutubeDLLogger:
+    """Basic logger front-end to loguru for use with ``YoutubeDL``."""
     def debug(self, message: str) -> None:
         if message.startswith('[debug] '):
             logger.debug(message)
