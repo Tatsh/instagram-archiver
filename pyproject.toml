@@ -9,7 +9,7 @@ version = "0.2.0"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4"
-click = ">=8.0,<8.1.4"
+click = ">=8.0,<8.1.5"
 loguru = "^0.6.0"
 mutagen = "^1.46.0"
 ratelimit = "^2.2.1"
