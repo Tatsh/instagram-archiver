@@ -59,12 +59,15 @@
     "yml"
   ],
   "ignorePaths": [
+    "*.log",
     ".coverage",
     ".directory",
+    ".git",
+    ".vscode/extensions.json",
+    "__pycache__",
     "build/**",
     "dist/**",
-    "htmlcov/**",
-    "xirvik_tools.egg-info/**"
+    "htmlcov/**"
   ],
   "languageSettings": [
     {
