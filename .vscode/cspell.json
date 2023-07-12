@@ -5,6 +5,7 @@
       "path": "dictionary.txt"
     }
   ],
+  "enableGlobDot": true,
   "enabledLanguageIds": [
     "asciidoc",
     "c",
