@@ -40,11 +40,11 @@ __all__ = ('main',)
 def main(output_dir: Path | None,
          browser: BrowserName,
          profile: str,
-         username: str | None = None,
          debug: bool = False,
          include_comments: bool = False,
          no_log: bool = False,
-         print_query_hashes: bool = False) -> None:
+         print_query_hashes: bool = False,
+         username: str | None = None) -> None:
     """Archive a profile's posts."""
     setup_logging(debug)
     if print_query_hashes:
