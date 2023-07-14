@@ -64,6 +64,7 @@
     ".coverage",
     ".directory",
     ".git",
+    ".mypy_cache",
     ".vscode/extensions.json",
     "__pycache__",
     "build/**",
