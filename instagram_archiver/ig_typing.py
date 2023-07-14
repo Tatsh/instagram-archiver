@@ -3,6 +3,13 @@ from typing import Any, Literal, Sequence, TypedDict
 
 from typing_extensions import NotRequired
 
+__all__ = ('BrowserName', 'CarouselMedia', 'Comments', 'Edge', 'EdgeMediaToComment',
+           'EdgeOwnerToTimelineMedia', 'EdgeOwnerToTimelineMediaPageInfo', 'EdgeSidecarToChildren',
+           'GraphImageNode', 'GraphNodeOwner', 'GraphSidecarNode', 'GraphVideoNode',
+           'GraphVideoNodeVideoDimensions', 'HasID', 'HighlightItem', 'HighlightsTray', 'MediaInfo',
+           'MediaInfoItem', 'MediaInfoItemImageVersions2', 'MediaInfoItemImageVersions2Candidate',
+           'MediaInfoItemVideoVersion', 'UserInfo', 'WebProfileInfo', 'WebProfileInfoData')
+
 
 class MediaInfoItemVideoVersion(TypedDict):
     height: int
@@ -159,3 +166,7 @@ class WebProfileInfoData(TypedDict):
 
 class WebProfileInfo(TypedDict):
     data: WebProfileInfoData
+
+
+BrowserName = Literal['brave', 'chrome', 'chromium', 'edge', 'firefox', 'opera', 'safari',
+                      'vivaldi']
