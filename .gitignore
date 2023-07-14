@@ -5,6 +5,7 @@
 /MANIFEST
 /htmlcov/
 /yarn-error.log
+_build/
 build/
 dist/
 node_modules/
