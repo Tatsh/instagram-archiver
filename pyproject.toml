@@ -98,6 +98,7 @@ load-plugins = [
   "pylint.extensions.set_membership",
   "pylint_quotes"
 ]
+recursive = true
 
 [tool.pylint.basic]
 class-attribute-naming-style = "snake_case"
