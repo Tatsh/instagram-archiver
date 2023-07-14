@@ -1,5 +1,5 @@
 # pylint: disable=unused-private-member
-from typing import Literal, Sequence, TypedDict
+from typing import Any, Literal, Sequence, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -93,10 +93,54 @@ class GraphSidecarNode(TypedDict):
     shortcode: NotRequired[str]
 
 
+class GraphVideoNodeVideoDimensions(TypedDict):
+    height: int
+    width: int
+
+
+class GraphNodeOwner(TypedDict):
+    id: str
+    username: str
+
+
 class GraphVideoNode(TypedDict):
     __typename: Literal['GraphVideo']
+    accessibility_caption: Any
+    clips_music_attribution_info: NotRequired[Any]
+    coauthor_producers: Sequence[Any]
+    comments_disabled: bool
+    dash_info: Any
+    dimensions: GraphVideoNodeVideoDimensions
+    display_url: str
+    edge_liked_by: EdgeMediaToComment
+    edge_media_caption: Any
+    edge_media_preview_like: EdgeMediaToComment
+    edge_media_to_comment: EdgeMediaToComment
+    edge_media_to_tagged_user: Any
+    fact_check_information: Any
+    fact_check_overall_rating: Any
+    felix_profile_grid_crop: Any
+    gating_info: Any
+    has_audio: bool
+    has_upcoming_event: bool
     id: str
+    is_video: Literal[True]
+    location: Any
+    media_overlay_info: Any
+    media_preview: Any
+    nft_asset_info: Any
+    owner: GraphNodeOwner
+    pinned_for_users: Sequence[Any]
+    product_type: str
+    sharing_friction_info: Any
     shortcode: NotRequired[str]
+    taken_at_timestamp: int
+    thumbnail_resources: Sequence[Any]
+    thumbnail_src: str
+    tracking_token: str
+    video_url: str
+    video_view_count: int
+    viewer_can_reshare: bool
 
 
 class GraphImageNode(TypedDict):
