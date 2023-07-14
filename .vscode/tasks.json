@@ -5,7 +5,7 @@
       "label": "Delete default output path",
       "presentation": {
         "close": true,
-        "echo": true,
+        "echo": false,
         "reveal": "never",
         "revealProblems": "always"
       },
