@@ -54,7 +54,7 @@ build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core"]
 
 [tool.poetry.scripts]
-ia = "instagram_archiver.main:main"
+ia = "instagram_archiver:instagram_archiver"
 
 [tool.isort]
 case_sensitive = true
