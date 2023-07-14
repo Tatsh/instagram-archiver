@@ -2,8 +2,8 @@ from typing import TYPE_CHECKING, Final, Mapping
 
 from .utils import YoutubeDLLogger
 
-__all__ = ('LOG_SCHEMA', 'RETRY_ABORT_NUM', 'SHARED_HEADERS', 'SHARED_YT_DLP_OPTIONS',
-           'YT_DLP_SLEEP_INTERVAL', 'USER_AGENT')
+__all__ = ('BROWSER_CHOICES', 'LOG_SCHEMA', 'RETRY_ABORT_NUM', 'SHARED_HEADERS',
+           'SHARED_YT_DLP_OPTIONS', 'YT_DLP_SLEEP_INTERVAL', 'USER_AGENT')
 
 if TYPE_CHECKING:
     from yt_dlp import YDLOpts
@@ -32,7 +32,9 @@ CREATE TABLE log (
     date TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 '''
+#: Calls per minute allowed.
 CALLS_PER_MINUTE: Final[int] = 10
+#: yt-dlp sleep interval.
 YT_DLP_SLEEP_INTERVAL: Final[int] = 60 // CALLS_PER_MINUTE
 #: Value taken from Instagram's JS under BootloaderConfig
 RETRY_ABORT_NUM: Final[int] = 2
@@ -101,4 +103,5 @@ SHARED_YT_DLP_OPTIONS: 'YDLOpts' = {
     'writeinfojson': True,
     'writethumbnail': True,
 }
+#: Possible browser choices to get cookies from.
 BROWSER_CHOICES = ('brave', 'chrome', 'chromium', 'edge', 'opera', 'vivaldi', 'firefox', 'safari')
