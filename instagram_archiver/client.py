@@ -18,13 +18,12 @@ import requests
 import yt_dlp
 
 from .constants import LOG_SCHEMA, RETRY_ABORT_NUM, SHARED_HEADERS, SHARED_YT_DLP_OPTIONS
-from .ig_typing import (CarouselMedia, Comments, Edge, HighlightsTray, MediaInfo, MediaInfoItem,
-                        MediaInfoItemImageVersions2Candidate, WebProfileInfo)
+from .ig_typing import (BrowserName, CarouselMedia, Comments, Edge, HighlightsTray, MediaInfo,
+                        MediaInfoItem, MediaInfoItemImageVersions2Candidate, WebProfileInfo)
 from .utils import chdir, get_extension, json_dumps_formatted, write_if_new
 
 __all__ = ('InstagramClient',)
 
-Browser = Literal['brave', 'chrome', 'chromium', 'edge', 'opera', 'vivaldi', 'firefox', 'safari']
 T = TypeVar('T')
 
 
@@ -45,7 +44,7 @@ class InstagramClient:
                  log_file: str | Path | None = None,
                  output_dir: str | Path | None = None,
                  disable_log: bool = False,
-                 browser: Browser = 'chrome',
+                 browser: BrowserName = 'chrome',
                  browser_profile: str = 'Default',
                  debug: bool = False,
                  comments: bool = False) -> None:
@@ -76,8 +75,7 @@ class InstagramClient:
             self._cursor.execute(LOG_SCHEMA)
 
     def _setup_session(self,
-                       browser: Literal['brave', 'chrome', 'chromium', 'edge', 'opera', 'vivaldi',
-                                        'firefox', 'safari'] = 'chrome',
+                       browser: BrowserName = 'chrome',
                        browser_profile: str = 'Default') -> None:
         self._session.mount(
             'https://',
