@@ -252,7 +252,7 @@ class InstagramClient:
         self._connection.close()
 
     def process(self) -> None:
-        """Process a post."""
+        """Process posts."""
         with chdir(self._output_dir):
             self._get_rate_limited(f'https://www.instagram.com/{self._username}/',
                                    return_json=False)
