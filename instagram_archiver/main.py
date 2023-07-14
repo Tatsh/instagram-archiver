@@ -1,3 +1,4 @@
+from pathlib import Path
 import sys
 
 from loguru import logger
@@ -13,12 +14,12 @@ from .utils import setup_logging
               '--output-dir',
               default=None,
               help='Output directory',
-              type=click.Path(exists=True))
+              type=click.Path(file_okay=False, path_type=Path, resolve_path=True, writable=True))
 @click.option('-b',
               '--browser',
               default='chrome',
               type=click.Choice(
-                  ['brave', 'chrome', 'chromium', 'edge', 'opera', 'vivaldi', 'firefox', 'safari']),
+                  ('brave', 'chrome', 'chromium', 'edge', 'opera', 'vivaldi', 'firefox', 'safari')),
               help='Browser to read cookies from')
 @click.option('-p', '--profile', default='Default', help='Browser profile')
 @click.option('-d', '--debug', is_flag=True, help='Enable debug output')
@@ -26,10 +27,9 @@ from .utils import setup_logging
 @click.option('-C',
               '--include-comments',
               is_flag=True,
-              help='Also download all comments (extends '
-              'download time significantly).')
+              help='Also download all comments (extends download time significantly).')
 @click.argument('username')
-def main(output_dir: str | None,
+def main(output_dir: Path | None,
          browser: Browser,
          profile: str,
          username: str,
