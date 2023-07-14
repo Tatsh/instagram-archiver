@@ -5,7 +5,7 @@ license = "MIT"
 name = "instagram-archiver"
 packages = [{ include = "instagram_archiver" }]
 readme = "README.md"
-version = "0.2.0"
+version = "0.2.1"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4"
