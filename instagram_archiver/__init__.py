@@ -1,3 +1,3 @@
-from .main import main
+from .main import main as instagram_archiver
 
-__all__ = ('main',)
+__all__ = ('instagram_archiver',)
