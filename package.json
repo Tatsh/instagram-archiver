@@ -13,15 +13,21 @@
   },
   "license": "MIT",
   "name": "instagram-archiver",
+  "prettier": {
+    "endOfLine": "lf",
+    "iniSpaceAroundEquals": true,
+    "printWidth": 100,
+    "singleQuote": true
+  },
   "repository": "git@github.com:Tatsh/instagram-archiver.git",
   "scripts": {
-    "check-formatting": "prettier -c '.*/**/*.json' '.*/**/*.y*ml' './**/*.md' './**/*.toml' './**/*.y*ml' ./.prettierrc && poetry run isort . --check && poetry run yapf -rd instagram_archiver .stubs tests",
+    "check-formatting": "prettier -c . && poetry run isort . --check && poetry run yapf -prd .",
     "check-spelling": "cspell --no-progress .",
     "clean-dict": "r=(); while IFS=$\\n read -r w; do ! rg --no-config -qi. -g '!.vscode/dictionary.txt' -m 1 \"$w\" . && r+=(\"$w\"); done < ./.vscode/dictionary.txt; j=$(printf \"|%s\" \"${r[@]}\"); j=\"^(${j:1})$\"; grep -Ev \"${j}\" ./.vscode/dictionary.txt > new && mv new ./.vscode/dictionary.txt",
     "fix-pluggy": "touch \"$(poetry run python -c 'import inspect, os, pluggy; print(os.path.dirname(inspect.getabsfile(pluggy)))')/py.typed\"",
-    "format": "prettier -w '.*/**/*.json' '.*/**/*.y*ml' './**/*.md' './**/*.toml' './**/*.y*ml' ./.prettierrc && poetry run isort . && poetry run yapf -ri instagram_archiver .stubs tests",
+    "format": "prettier -w . && poetry run isort . && poetry run yapf -pri .",
     "mypy": "yarn fix-pluggy && poetry run mypy .",
-    "pylint": "poetry run pylint docs instagram_archiver",
+    "pylint": "poetry run pylint .",
     "qa": "yarn mypy && yarn pylint && yarn check-spelling && yarn check-formatting"
   },
   "version": "0.2.0"
