@@ -50,10 +50,11 @@ pylint
 pytest
 ratelimit
 ratelimit
-reshare
 referer
+reshare
 restrictfilenames
 rstcheck
+rtfd
 selfpromo
 setuptools
 shortcode
