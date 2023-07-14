@@ -11,6 +11,8 @@ from .find_query_hashes import find_query_hashes
 from .ig_typing import BrowserName
 from .utils import setup_logging
 
+__all__ = ('main',)
+
 
 @click.command()
 @click.option('-o',
@@ -43,7 +45,7 @@ def main(output_dir: Path | None,
          include_comments: bool = False,
          no_log: bool = False,
          print_query_hashes: bool = False) -> None:
-    """Entry point."""
+    """Archive a profile's posts."""
     setup_logging(debug)
     if print_query_hashes:
         for query_hash in sorted(find_query_hashes(browser, profile)):
