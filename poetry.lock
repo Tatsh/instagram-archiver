@@ -1574,6 +1574,18 @@ files = [
 types-urllib3 = "*"
 
 [[package]]
+name = "types-toml"
+version = "0.10.8.6"
+description = "Typing stubs for toml"
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "types-toml-0.10.8.6.tar.gz", hash = "sha256:6d3ac79e36c9ee593c5d4fb33a50cca0e3adceb6ef5cff8b8e5aef67b4c4aaf2"},
+    {file = "types_toml-0.10.8.6-py3-none-any.whl", hash = "sha256:de7b2bb1831d6f7a4b554671ffe5875e729753496961b3e9b202745e4955dafa"},
+]
+
+[[package]]
 name = "types-urllib3"
 version = "1.26.25.13"
 description = "Typing stubs for urllib3"
@@ -1875,4 +1887,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<4"
-content-hash = "54c22b996a92e1c74e68a1c8c4b2c90de566a7a9d89728f5792204a5a7c55129"
+content-hash = "202223c83bb234a5947895e35304d3332c12053e63f5daf48d61fcdc143fcdca"

@@ -3,16 +3,17 @@
 Configuration file for the Sphinx documentation builder.
 https://www.sphinx-doc.org/en/master/usage/configuration.html
 """
-from typing import Final, Sequence
 from os.path import dirname
+from typing import Final, Sequence, cast
 import os
 import sys
+
 import toml
 
 
 def read_version() -> str:
     with open(f'{dirname(__file__)}/../pyproject.toml') as f:
-        return toml.load(f)['tool']['poetry']['version']
+        return cast(str, toml.load(f)['tool']['poetry']['version'])
 
 
 # region Path setup
