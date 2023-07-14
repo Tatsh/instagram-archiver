@@ -168,5 +168,6 @@ class WebProfileInfo(TypedDict):
     data: WebProfileInfoData
 
 
+#: Possible browsers to use for cookies.
 BrowserName = Literal['brave', 'chrome', 'chromium', 'edge', 'firefox', 'opera', 'safari',
                       'vivaldi']
