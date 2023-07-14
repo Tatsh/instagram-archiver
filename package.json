@@ -7,8 +7,10 @@
   ],
   "devDependencies": {
     "cspell": "^6.31.1",
+    "markdownlint-cli2": "^0.8.1",
     "prettier": "^2.8.7",
     "prettier-plugin-ini": "^1.1.0",
+    "prettier-plugin-sort-json": "^1.0.0",
     "prettier-plugin-toml": "^0.3.1"
   },
   "license": "MIT",
@@ -21,11 +23,11 @@
   },
   "repository": "git@github.com:Tatsh/instagram-archiver.git",
   "scripts": {
-    "check-formatting": "prettier -c . && poetry run isort . --check && poetry run yapf -prd .",
+    "check-formatting": "prettier -c . && poetry run isort . --check && poetry run yapf -prd . && markdownlint-cli2 '**/*.md' '#node_modules'",
     "check-spelling": "cspell --no-progress .",
     "clean-dict": "r=(); while IFS=$\\n read -r w; do ! rg --no-config -qi. -g '!.vscode/dictionary.txt' -m 1 \"$w\" . && r+=(\"$w\"); done < ./.vscode/dictionary.txt; j=$(printf \"|%s\" \"${r[@]}\"); j=\"^(${j:1})$\"; grep -Ev \"${j}\" ./.vscode/dictionary.txt > new && mv new ./.vscode/dictionary.txt",
     "fix-pluggy": "touch \"$(poetry run python -c 'import inspect, os, pluggy; print(os.path.dirname(inspect.getabsfile(pluggy)))')/py.typed\"",
-    "format": "prettier -w . && poetry run isort . && poetry run yapf -pri .",
+    "format": "prettier -w . && poetry run isort . && poetry run yapf -pri . && markdownlint-cli2 --fix '**/*.md' '#node_modules'",
     "mypy": "yarn fix-pluggy && poetry run mypy .",
     "pylint": "poetry run pylint .",
     "qa": "yarn mypy && yarn pylint && yarn check-spelling && yarn check-formatting"
