@@ -43,7 +43,7 @@ class InstagramClient:
                  *,
                  username: str,
                  log_file: str | Path | None = None,
-                 output_dir: str | None = None,
+                 output_dir: str | Path | None = None,
                  disable_log: bool = False,
                  browser: Browser = 'chrome',
                  browser_profile: str = 'Default',
