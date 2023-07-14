@@ -43,6 +43,7 @@ docutils = "^0.20.1"
 esbonio = "^0.16.1"
 sphinx = "^7.0.1"
 sphinx-click = "^4.4.0"
+toml = "^0.10.2"
 
 [tool.poetry.group.tests]
 optional = true
