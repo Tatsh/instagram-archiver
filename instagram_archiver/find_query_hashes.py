@@ -12,6 +12,7 @@ __all__ = ('find_query_hashes',)
 
 
 def find_query_hashes(browser: BrowserName = 'chrome', profile: str = 'Default') -> Iterator[str]:
+    """Gets the current query hashes in Instagram's JavaScript files."""
     with requests.Session() as session:
         session.headers.update({
             **SHARED_HEADERS,
