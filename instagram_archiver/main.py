@@ -5,7 +5,10 @@ from loguru import logger
 from requests.exceptions import RetryError
 import click
 
-from .client import AuthenticationError, Browser, InstagramClient
+from .client import AuthenticationError, InstagramClient
+from .constants import BROWSER_CHOICES
+from .find_query_hashes import find_query_hashes
+from .ig_typing import BrowserName
 from .utils import setup_logging
 
 
@@ -18,8 +21,7 @@ from .utils import setup_logging
 @click.option('-b',
               '--browser',
               default='chrome',
-              type=click.Choice(
-                  ('brave', 'chrome', 'chromium', 'edge', 'opera', 'vivaldi', 'firefox', 'safari')),
+              type=click.Choice(BROWSER_CHOICES),
               help='Browser to read cookies from')
 @click.option('-p', '--profile', default='Default', help='Browser profile')
 @click.option('-d', '--debug', is_flag=True, help='Enable debug output')
@@ -28,16 +30,27 @@ from .utils import setup_logging
               '--include-comments',
               is_flag=True,
               help='Also download all comments (extends download time significantly).')
-@click.argument('username')
+@click.option('--print-query-hashes',
+              is_flag=True,
+              help='Print current query hashes and exit.',
+              hidden=True)
+@click.argument('username', required=False)
 def main(output_dir: Path | None,
-         browser: Browser,
+         browser: BrowserName,
          profile: str,
-         username: str,
+         username: str | None = None,
          debug: bool = False,
+         include_comments: bool = False,
          no_log: bool = False,
-         include_comments: bool = False) -> None:
+         print_query_hashes: bool = False) -> None:
     """Entry point."""
     setup_logging(debug)
+    if print_query_hashes:
+        for query_hash in sorted(find_query_hashes(browser, profile)):
+            click.echo(query_hash)
+        return
+    if not username:
+        raise click.UsageError('Username is required')
     try:
         with InstagramClient(username=username,
                              output_dir=output_dir,

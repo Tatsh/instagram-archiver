@@ -101,3 +101,4 @@ SHARED_YT_DLP_OPTIONS: 'YDLOpts' = {
     'writeinfojson': True,
     'writethumbnail': True,
 }
+BROWSER_CHOICES = ('brave', 'chrome', 'chromium', 'edge', 'opera', 'vivaldi', 'firefox', 'safari')
