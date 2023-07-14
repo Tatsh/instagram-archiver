@@ -54,13 +54,13 @@ def main(output_dir: Path | None,
     if not username:
         raise click.UsageError('Username is required')
     try:
-        with InstagramClient(username=username,
-                             output_dir=output_dir,
+        with InstagramClient(browser=browser,
                              browser_profile=profile,
-                             browser=browser,
+                             comments=include_comments,
                              debug=debug,
                              disable_log=no_log,
-                             comments=include_comments) as client:
+                             output_dir=output_dir,
+                             username=username) as client:
             client.process()
     except RetryError as e:
         click.echo(
