@@ -4,8 +4,16 @@ Configuration file for the Sphinx documentation builder.
 https://www.sphinx-doc.org/en/master/usage/configuration.html
 """
 from typing import Final, Sequence
+from os.path import dirname
 import os
 import sys
+import toml
+
+
+def read_version() -> str:
+    with open(f'{dirname(__file__)}/../pyproject.toml') as f:
+        return toml.load(f)['tool']['poetry']['version']
+
 
 # region Path setup
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -18,7 +26,7 @@ author: Final[str] = 'Andrew Udvare <audvare@gmail.com>'
 copyright: Final[str] = '2023'
 project: Final[str] = 'instagram-archiver'
 '''The short X.Y version.'''
-version: Final[str] = '0.2.0'
+version: Final[str] = read_version()
 '''The full version, including alpha/beta/rc tags.'''
 release: Final[str] = f'v{version}'
 '''
