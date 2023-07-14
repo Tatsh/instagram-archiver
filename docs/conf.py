@@ -3,18 +3,16 @@
 Configuration file for the Sphinx documentation builder.
 https://www.sphinx-doc.org/en/master/usage/configuration.html
 """
+from datetime import datetime
 from os.path import dirname
-from typing import Final, Sequence, cast
+from typing import Final, Sequence
 import os
 import sys
 
 import toml
 
-
-def read_version() -> str:
-    with open(f'{dirname(__file__)}/../pyproject.toml') as f:
-        return cast(str, toml.load(f)['tool']['poetry']['version'])
-
+with open(f'{dirname(__file__)}/../pyproject.toml') as f:
+    PROJECT = toml.load(f)
 
 # region Path setup
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -23,18 +21,18 @@ def read_version() -> str:
 sys.path.insert(0, os.path.abspath('..'))
 # endregion
 
-author: Final[str] = 'Andrew Udvare <audvare@gmail.com>'
-copyright: Final[str] = '2023'
-project: Final[str] = 'instagram-archiver'
+author: Final[str] = PROJECT['tool']['poetry']['authors'][0]
+copyright: Final[str] = str(datetime.now().year)
+project: Final[str] = PROJECT['tool']['poetry']['name']
 '''The short X.Y version.'''
-version: Final[str] = read_version()
+version: Final[str] = PROJECT['tool']['poetry']['version']
 '''The full version, including alpha/beta/rc tags.'''
 release: Final[str] = f'v{version}'
 '''
 Add any Sphinx extension module names here, as strings. They can be extensions
 coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 '''
-extensions: Final[Sequence[str]] = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon']
+extensions: Final[Sequence[str]] = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx_click']
 '''Add any paths that contain templates here, relative to this directory.'''
 templates_path: Final[Sequence[str]] = ['_templates']
 '''
