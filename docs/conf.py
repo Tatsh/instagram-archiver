@@ -32,7 +32,9 @@ release: Final[str] = f'v{version}'
 Add any Sphinx extension module names here, as strings. They can be extensions
 coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 '''
-extensions: Final[Sequence[str]] = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx_click']
+extensions: Final[Sequence[str]] = (
+    ['sphinx.ext.autodoc', 'sphinx.ext.napoleon'] +
+    (['sphinx_click'] if PROJECT['tool']['poetry'].get('scripts') else []))
 '''Add any paths that contain templates here, relative to this directory.'''
 templates_path: Final[Sequence[str]] = ['_templates']
 '''
