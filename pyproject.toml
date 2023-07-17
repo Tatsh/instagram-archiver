@@ -10,7 +10,7 @@ version = "0.2.1"
 [tool.poetry.dependencies]
 python = ">=3.10,<4"
 beautifulsoup4 = "^4.12.2"
-click = ">=8.0,<8.1.4"
+click = ">=8.0,<8.1.6"
 html5lib = "^1.1"
 loguru = "^0.6.0"
 mutagen = "^1.46.0"
