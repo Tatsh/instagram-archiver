@@ -24,7 +24,7 @@ optional = true
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.4.1"
-pylint = "^2.17.2"
+pylint = ">=2.17.2,<4.0.0"
 pylint-quotes = "^0.2.3"
 ratelimit-types = "^0.0.1"
 rope = "^1.7.0"
