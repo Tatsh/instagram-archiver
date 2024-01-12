@@ -1,9 +1,9 @@
+from collections.abc import Collection, Mapping
 from copy import deepcopy
-from inspect import Traceback
-from os import makedirs, utime
+from os import utime
 from pathlib import Path
-from pprint import pprint as pp
-from typing import Collection, Literal, Mapping, Type, TypeVar, overload
+from types import TracebackType
+from typing import Literal, TypeVar, overload
 from urllib.parse import urlparse
 import json
 import re
@@ -18,13 +18,37 @@ import requests
 import yt_dlp
 
 from .constants import LOG_SCHEMA, RETRY_ABORT_NUM, SHARED_HEADERS, SHARED_YT_DLP_OPTIONS
-from .ig_typing import (BrowserName, CarouselMedia, Comments, Edge, HighlightsTray, MediaInfo,
-                        MediaInfoItem, MediaInfoItemImageVersions2Candidate, WebProfileInfo)
+from .ig_typing import (
+    BrowserName,
+    CarouselMedia,
+    Comments,
+    Edge,
+    HighlightsTray,
+    MediaInfo,
+    MediaInfoItem,
+    MediaInfoItemImageVersions2Candidate,
+    WebProfileInfo,
+)
 from .utils import chdir, get_extension, json_dumps_formatted, write_if_new
 
 __all__ = ('InstagramClient',)
 
 T = TypeVar('T')
+
+
+class UnexpectedMoreAvailableTrue(ValueError):
+    def __init__(self) -> None:
+        super().__init__('Unhandled more_available set to True')
+
+
+class UnknownShortcode(ValueError):
+    def __init__(self) -> None:
+        super().__init__('Unknown shortcode')
+
+
+class UnknownType(ValueError):
+    def __init__(self, typename: str) -> None:
+        super().__init__(f'Unknown type: {typename}')
 
 
 def _clean_url(url: str) -> str:
@@ -53,8 +77,8 @@ class InstagramClient:
         self._browser = browser
         self._browser_profile = browser_profile
         self._setup_session(browser, browser_profile)
-        self._output_dir = Path(output_dir or Path('.').resolve() / username)
-        makedirs(self._output_dir, exist_ok=True)
+        self._output_dir = Path(output_dir or Path().resolve() / username)
+        Path(self._output_dir).mkdir(parents=True)
         self._log_db = Path(log_file or self._output_dir / '.log.db')
         self._connection = sqlite3.connect(self._log_db)
         self._cursor = self._connection.cursor()
@@ -161,8 +185,7 @@ class InstagramClient:
             return
         media_info = self._get_rate_limited(media_info_url, cast_to=MediaInfo)
         if media_info['more_available'] or media_info['num_results'] != 1:
-            pp(media_info)
-            raise ValueError('Unhandled more_available set to True')
+            raise UnexpectedMoreAvailableTrue
         timestamp = media_info['items'][0]['taken_at']
         id_json_file = f'{edge["node"]["id"]}.json'
         media_info_json_file = f'{edge["node"]["id"]}-media-info-0000.json'
@@ -189,9 +212,9 @@ class InstagramClient:
                         try:
                             shortcode = parent_edge['node']['shortcode']
                         except KeyError as exc:
-                            raise ValueError('Unknown shortcode') from exc
+                            raise UnknownShortcode from exc
                     else:
-                        raise ValueError('Unknown shortcode') from e
+                        raise UnknownShortcode from e
                 self._add_video_url(f'https://www.instagram.com/p/{shortcode}')
             elif edge['node']['__typename'] == 'GraphImage':
                 self._save_media(edge)
@@ -202,10 +225,10 @@ class InstagramClient:
                     self._save_comments(edge)
                 self._save_stuff(edge['node']['edge_sidecar_to_children']['edges'], edge)
             else:
-                raise ValueError(f'Unknown type "{edge["node"]["__typename"]}"')
+                raise UnknownType(edge["node"]["__typename"])
 
     @overload
-    def _get_rate_limited(self, url: str, *, cast_to: Type[T]) -> T:
+    def _get_rate_limited(self, url: str, *, cast_to: type[T]) -> T:
         pass
 
     @overload
@@ -220,18 +243,17 @@ class InstagramClient:
                           url: str,
                           *,
                           params: Mapping[str, str] | None = None,
-                          cast_to: Type[T]) -> T:
+                          cast_to: type[T]) -> T:
         pass
 
     @sleep_and_retry
     @limits(calls=10, period=60)
-    def _get_rate_limited(
-            self,
-            url: str,
-            *,
-            return_json: bool = True,
-            params: Mapping[str, str] | None = None,
-            cast_to: Type[T] | None = None) -> T | requests.Response:  # pylint: disable=unused-argument
+    def _get_rate_limited(self,
+                          url: str,
+                          *,
+                          return_json: bool = True,
+                          params: Mapping[str, str] | None = None,
+                          cast_to: type[T] | None = None) -> T | requests.Response:
         with self._session.get(url, params=params) as r:
             r.raise_for_status()
             return r.json() if return_json else r
@@ -246,7 +268,8 @@ class InstagramClient:
         """Recommended way to initialise the client."""
         return self
 
-    def __exit__(self, _: Type[BaseException], __: BaseException, ___: Traceback) -> None:
+    def __exit__(self, _: type[BaseException] | None, __: BaseException | None,
+                 ___: TracebackType | None) -> None:
         """Clean up."""
         self._cursor.close()
         self._connection.close()

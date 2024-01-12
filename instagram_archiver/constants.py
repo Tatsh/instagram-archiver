@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Final, Mapping
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Final
 
 from .utils import YoutubeDLLogger
 

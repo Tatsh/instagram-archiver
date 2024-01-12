@@ -1,3 +1,2 @@
-* text=auto eol=lf working-tree-encoding=utf-8
-poetry.lock -diff
-yarn.lock -diff
+* text=auto eol=lf
+*.lock binary

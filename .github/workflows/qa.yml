@@ -12,13 +12,13 @@ jobs:
           cache: poetry
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies (Poetry)
-        run: poetry install --with=dev --with=tests
+        run: poetry install --with=dev,docs,tests --all-extras
       - name: Install dependencies (Yarn)
         run: yarn
       - name: Lint with mypy
         run: yarn mypy
-      - name: Lint with pylint
-        run: yarn pylint
+      - name: Lint with Ruff
+        run: yarn ruff
       - name: Check spelling
         run: yarn check-spelling
       - name: Check formatting
@@ -26,8 +26,8 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - '3.10'
           - '3.11'
+          - '3.12'
 name: QA
 'on':
   pull_request:

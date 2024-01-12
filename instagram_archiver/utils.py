@@ -1,9 +1,8 @@
+from collections.abc import Iterator
 from contextlib import contextmanager
-from os import chdir as os_chdir, getcwd
-from os.path import isfile
+from os import chdir as os_chdir
 from pathlib import Path
-from types import FrameType
-from typing import Generic, Iterator, Literal, TypeVar
+from typing import TYPE_CHECKING, Generic, Literal, TypeVar
 import json
 import logging
 import sys
@@ -11,13 +10,16 @@ import sys
 from loguru import logger
 import click
 
+if TYPE_CHECKING:
+    from types import FrameType
+
 __all__ = ('UnknownMimetypeError', 'YoutubeDLLogger', 'chdir', 'get_extension',
            'json_dumps_formatted', 'setup_logging', 'write_if_new')
 
 T = TypeVar('T')
 
 
-class JSONFormattedString(Generic[T]):  # pylint: disable=too-few-public-methods
+class JSONFormattedString(Generic[T]):
     def __init__(self, formatted: str, original: T) -> None:
         self.formatted = formatted
         self.original_value = original
@@ -34,7 +36,7 @@ def json_dumps_formatted(obj: T) -> JSONFormattedString[T]:
 @contextmanager
 def chdir(path: str | Path) -> Iterator[None]:
     """Context-managing ``chdir``. Changes to old path on exit."""
-    old_path = getcwd()
+    old_path = Path.cwd()
     os_chdir(path)
     try:
         yield
@@ -44,7 +46,7 @@ def chdir(path: str | Path) -> Iterator[None]:
 
 def write_if_new(target: Path | str, content: str | bytes, mode: str = 'w') -> None:
     """Write a file only if it will be a new file."""
-    if not isfile(target):
+    if not Path(target).is_file():
         with click.open_file(str(target), mode) as f:
             f.write(content)
 

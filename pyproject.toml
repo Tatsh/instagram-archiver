@@ -1,74 +1,117 @@
 [tool.poetry]
-authors = ["Andrew Udvare <audvare@gmail.com>"]
-description = "Archive Instagram content."
-license = "MIT"
 name = "instagram-archiver"
+version = "0.2.1"
+authors = ["Andrew Udvare <audvare@gmail.com>"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Typing :: Typed",
+]
+description = "Archive Instagram content."
+documentation = "https://instagram-archiver.readthedocs.io/"
+include = ["man"]
+keywords = ["command line"]
+license = "MIT"
 packages = [{ include = "instagram_archiver" }]
 readme = "README.md"
-version = "0.2.1"
+repository = "https://github.com/Tatsh/instagram-archiver"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<4"
+python = ">=3.11,<4"
 beautifulsoup4 = "^4.12.2"
-click = ">=8.0,<8.1.8"
+click = ">=8.1.3,<8.1.4 || >8.1.4"
 html5lib = "^1.1"
-loguru = ">=0.6,<0.8"
-mutagen = "^1.46.0"
+loguru = "^0.7.2"
+mutagen = "^1.47.0"
 ratelimit = "^2.2.1"
-requests = "^2.28.2"
-typing-extensions = "^4.7.1"
-yt-dlp = "^2023.6.22"
+requests = "^2.31.0"
+typing-extensions = "^4.9.0"
+yt-dlp = "^2023.12.30"
 
 [tool.poetry.group.dev]
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-mypy = "^1.4.1"
-pylint = ">=2.17.2,<4.0.0"
-pylint-quotes = "^0.2.3"
+commitizen = "^3.13.0"
+mypy = "^1.8.0"
 ratelimit-types = "^0.0.1"
-rope = "^1.7.0"
-toml = "^0.10.2"
-types-beautifulsoup4 = "^4.12.0.5"
-types-requests = "^2.28.11.17"
-types-toml = "^0.10.8.6"
-yapf = "^0.40.1"
-yt-dlp-types = ">=0.0.4,<0.0.8"
+rope = "^1.11.0"
+ruff = "^0.1.12"
+types-beautifulsoup4 = "^4.12.0.20240106"
+types-requests = "^2.31.0.20240106"
+yapf = "^0.40.2"
+yt-dlp-types = "^0.0.7"
 
 [tool.poetry.group.docs]
 optional = true
 
 [tool.poetry.group.docs.dependencies]
+doc8 = "^1.1.1"
 docutils = "^0.20.1"
-esbonio = "^0.16.1"
-sphinx = "^7.0.1"
-sphinx-click = ">=4.4,<6.0"
-toml = "^0.10.2"
+esbonio = "^0.16.4"
+restructuredtext-lint = "^1.4.0"
+sphinx = "^7.2.6"
+sphinx-click = "^5.1.0"
+tomlkit = "^0.12.3"
 
 [tool.poetry.group.tests]
 optional = true
 
 [tool.poetry.group.tests.dependencies]
 coveralls = "^3.3.1"
-mock = "^5.0.1"
-pytest = "^7.3.0"
-pytest-mock = "^3.10.0"
-requests-mock = "^1.10.0"
+mock = "^5.1.0"
+pytest = "^7.4.4"
+pytest-cov = "^4.1.0"
+pytest-mock = "^3.12.0"
+requests-mock = "^1.11.0"
+
+[tool.poetry.scripts]
+ia = "instagram_archiver:main"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core"]
 
-[tool.poetry.scripts]
-ia = "instagram_archiver:instagram_archiver"
+[tool.commitizen]
+tag_format = "v$version"
+version_files = [
+  "README.md",
+  "instagram_archiver/__init__.py",
+  "man/instagram_archiver.1",
+  "package.json",
+]
+version_provider = "poetry"
 
-[tool.isort]
-case_sensitive = true
-combine_as_imports = true
-from_first = true
-line_length = 100
-order_by_type = true
-use_parentheses = true
+[tool.cruft]
+skip = [
+  "./*.lock",
+  "./.*_cache",
+  "./.git/hooks/*.sample",
+  "./docs/*.rst",
+  "./tests/*/test_*.py",
+  "./tests/test_*.py",
+  ".git/COMMIT_EDITMSG",
+  ".git/HEAD",
+  ".git/config",
+  ".git/index",
+  ".git/logs/",
+  ".git/refs/",
+  ".vscode/dictionary.txt",
+  "CHANGELOG.md",
+  "LICENSE.txt",
+  "dist/",
+  "htmlcov/",
+  "instagram_archiver/",
+  "man/",
+  "node_modules/",
+]
+
+[tool.doc8]
+max-line-length = 100
 
 [tool.mypy]
 disallow_incomplete_defs = true
@@ -85,82 +128,116 @@ warn_return_any = true
 warn_unreachable = true
 warn_unused_ignores = true
 
-[tool.pylint.main]
-ignore = [".git", "node_modules"]
-load-plugins = [
-  "pylint.extensions.bad_builtin",
-  "pylint.extensions.check_elif",
-  "pylint.extensions.code_style",
-  "pylint.extensions.comparison_placement",
-  "pylint.extensions.consider_refactoring_into_while_condition",
-  "pylint.extensions.consider_ternary_expression",
-  "pylint.extensions.docparams",
-  "pylint.extensions.empty_comment",
-  "pylint.extensions.eq_without_hash",
-  "pylint.extensions.for_any_all",
-  "pylint.extensions.magic_value",
-  "pylint.extensions.overlapping_exceptions",
-  "pylint.extensions.redefined_loop_name",
-  "pylint.extensions.set_membership",
-  "pylint_quotes"
-]
-recursive = true
-
-[tool.pylint.basic]
-class-attribute-naming-style = "snake_case"
-good-names = ["e", "f", "g", "i", "id", "j", "k", "m", "n", "r", "x", "y", "z"]
-include-naming-hint = true
-inlinevar-naming-style = "snake_case"
-
-[tool.pylint.design]
-max-args = 8
-max-branches = 15
-max-locals = 30
-max-statements = 80
-
-[tool.pylint.format]
-expected-line-ending-format = "LF"
-
-[tool.pylint.logging]
-logging-format-style = "new"
-logging-modules = ["logging", "loguru"]
-
-[tool.pylint."messages control"]
-disable = [
-  "magic-value-comparison",
-  "missing-class-docstring",
-  "missing-function-docstring",
-  "missing-module-docstring",
-  "too-many-instance-attributes",
-  "unspecified-encoding",
-  "use-dict-literal"
-]
-enable = [
-  "bad-builtin",
-  "consider-refactoring-into-while-condition",
-  "consider-ternary-expression",
-  "consider-using-assignment-expr",
-  "else-if-used",
-  "empty-comment",
-  "eq-without-hash",
-  "misplaced-comparison-constant",
-  "overlapping-except",
-  "redefined-loop-name",
-  "use-set-for-membership",
-  "useless-type-doc"
-]
-
-[tool.pylint.parameter_documentation]
-default-docstring-type = "numpy"
-
-[tool.pylint.refactoring]
-max-nested-blocks = 6
-
 [tool.pytest.ini_options]
 mock_use_standalone_module = true
 
-[tool.rstcheck]
-ignore_directives = "automodule"
+[tool.ruff]
+cache-dir = "~/.cache/ruff"
+extend-ignore = ["C408", "PTH123", "Q000", "Q001", "Q003", "T201", "TD002", "TD003", "TD004"]
+namespace-packages = ["docs", "tests"]
+extend-select = [
+  "A",
+  "ASYNC",
+  "B",
+  "C4",
+  "DTZ",
+  "ERA",
+  "EXE",
+  "G",
+  "I",
+  "INP",
+  "INT",
+  "ISC003",
+  "NPY",
+  "PD",
+  "PERF",
+  "PGH",
+  "PIE",
+  "PLC0105",
+  "PLC0131",
+  "PLC0132",
+  "PLC0205",
+  "PLC0208",
+  "PLC0414",
+  "PLC3002",
+  "PLE0100",
+  "PLE0101",
+  "PLE0116",
+  "PLE0117",
+  "PLE0118",
+  "PLE0241",
+  "PLE0302",
+  "PLE0307",
+  "PLE0604",
+  "PLE0605",
+  "PLE1142",
+  "PLE1205",
+  "PLE1206",
+  "PLE1300",
+  "PLE1307",
+  "PLE1310",
+  "PLE1507",
+  "PLE1700",
+  "PLE2502",
+  "PLE2510",
+  "PLE2512",
+  "PLE2513",
+  "PLE2514",
+  "PLE2515",
+  "PLR0124",
+  "PLR0133",
+  "PLR0206",
+  "PLR0402",
+  "PLR1701",
+  "PLR1711",
+  "PLR1714",
+  "PLR1722",
+  "PLR2004",
+  "PLR5501",
+  "PLW0120",
+  "PLW0127",
+  "PLW0129",
+  "PLW0131",
+  "PLW0406",
+  "PLW0602",
+  "PLW0603",
+  "PLW0711",
+  "PLW1508",
+  "PLW1509",
+  "PLW1510",
+  "PLW2901",
+  "PLW3301",
+  "PT",
+  "PTH",
+  "PYI",
+  "Q",
+  "RET",
+  "RSE",
+  "RUF200",
+  "S506",
+  "S602",
+  "SIM",
+  "SLF",
+  "SLOT",
+  "T20",
+  "TCH",
+  "TD",
+  "TRY",
+  "UP",
+  "YTT",
+]
+line-length = 100
+target-version = "py311"
+unsafe-fixes = true
+
+[tool.ruff.flake8-quotes]
+inline-quotes = "single"
+multiline-quotes = "single"
+
+[tool.ruff.lint.isort]
+from-first = true
+case-sensitive = true
+combine-as-imports = true
 
 [tool.yapf]
 align_closing_bracket_with_visual_indent = true
@@ -207,3 +284,6 @@ split_penalty_for_added_line_split = 30
 split_penalty_import_names = 0
 split_penalty_logical_operator = 300
 use_tabs = false
+
+[tool.yapfignore]
+ignore_patterns = ["node_modules/**"]

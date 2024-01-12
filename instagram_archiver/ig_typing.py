@@ -1,7 +1,5 @@
-# pylint: disable=unused-private-member
-from typing import Any, Literal, Sequence, TypedDict
-
-from typing_extensions import NotRequired
+from collections.abc import Sequence
+from typing import Any, Literal, NotRequired, TypedDict
 
 __all__ = ('BrowserName', 'CarouselMedia', 'Comments', 'Edge', 'EdgeMediaToComment',
            'EdgeOwnerToTimelineMedia', 'EdgeOwnerToTimelineMediaPageInfo', 'EdgeSidecarToChildren',

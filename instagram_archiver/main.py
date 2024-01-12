@@ -52,7 +52,7 @@ def main(output_dir: Path | None,
             click.echo(query_hash)
         return
     if not username:
-        raise click.UsageError('Username is required')
+        raise click.BadOptionUsage('username', 'Username required in this case.')
     try:
         with InstagramClient(browser=browser,
                              browser_profile=profile,
@@ -67,16 +67,16 @@ def main(output_dir: Path | None,
             'Open your browser and login if necessary. If you are logged in and this continues, '
             'try waiting at least 12 hours.',
             file=sys.stderr)
-        raise click.Abort() from e
+        raise click.Abort from e
     except AuthenticationError as e:
         click.echo(
             'You are probably not logged into Instagram in this browser profile or your '
             'session has expired.',
             file=sys.stderr)
-        raise click.Abort() from e
+        raise click.Abort from e
     except Exception as e:
         if debug:
             logger.exception(e)
         else:
             click.echo('Run with --debug for more information')
-        raise click.Abort(f'{e} (run with --debug for more information)') from e
+        raise click.Abort from e

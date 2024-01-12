@@ -1,4 +1,5 @@
-from typing import Iterator, cast
+from collections.abc import Iterator
+from typing import cast
 import re
 
 from bs4 import BeautifulSoup
