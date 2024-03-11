@@ -434,13 +434,13 @@ files = [
 
 [[package]]
 name = "commitizen"
-version = "3.16.0"
+version = "3.18.1"
 description = "Python commitizen client tool"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "commitizen-3.16.0-py3-none-any.whl", hash = "sha256:a880005352fd35b908d9c3951e71e155b157f4a4ec61ca9c080a9637bf98e0a1"},
-    {file = "commitizen-3.16.0.tar.gz", hash = "sha256:1269619d383d12809f436ff196fb786a3d49fc50987562e6e566cd9c2908735c"},
+    {file = "commitizen-3.18.1-py3-none-any.whl", hash = "sha256:829925ff3d0a2f07fae4cdec4214a0c2e391aadf0dd65313b40ad3e866418c70"},
+    {file = "commitizen-3.18.1.tar.gz", hash = "sha256:28930493f0a370e23e0e469ea7ec9dcf501be21dd87e8c012497552e5778bc41"},
 ]
 
 [package.dependencies]
