@@ -117,9 +117,9 @@ class InstagramClient:
                     if 'instagram.com' in cookie.domain))
         })
         r = self._get_rate_limited('https://www.instagram.com', return_json=False)
-        m = re.search(r'"config":{"csrf_token":"([^"]+)"', r.text)
-        assert m is not None
-        self._session.headers.update({'x-csrftoken': m.group(1)})
+        m = list(re.finditer(r'{"csrf_token":"([^"]+)"', r.text))
+        assert len(m) == 1, m
+        self._session.headers.update({'x-csrftoken': m[0].group(1)})
 
     def _save_to_log(self, url: str) -> None:
         if self._no_log:
