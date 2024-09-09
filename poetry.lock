@@ -549,17 +549,17 @@ files = [
 
 [[package]]
 name = "doc8"
-version = "1.1.1"
+version = "1.1.2"
 description = "Style checker for Sphinx (or other) RST documentation"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "doc8-1.1.1-py3-none-any.whl", hash = "sha256:e493aa3f36820197c49f407583521bb76a0fde4fffbcd0e092be946ff95931ac"},
-    {file = "doc8-1.1.1.tar.gz", hash = "sha256:d97a93e8f5a2efc4713a0804657dedad83745cca4cd1d88de9186f77f9776004"},
+    {file = "doc8-1.1.2-py3-none-any.whl", hash = "sha256:e787b3076b391b8b49400da5d018bacafe592dfc0a04f35a9be22d0122b82b59"},
+    {file = "doc8-1.1.2.tar.gz", hash = "sha256:1225f30144e1cc97e388dbaf7fe3e996d2897473a53a6dae268ddde21c354b98"},
 ]
 
 [package.dependencies]
-docutils = ">=0.19,<0.21"
+docutils = ">=0.19,<=0.21.2"
 Pygments = "*"
 restructuredtext-lint = ">=0.7"
 stevedore = "*"
@@ -576,13 +576,13 @@ files = [
 
 [[package]]
 name = "docutils"
-version = "0.20.1"
+version = "0.21.2"
 description = "Docutils -- Python Documentation Utilities"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.9"
 files = [
-    {file = "docutils-0.20.1-py3-none-any.whl", hash = "sha256:96f387a2c5562db4476f09f13bbab2192e764cac08ebbf3a34a95d9b1e4a59d6"},
-    {file = "docutils-0.20.1.tar.gz", hash = "sha256:f08a4e276c3a1583a86dce3e34aba3fe04d02bba2dd51ed16106244e8a923e3b"},
+    {file = "docutils-0.21.2-py3-none-any.whl", hash = "sha256:dafca5b9e384f0e419294eb4d2ff9fa826435bf15f15b7bd45723e8ad76811b2"},
+    {file = "docutils-0.21.2.tar.gz", hash = "sha256:3a6b18732edf182daa3cd12775bbb338cf5691468f91eeeb109deff6ebfa986f"},
 ]
 
 [[package]]
@@ -1809,4 +1809,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<4"
-content-hash = "38d41429428d302cc4935697876ee35fb1ab79a62c78e1cf3642aec3b0ba6542"
+content-hash = "013ead247a0840fb7ee45fcb9b45a473983f4d3d0bdbaa76a240f61f38135501"
