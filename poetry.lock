@@ -1446,13 +1446,13 @@ test = ["pytest (>=8.1,<9.0)", "pytest-rerunfailures (>=14.0,<15.0)"]
 
 [[package]]
 name = "yt-dlp-types"
-version = "0.0.11"
+version = "0.0.13"
 description = "Typing stubs for yt-dlp."
 optional = false
 python-versions = "<4,>=3.10"
 files = [
-    {file = "yt_dlp_types-0.0.11-py3-none-any.whl", hash = "sha256:a55fc2cf4a644efada28f588ad00d2e3caae9de6bd522c8d49490bfb88d4ed27"},
-    {file = "yt_dlp_types-0.0.11.tar.gz", hash = "sha256:a943ecbc4e3c1d2c5c6b43e4e1070929683808aec6bd4d627b406076828f9f50"},
+    {file = "yt_dlp_types-0.0.13-py3-none-any.whl", hash = "sha256:8f0fe4ce61c91f2692ec05e915e3366ac61c387cc30e5459fdd9f98ec18918d8"},
+    {file = "yt_dlp_types-0.0.13.tar.gz", hash = "sha256:a350258371aece1712a87c74fa6609188d40a70a90da891426ad5529a8e945f2"},
 ]
 
 [[package]]
@@ -1473,4 +1473,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<4"
-content-hash = "baf51dc9250e33e9aca3191406ffe20eb534cabac86dea3c6f223c3211cfc8c0"
+content-hash = "fe985f85936989acf56864517e80fbb50b5370f96e6a59a922923c4b21457c84"
