@@ -36,7 +36,7 @@ yt-dlp = ">=2023.12.30,<2025.0.0"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-commitizen = "^3.13.0"
+commitizen = ">=3.13,<5.0"
 mypy = "^1.8.0"
 ratelimit-types = "^0.0.1"
 rope = "^1.11.0"
