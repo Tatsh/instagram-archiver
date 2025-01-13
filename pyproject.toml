@@ -30,7 +30,7 @@ mutagen = "^1.47.0"
 ratelimit = "^2.2.1"
 requests = "^2.31.0"
 typing-extensions = "^4.9.0"
-yt-dlp = ">=2023.12.30,<2025.0.0"
+yt-dlp = ">=2023.12.30,<2026.0.0"
 
 [tool.poetry.group.dev]
 optional = true
