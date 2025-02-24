@@ -1415,16 +1415,16 @@ test = ["pytest (>=8.1,<9.0)", "pytest-rerunfailures (>=14.0,<15.0)"]
 
 [[package]]
 name = "yt-dlp-types"
-version = "0.0.13"
+version = "0.0.14"
 description = "Typing stubs for yt-dlp."
 optional = false
 python-versions = "<4,>=3.10"
 files = [
-    {file = "yt_dlp_types-0.0.13-py3-none-any.whl", hash = "sha256:8f0fe4ce61c91f2692ec05e915e3366ac61c387cc30e5459fdd9f98ec18918d8"},
-    {file = "yt_dlp_types-0.0.13.tar.gz", hash = "sha256:a350258371aece1712a87c74fa6609188d40a70a90da891426ad5529a8e945f2"},
+    {file = "yt_dlp_types-0.0.14-py3-none-any.whl", hash = "sha256:05ecbbd6b8134bf05c3690745457b3ced35697f3e45f0bf180b73119d478c696"},
+    {file = "yt_dlp_types-0.0.14.tar.gz", hash = "sha256:42ec6a8eaf5be381ecc2dba81c46129a69b9cf85a627140978b10245b054c38d"},
 ]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<4"
-content-hash = "d78f78e760696c7034f1af26ebbf04a2b1b67f1d6fc286835117f7150f7e5922"
+content-hash = "69150a25148506a86bb6188d2a4cadee2cff41092d394dd4b610e30045e71996"
