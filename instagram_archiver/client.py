@@ -82,7 +82,7 @@ class InstagramClient:
         self._browser_profile = browser_profile
         self._setup_session(browser, browser_profile)
         self._output_dir = Path(output_dir or Path().resolve() / username)
-        Path(self._output_dir).mkdir(parents=True)
+        Path(self._output_dir).mkdir(parents=True, exist_ok=True)
         self._log_db = Path(log_file or self._output_dir / '.log.db')
         self._connection = sqlite3.connect(self._log_db)
         self._cursor = self._connection.cursor()

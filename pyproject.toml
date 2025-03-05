@@ -70,7 +70,7 @@ pytest-mock = "^3.12.0"
 requests-mock = "^1.11.0"
 
 [tool.poetry.scripts]
-ia = "instagram_archiver:main"
+ia = "instagram_archiver.main:main"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
