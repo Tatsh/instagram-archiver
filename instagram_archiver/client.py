@@ -60,6 +60,10 @@ class AuthenticationError(Exception):
     pass
 
 
+class CSRFTokenNotFound(AuthenticationError):
+    pass
+
+
 class InstagramClient:
     """The client."""
     def __init__(self,
@@ -118,8 +122,10 @@ class InstagramClient:
         })
         r = self._get_rate_limited('https://www.instagram.com', return_json=False)
         m = list(re.finditer(r'{"csrf_token":"([^"]+)"', r.text))
-        assert len(m) == 1, m
-        self._session.headers.update({'x-csrftoken': m[0].group(1)})
+        try:
+            self._session.headers.update({'x-csrftoken': m[0].group(1)})
+        except IndexError as e:
+            raise CSRFTokenNotFound from e
 
     def _save_to_log(self, url: str) -> None:
         if self._no_log:

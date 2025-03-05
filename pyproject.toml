@@ -133,8 +133,13 @@ mock_use_standalone_module = true
 
 [tool.ruff]
 cache-dir = "~/.cache/ruff"
-extend-ignore = ["C408", "PTH123", "Q000", "Q001", "Q003", "T201", "TD002", "TD003", "TD004"]
 namespace-packages = ["docs", "tests"]
+line-length = 100
+target-version = "py311"
+unsafe-fixes = true
+
+[tool.ruff.lint]
+extend-ignore = ["C408", "PTH123", "Q000", "Q001", "Q003", "T201", "TD002", "TD003", "TD004"]
 extend-select = [
   "A",
   "ASYNC",
@@ -188,7 +193,7 @@ extend-select = [
   "PLR0133",
   "PLR0206",
   "PLR0402",
-  "PLR1701",
+  "SIM101",
   "PLR1711",
   "PLR1714",
   "PLR1722",
@@ -226,11 +231,8 @@ extend-select = [
   "UP",
   "YTT",
 ]
-line-length = 100
-target-version = "py311"
-unsafe-fixes = true
 
-[tool.ruff.flake8-quotes]
+[tool.ruff.lint.flake8-quotes]
 inline-quotes = "single"
 multiline-quotes = "single"
 
