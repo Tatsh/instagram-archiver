@@ -1,245 +1,292 @@
-[tool.poetry]
-name = "instagram-archiver"
-version = "0.2.1"
-authors = ["Andrew Udvare <audvare@gmail.com>"]
-classifiers = [
-  "Development Status :: 4 - Beta",
-  "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Typing :: Typed",
-]
-description = "Archive Instagram content."
-documentation = "https://instagram-archiver.readthedocs.io/"
-include = ["man"]
-keywords = ["command line"]
-license = "MIT"
-packages = [{ include = "instagram_archiver" }]
-readme = "README.md"
-repository = "https://github.com/Tatsh/instagram-archiver"
-
-[tool.poetry.dependencies]
-python = ">=3.11,<4"
-beautifulsoup4 = "^4.12.2"
-click = ">=8.1.3,<8.1.4 || >8.1.4"
-html5lib = "^1.1"
-loguru = "^0.7.2"
-mutagen = "^1.47.0"
-ratelimit = "^2.2.1"
-requests = "^2.31.0"
-typing-extensions = "^4.9.0"
-yt-dlp = ">=2023.12.30,<2026.0.0"
-
-[tool.poetry.group.dev]
-optional = true
-
-[tool.poetry.group.dev.dependencies]
-commitizen = ">=3.13,<5.0"
-mypy = "^1.8.0"
-ratelimit-types = "^0.0.1"
-rope = "^1.11.0"
-ruff = ">=0.5.0,<0.12.0"
-types-beautifulsoup4 = "^4.12.0.20240106"
-types-requests = "^2.31.0.20240106"
-yapf = ">=0.40.2,<0.44.0"
-yt-dlp-types = ">=0.0.7,<0.0.15"
-
-[tool.poetry.group.docs]
-optional = true
-
-[tool.poetry.group.docs.dependencies]
-doc8 = "^1.1.1"
-docutils = ">=0.20.1,<0.22.0"
-esbonio = "^0.16.4"
-restructuredtext-lint = "^1.4.0"
-sphinx = ">=7.2.6,<9.0.0"
-sphinx-click = ">=5.1,<7.0"
-tomlkit = ">=0.12.3,<0.14.0"
-
-[tool.poetry.group.tests]
-optional = true
-
-[tool.poetry.group.tests.dependencies]
-coveralls = "^3.3.1"
-mock = "^5.1.0"
-pytest = ">=7.4.4,<9.0.0"
-pytest-cov = ">=4.1,<6.0"
-pytest-mock = "^3.12.0"
-requests-mock = "^1.11.0"
-
-[tool.poetry.scripts]
-ia = "instagram_archiver.main:main"
-
 [build-system]
 build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core"]
 
+[project]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Typing :: Typed",
+]
+description = "Save Instagram content you have access to."
+dynamic = ["dependencies", "requires-python"]
+keywords = ["command line", "instagram"]
+license = "MIT"
+name = "instagram-archiver"
+readme = "README.md"
+version = "0.2.1"
+
+[[project.authors]]
+email = "audvare@gmail.com"
+name = "Andrew Udvare"
+
+[project.scripts]
+instagram-archiver = "instagram_archiver.main:main"
+
+[project.urls]
+Issues = "https://github.com/Tatsh/instagram-archiver/issues"
+documentation = "https://instagram-archiver.readthedocs.org"
+homepage = "https://tatsh.github.io/instagram-archiver/"
+repository = "https://github.com/Tatsh/instagram-archiver"
+
+[tool]
+
 [tool.commitizen]
 tag_format = "v$version"
 version_files = [
+  ".wiswa.jsonnet",
+  "CITATION.cff",
   "README.md",
-  "instagram_archiver/__init__.py",
-  "man/instagram_archiver.1",
   "package.json",
+  "instagram_archiver/__init__.py",
 ]
-version_provider = "poetry"
+version_provider = "pep621"
 
-[tool.cruft]
-skip = [
-  "./*.lock",
-  "./.*_cache",
-  "./.git/hooks/*.sample",
-  "./docs/*.rst",
-  "./tests/*/test_*.py",
-  "./tests/test_*.py",
-  ".git/COMMIT_EDITMSG",
-  ".git/HEAD",
-  ".git/config",
-  ".git/index",
-  ".git/logs/",
-  ".git/refs/",
-  ".vscode/dictionary.txt",
-  "CHANGELOG.md",
-  "LICENSE.txt",
-  "dist/",
-  "htmlcov/",
-  "instagram_archiver/",
-  "man/",
-  "node_modules/",
-]
+[tool.coverage]
+
+[tool.coverage.report]
+exclude_also = ["if TYPE_CHECKING:"]
+omit = ["conftest.py", "tests.py", "tests/test_*.py", "__main__.py"]
+show_missing = true
+
+[tool.coverage.run]
+branch = true
+omit = ["conftest.py", "tests.py", "tests/test_*.py", "__main__.py"]
+
+[tool.djlint]
+max_line_length = 100
+no_line_after_yaml = true
+preserve_blank_lines = true
+preserve_leading_space = true
+profile = "jinja"
+use_gitignore = true
 
 [tool.doc8]
 max-line-length = 100
 
 [tool.mypy]
-disallow_incomplete_defs = true
-disallow_untyped_calls = true
-disallow_untyped_defs = true
-disallow_untyped_decorators = true
-disallow_subclassing_any = true
+cache_dir = "~/.cache/mypy"
+explicit_package_bases = true
+platform = "linux"
+python_version = "3.12"
 show_column_numbers = true
-show_error_codes = true
-strict_equality = true
+strict = true
 strict_optional = true
-warn_redundant_casts = true
-warn_return_any = true
 warn_unreachable = true
-warn_unused_ignores = true
+
+[tool.poetry]
+include = ["man"]
+
+[tool.poetry.dependencies]
+click = "^8.1.8"
+colorlog = "^6.9.0"
+python = ">=3.12,<3.14"
+requests = "^2.32.3"
+typing-extensions = "^4.13.1"
+yt-dlp-utils = "^0"
+
+[tool.poetry.group]
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+commitizen = "^4.6.2"
+djlint = "^1.36.4"
+mypy = ">=1.12,<1.16"
+ruff = "^0.11.8"
+types-requests = "^2.31.0.20240106"
+yapf = "^0.43.0"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+autodoc-pydantic = "^2.2.0"
+doc8 = "^1.1.2"
+docutils = "^0.21.2"
+esbonio = "^0.16.5"
+numpydoc = "^1.8.0"
+restructuredtext-lint = "^1.4.0"
+sphinx = "<8.2.0"
+sphinx-click = "^6.0.0"
+sphinx-datatables = "^0.2.1"
+sphinx-hoverxref = "^1.4.2"
+sphinx-immaterial = "^0.13.4"
+
+[tool.poetry.group.docs.dependencies.enum-tools]
+extras = ["sphinx"]
+version = "^0.12.0"
+
+[tool.poetry.group.docs.dependencies.erdantic]
+optional = true
+version = "<2.0"
+
+[tool.poetry.group.tests]
+optional = true
+
+[tool.poetry.group.tests.dependencies]
+mock = "^5.2.0"
+pytest = "^8.3.5"
+pytest-cov = "^6.1.1"
+pytest-mock = "^3.14.0"
+
+[tool.poetry.group.tests.dependencies.coveralls]
+python = "<3.13"
+version = "^4.0.1"
+
+[[tool.poetry.packages]]
+include = "instagram_archiver"
+
+[tool.pyright]
+deprecateTypingAliases = true
+enableExperimentalFeatures = true
+include = ["./instagram_archiver", "./tests"]
+pythonPlatform = "Linux"
+pythonVersion = "3.12"
+reportCallInDefaultInitializer = "warning"
+reportImplicitOverride = "warning"
+reportImportCycles = "error"
+reportMissingModuleSource = "error"
+reportPropertyTypeMismatch = "error"
+reportShadowedImports = "error"
+reportUnnecessaryTypeIgnoreComment = "none"
+typeCheckingMode = "off"
+useLibraryCodeForTypes = false
+
+[tool.pytest]
 
 [tool.pytest.ini_options]
 mock_use_standalone_module = true
+norecursedirs = ["node_modules"]
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+testpaths = ["tests"]
 
 [tool.ruff]
 cache-dir = "~/.cache/ruff"
-namespace-packages = ["docs", "tests"]
+force-exclude = true
 line-length = 100
-target-version = "py311"
+namespace-packages = ["docs", "tests"]
+target-version = "py312"
 unsafe-fixes = true
 
 [tool.ruff.lint]
-extend-ignore = ["C408", "PTH123", "Q000", "Q001", "Q003", "T201", "TD002", "TD003", "TD004"]
 extend-select = [
   "A",
+  "AIR",
+  "ANN",
+  "ARG",
   "ASYNC",
   "B",
+  "BLE",
   "C4",
+  "C90",
+  "COM",
+  "CPY",
+  "D",
+  "DJ",
+  "DOC",
   "DTZ",
+  "E",
+  "EM",
   "ERA",
   "EXE",
+  "F",
+  "FA",
+  "FAST",
+  "FBT",
+  "FIX",
+  "FLY",
+  "FURB",
   "G",
   "I",
+  "ICN",
   "INP",
   "INT",
-  "ISC003",
+  "ISC",
+  "LOG",
+  "N",
   "NPY",
   "PD",
   "PERF",
   "PGH",
   "PIE",
-  "PLC0105",
-  "PLC0131",
-  "PLC0132",
-  "PLC0205",
-  "PLC0208",
-  "PLC0414",
-  "PLC3002",
-  "PLE0100",
-  "PLE0101",
-  "PLE0116",
-  "PLE0117",
-  "PLE0118",
-  "PLE0241",
-  "PLE0302",
-  "PLE0307",
-  "PLE0604",
-  "PLE0605",
-  "PLE1142",
-  "PLE1205",
-  "PLE1206",
-  "PLE1300",
-  "PLE1307",
-  "PLE1310",
-  "PLE1507",
-  "PLE1700",
-  "PLE2502",
-  "PLE2510",
-  "PLE2512",
-  "PLE2513",
-  "PLE2514",
-  "PLE2515",
-  "PLR0124",
-  "PLR0133",
-  "PLR0206",
-  "PLR0402",
-  "SIM101",
-  "PLR1711",
-  "PLR1714",
-  "PLR1722",
-  "PLR2004",
-  "PLR5501",
-  "PLW0120",
-  "PLW0127",
-  "PLW0129",
-  "PLW0131",
-  "PLW0406",
-  "PLW0602",
-  "PLW0603",
-  "PLW0711",
-  "PLW1508",
-  "PLW1509",
-  "PLW1510",
-  "PLW2901",
-  "PLW3301",
+  "PL",
   "PT",
   "PTH",
   "PYI",
   "Q",
   "RET",
   "RSE",
-  "RUF200",
-  "S506",
-  "S602",
+  "RUF",
+  "S",
   "SIM",
   "SLF",
   "SLOT",
+  "T10",
   "T20",
-  "TCH",
+  "TC",
   "TD",
+  "TID",
   "TRY",
   "UP",
+  "W",
   "YTT",
 ]
+ignore = [
+  "A005",
+  "ANN401",
+  "ARG001",
+  "ARG002",
+  "ARG004",
+  "C901",
+  "COM812",
+  "CPY001",
+  "D201",
+  "D203",
+  "D204",
+  "D212",
+  "DOC201",
+  "EM101",
+  "N818",
+  "PLR0912",
+  "PLR0913",
+  "PLR0914",
+  "PLR0915",
+  "PLR0917",
+  "PLR1702",
+  "PLR6301",
+  "S101",
+  "S404",
+  "S603",
+  "TD002",
+  "TD003",
+  "TD004",
+  "UP046",
+  "UP047",
+]
+preview = true
 
 [tool.ruff.lint.flake8-quotes]
 inline-quotes = "single"
-multiline-quotes = "single"
+multiline-quotes = "double"
 
 [tool.ruff.lint.isort]
-from-first = true
 case-sensitive = true
 combine-as-imports = true
+from-first = true
+required-imports = ["from __future__ import annotations"]
+section-order = ["future", "standard-library", "third-party", "local-folder"]
+
+[tool.ruff.lint.pep8-naming]
+extend-ignore-names = ["test_*"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
 
 [tool.yapf]
 align_closing_bracket_with_visual_indent = true

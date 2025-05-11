@@ -1,28 +1,6 @@
 {
   "configurations": [
     {
-      "args": [
-        "-b",
-        "${input:browser}",
-        "-p",
-        "${input:profile}",
-        "-o",
-        "${input:outputPath}",
-        "-d",
-        "${input:username}"
-      ],
-      "autoReload": {
-        "enable": true
-      },
-      "console": "integratedTerminal",
-      "module": "instagram_archiver",
-      "name": "instagram-archiver",
-      "preLaunchTask": "Delete default output path",
-      "request": "launch",
-      "showReturnValue": true,
-      "type": "python"
-    },
-    {
       "args": ["-x"],
       "autoReload": {
         "enable": true
@@ -31,72 +9,13 @@
       "env": {
         "_PYTEST_RAISE": "1"
       },
-      "justMyCode": true,
+      "justMyCode": false,
       "module": "pytest",
       "name": "Run tests",
       "request": "launch",
-      "type": "python"
+      "type": "debugpy"
     }
   ],
-  "inputs": [
-    {
-      "default": "instagram",
-      "description": "Please enter an Instagram username.",
-      "id": "username",
-      "type": "promptString"
-    },
-    {
-      "default": "${env:XDG_RUNTIME_DIR}/instagram",
-      "description": "Please enter a path.",
-      "id": "outputPath",
-      "type": "promptString"
-    },
-    {
-      "default": "chrome",
-      "description": "Pick a browser that is signed into Instagram.",
-      "id": "browser",
-      "options": [
-        {
-          "label": "Brave",
-          "value": "brave"
-        },
-        {
-          "label": "Chrome",
-          "value": "chrome"
-        },
-        {
-          "label": "Chromium",
-          "value": "chromium"
-        },
-        {
-          "label": "Edge",
-          "value": "edge"
-        },
-        {
-          "label": "Firefox",
-          "value": "firefox"
-        },
-        {
-          "label": "Opera",
-          "value": "opera"
-        },
-        {
-          "label": "Safari",
-          "value": "safari"
-        },
-        {
-          "label": "Vivaldi",
-          "value": "vivaldi"
-        }
-      ],
-      "type": "pickString"
-    },
-    {
-      "default": "Default",
-      "description": "Type a browser profile name (Default, Profile 1, Profile 2, etc).",
-      "id": "profile",
-      "type": "promptString"
-    }
-  ],
+  "inputs": [],
   "version": "0.2.0"
 }

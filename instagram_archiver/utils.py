@@ -1,47 +1,87 @@
-from collections.abc import Iterator
-from contextlib import contextmanager
-from os import chdir as os_chdir
+"""Utility functions."""
+from __future__ import annotations
+
 from pathlib import Path
-from typing import TYPE_CHECKING, Generic, Literal, TypeVar
+from typing import Any, Literal, TypeVar, override
 import json
 import logging
-import sys
+import logging.config
 
-from loguru import logger
 import click
 
-if TYPE_CHECKING:
-    from types import FrameType
-
-__all__ = ('UnknownMimetypeError', 'YoutubeDLLogger', 'chdir', 'get_extension',
-           'json_dumps_formatted', 'setup_logging', 'write_if_new')
+__all__ = ('UnknownMimetypeError', 'get_extension', 'json_dumps_formatted', 'setup_logging',
+           'write_if_new')
 
 T = TypeVar('T')
 
 
-class JSONFormattedString(Generic[T]):
-    def __init__(self, formatted: str, original: T) -> None:
-        self.formatted = formatted
-        self.original_value = original
+def setup_logging(*,
+                  debug: bool = False,
+                  force_color: bool = False,
+                  no_color: bool = False) -> None:  # pragma: no cover
+    """Set up logging configuration."""
+    logging.config.dictConfig({
+        'version': 1,
+        'disable_existing_loggers': True,
+        'root': {
+            'handlers': ('console',),
+            'level': 'DEBUG' if debug else 'INFO',
+        },
+        'formatters': {
+            'default': {
+                '()': 'colorlog.ColoredFormatter',
+                'force_color': force_color,
+                'format':
+                    '%(log_color)s%(levelname)-8s%(reset)s | %(light_green)s%(name)s%(reset)s:'
+                    '%(light_red)s%(funcName)s%(reset)s:%(blue)s%(lineno)d%(reset)s - %(message)s',
+                'no_color': no_color,
+            },
+            'simple': {
+                'format': '%(message)s',
+            },
+        },
+        'handlers': {
+            'console': {
+                'class': 'colorlog.StreamHandler',
+                'formatter': 'default' if debug else 'simple',
+            },
+        },
+        'loggers': {
+            'instagram_archiver': {
+                'handlers': ('console',),
+                'propagate': False,
+            },
+            'urllib3': {
+                'handlers': ('console',),
+                'propagate': False,
+            }
+        },
+    })
 
+
+class JSONFormattedString:
+    """Contains a formatted version of the JSON str and the original value."""
+    def __init__(self, formatted: str, original: Any) -> None:
+        self.formatted = formatted
+        """Formatted JSON string."""
+        self.original_value = original
+        """Original value."""
+
+    @override
     def __str__(self) -> str:
         return self.formatted
 
 
-def json_dumps_formatted(obj: T) -> JSONFormattedString[T]:
-    """Returns a special object with the formatted version of the JSON str and the original."""
+def json_dumps_formatted(obj: Any) -> JSONFormattedString:
+    """
+    Return a special object with the formatted version of the JSON str and the original.
+
+    Parameters
+    ----------
+    obj : Any
+        The object to be formatted.
+    """
     return JSONFormattedString(json.dumps(obj, sort_keys=True, indent=2), obj)
-
-
-@contextmanager
-def chdir(path: str | Path) -> Iterator[None]:
-    """Context-managing ``chdir``. Changes to old path on exit."""
-    old_path = Path.cwd()
-    os_chdir(path)
-    try:
-        yield
-    finally:
-        chdir(old_path)
 
 
 def write_if_new(target: Path | str, content: str | bytes, mode: str = 'w') -> None:
@@ -52,67 +92,20 @@ def write_if_new(target: Path | str, content: str | bytes, mode: str = 'w') -> N
 
 
 class UnknownMimetypeError(Exception):
-    """Raised when an unknown mimetype is encountered in ``get_extension()``."""
+    """Raised when an unknown mimetype is encountered in :py:func:`~get_extension`."""
 
 
 def get_extension(mimetype: str) -> Literal['png', 'jpg']:
-    """Gets the appropriate three-letter extension for a mimetype."""
+    """
+    Get the appropriate three-letter extension for a mimetype.
+
+    Raises
+    ------
+    UnknownMimetypeError
+        If the mimetype is not recognised.
+    """
     if mimetype == 'image/jpeg':
         return 'jpg'
     if mimetype == 'image/png':
         return 'png'
     raise UnknownMimetypeError(mimetype)
-
-
-class InterceptHandler(logging.Handler):  # pragma: no cover
-    """Intercept handler taken from Loguru's documentation."""
-    def emit(self, record: logging.LogRecord) -> None:
-        level: str | int
-        # Get corresponding Loguru level if it exists
-        try:
-            level = logger.level(record.levelname).name
-        except ValueError:
-            level = record.levelno
-        # Find caller from where originated the logged message
-        frame: FrameType | None = logging.currentframe()
-        depth = 2
-        while frame and frame.f_code.co_filename == logging.__file__:
-            frame = frame.f_back
-            depth += 1
-        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
-
-
-def setup_log_intercept_handler() -> None:  # pragma: no cover
-    """Sets up Loguru to intercept records from the logging module."""
-    logging.basicConfig(handlers=(InterceptHandler(),), level=0)
-
-
-def setup_logging(debug: bool | None = False) -> None:
-    """Shared function to enable logging."""
-    if debug:  # pragma: no cover
-        setup_log_intercept_handler()
-        logger.enable('')
-    else:
-        logger.configure(handlers=(dict(
-            format='<level>{message}</level>',
-            level='INFO',
-            sink=sys.stderr,
-        ),))
-
-
-class YoutubeDLLogger:
-    """Basic logger front-end to loguru for use with ``YoutubeDL``."""
-    def debug(self, message: str) -> None:
-        if message.startswith('[debug] '):
-            logger.debug(message)
-        else:
-            logger.info(message)
-
-    def info(self, message: str) -> None:
-        pass
-
-    def warning(self, message: str) -> None:
-        logger.warning(message)
-
-    def error(self, message: str) -> None:
-        logger.error(message)

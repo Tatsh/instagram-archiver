@@ -5,38 +5,46 @@ Commands
 --------
 
 .. click:: instagram_archiver.main:main
-  :prog: ia
+  :prog: instagram-archiver
   :nested: full
 
-Library
--------
-.. automodule:: instagram_archiver.client
-   :members:
+Typical use
+^^^^^^^^^^^
 
-Constants
----------
-.. automodule:: instagram_archiver.constants
-  :members:
+.. code-block:: shell
 
-Typing
-------
-.. automodule:: instagram_archiver.ig_typing
-  :members:
+   instagram-archiver -o ~/instagram-backups username
 
-Utilities
----------
-.. automodule:: instagram_archiver.find_query_hashes
-  :members:
+Videos are saved using yt-dlp and its respective configuration.
 
-.. automodule:: instagram_archiver.utils
-  :members:
+.. only:: html
 
-.. toctree::
-  :maxdepth: 2
-  :caption: Contents:
+   Library
+   -------
+   .. automodule:: instagram_archiver.client
+      :members:
+
+   Constants
+   ---------
+   .. automodule:: instagram_archiver.constants
+      :members:
+
+   Typing
+   ------
+   .. automodule:: instagram_archiver.typing
+      :members:
+
+   Utilities
+   ---------
+   .. automodule:: instagram_archiver.utils
+      :members:
+      :exclude-members: setup_logging
+
+   .. toctree::
+      :maxdepth: 2
+      :caption: Contents:
 
 Indices and tables
 ------------------
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`
