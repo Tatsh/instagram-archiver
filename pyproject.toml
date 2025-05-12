@@ -45,6 +45,7 @@ version_files = [
   "package.json",
   "instagram_archiver/__init__.py",
   "docs/index.rst",
+  "man/instagram-archiver.1",
 ]
 version_provider = "pep621"
 
