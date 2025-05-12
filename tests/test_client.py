@@ -255,9 +255,9 @@ def test_save_comments_http_error_page_2(client: MagicMock, mocker: MockerFixtur
 
 def test_save_media_already_saved(client: MagicMock, mocker: MockerFixture) -> None:
     mock_is_saved = mocker.patch.object(client, 'is_saved', return_value=True)
-    edge = {'node': {'code': 'test_code'}}
+    edge = {'node': {'code': 'test_code', 'pk': 'pk'}}
     client.save_media(edge)
-    mock_is_saved.assert_called_once_with('https://www.instagram.com/p/test_code/')
+    mock_is_saved.assert_called_once_with('https://www.instagram.com/api/v1/media/pk/info/')
     client.session.get.assert_not_called()
 
 
@@ -268,11 +268,11 @@ def test_save_media_get_request_failure(client: MagicMock, mocker: MockerFixture
     client.session.get.return_value = mock_response
     mock_log_warning = mocker.patch('instagram_archiver.client.log.warning')
 
-    edge = {'node': {'code': 'test_code'}}
+    edge = {'node': {'code': 'test_code', 'pk': 'pk'}}
     client.save_media(edge)
 
-    mock_is_saved.assert_called_once_with('https://www.instagram.com/p/test_code/')
-    client.session.get.assert_called_once_with('https://www.instagram.com/p/test_code/',
+    mock_is_saved.assert_called_once_with('https://www.instagram.com/api/v1/media/pk/info/')
+    client.session.get.assert_called_once_with('https://www.instagram.com/api/v1/media/pk/info/',
                                                headers=mocker.ANY)
     mock_log_warning.assert_called_once_with('GET request failed with status code %s.', 404)
 
@@ -285,67 +285,13 @@ def test_save_media_invalid_response(client: MagicMock, mocker: MockerFixture) -
     client.session.get.return_value = mock_response
     mock_log_warning = mocker.patch('instagram_archiver.client.log.warning')
 
-    edge = {'node': {'code': 'test_code'}}
+    edge = {'node': {'code': 'test_code', 'pk': 'pk'}}
     client.save_media(edge)
 
-    mock_is_saved.assert_called_once_with('https://www.instagram.com/p/test_code/')
-    client.session.get.assert_called_once_with('https://www.instagram.com/p/test_code/',
+    mock_is_saved.assert_called_once_with('https://www.instagram.com/api/v1/media/pk/info/')
+    client.session.get.assert_called_once_with('https://www.instagram.com/api/v1/media/pk/info/',
                                                headers=mocker.ANY)
     mock_log_warning.assert_called_once_with('Invalid response. image_versions2 dict not found.')
-
-
-_MOCK_SCRIPT_TAG_CONTENT = """
-{
-  "require": [
-    [
-      null,
-      null,
-      null,
-      [
-        {
-          "__bbox": {
-            "require": [
-              [
-                null,
-                null,
-                null,
-                [
-                  null,
-                  {
-                    "__bbox": {
-                      "result": {
-                        "data": {
-                          "xdt_api__v1__media__shortcode__web_info": {
-                            "items": [
-                              {
-                                "image_versions2": {},
-                                "taken_at": 1234567890
-                              },
-                              {
-                                "carousel_media": [
-                                  {}
-                                ],
-                                "taken_at": 1234567890
-                              },
-                              {
-                                "taken_at": 259
-                              }
-                            ]
-                          }
-                        }
-                      }
-                    }
-                  }
-                ]
-              ]
-            ]
-          }
-        }
-      ]
-    ]
-  ]
-}
-"""  # Stored as a string because Mypy handles complex literals poorly.
 
 
 def test_save_media_success(client: MagicMock, mocker: MockerFixture) -> None:
@@ -354,24 +300,20 @@ def test_save_media_success(client: MagicMock, mocker: MockerFixture) -> None:
     mock_utime = mocker.patch('instagram_archiver.client.utime')
     mocker.patch.object(client, 'save_image_versions2')
     mock_save_to_log = mocker.patch.object(client, 'save_to_log')
-    mock_response = MagicMock()
+    mock_response = MagicMock(json=MagicMock(return_value={'items': [{'taken_at': 1234567890}]}))
     mock_response.status_code = 200
     mock_response.text = '{"image_versions2": {}, "taken_at": 1234567890}'
     client.session.get.return_value = mock_response
-    mock_soup = mocker.patch('instagram_archiver.client.Soup')
-    mock_soup.return_value.select.return_value = [
-        MagicMock(contents=[MagicMock(text=_MOCK_SCRIPT_TAG_CONTENT)])
-    ]
-    edge = {'node': {'code': 'test_code', 'id': '123'}}
+    edge = {'node': {'code': 'test_code', 'id': '123', 'pk': 'pk'}}
     client.save_media(edge)
-    mock_is_saved.assert_called_once_with('https://www.instagram.com/p/test_code/')
-    client.session.get.assert_called_once_with('https://www.instagram.com/p/test_code/',
+    client.session.get.assert_called_once_with('https://www.instagram.com/api/v1/media/pk/info/',
                                                headers=mocker.ANY)
+    mock_is_saved.assert_called_once_with('https://www.instagram.com/api/v1/media/pk/info/')
     mock_write_if_new.assert_any_call('123.json', mocker.ANY)
     mock_write_if_new.assert_any_call('123-media-info-0000.json', mocker.ANY)
     mock_utime.assert_any_call('123.json', (1234567890, 1234567890))
     mock_utime.assert_any_call('123-media-info-0000.json', (1234567890, 1234567890))
-    mock_save_to_log.assert_called_once_with('https://www.instagram.com/p/test_code/')
+    mock_save_to_log.assert_called_once_with('https://www.instagram.com/api/v1/media/pk/info/')
 
 
 def test_save_edges_typename_xdtmediadict_video(client: MagicMock, mocker: MockerFixture) -> None:
@@ -384,7 +326,7 @@ def test_save_edges_typename_xdtmediadict_video(client: MagicMock, mocker: Mocke
         }
     }
     client.save_edges([edge])
-    mock_add_video_url.assert_called_once_with('https://www.instagram.com/p/test_code')
+    mock_add_video_url.assert_called_once_with('https://www.instagram.com/p/test_code/')
 
 
 def test_save_edges_typename_xdtmediadict_media(client: MagicMock, mocker: MockerFixture) -> None:
@@ -415,7 +357,7 @@ def test_save_edges_unknown_typename(client: MagicMock, mocker: MockerFixture) -
     client.save_edges([edge])
     mock_log_warning.assert_called_once_with('Unknown type: `%s`. Item %s will not be processed.',
                                              'UnknownType', '123')
-    mock_failed_urls.add.assert_called_once_with('https://www.instagram.com/p/test_code')
+    mock_failed_urls.add.assert_called_once_with('https://www.instagram.com/p/test_code/')
 
 
 def test_save_edges_parent_edge(client: MagicMock, mocker: MockerFixture) -> None:

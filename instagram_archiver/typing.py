@@ -131,6 +131,8 @@ class XDTMediaDict(TypedDict):
     """Media ID."""
     owner: Owner
     """Owner information."""
+    pk: str
+    """Primary key. Also carousel ID."""
     video_dash_manifest: NotRequired[str | None]
     """Video dash manifest URL, if available."""
 

@@ -8,12 +8,11 @@ from typing import TYPE_CHECKING, Any, Self, TypeVar, cast
 import json
 import logging
 
-from bs4 import BeautifulSoup as Soup
 from requests import HTTPError
 from yt_dlp_utils import setup_session
 import requests
 
-from .constants import API_HEADERS, PAGE_FETCH_HEADERS, SHARED_HEADERS
+from .constants import API_HEADERS, SHARED_HEADERS
 from .typing import (
     CarouselMedia,
     Comments,
@@ -59,7 +58,6 @@ class InstagramClient:
                                      browser_profile,
                                      SHARED_HEADERS,
                                      domains={'instagram.com'},
-                                     setup_retry=True,
                                      status_forcelist=(413, 429, 500, 502, 503, 504))
         self.failed_urls: set[str] = set()
         """Set of failed URLs."""
@@ -194,26 +192,19 @@ class InstagramClient:
 
     def save_media(self, edge: Edge) -> None:
         """Save media for an edge node."""
-        log.info('Saving media at URL: https://www.instagram.com/p/%s', edge['node']['code'])
-        media_info_url = f'https://www.instagram.com/p/{edge["node"]["code"]}/'
+        media_info_url = f'https://www.instagram.com/api/v1/media/{edge["node"]["pk"]}/info/'
+        log.info('Saving media at URL: %s', media_info_url)
         if self.is_saved(media_info_url):
             return
-        r = self.session.get(media_info_url, headers=PAGE_FETCH_HEADERS)
+        r = self.session.get(media_info_url, headers=API_HEADERS)
         if r.status_code != HTTPStatus.OK:
             log.warning('GET request failed with status code %s.', r.status_code)
+            log.debug('Content: %s', r.text)
             return
         if 'image_versions2' not in r.text or 'taken_at' not in r.text:
             log.warning('Invalid response. image_versions2 dict not found.')
             return
-        soup = Soup(r.text, 'html5lib')
-        media_info_embedded = next(
-            json.loads(s) for s in (''.join(
-                getattr(c, 'text', '') for c in getattr(script, 'contents', ''))
-                                    for script in soup.select('script[type="application/json"]'))
-            if 'image_versions2' in s and 'taken_at' in s)
-        media_info: MediaInfo = (
-            media_info_embedded['require'][0][3][0]['__bbox']['require'][0][3][1]['__bbox']
-            ['result']['data']['xdt_api__v1__media__shortcode__web_info'])
+        media_info: MediaInfo = r.json()
         timestamp = media_info['items'][0]['taken_at']
         id_json_file = f'{edge["node"]["id"]}.json'
         media_info_json_file = f'{edge["node"]["id"]}-media-info-0000.json'
@@ -246,7 +237,7 @@ class InstagramClient:
                     else:
                         log.exception('Unknown shortcode.')
                 if edge['node'].get('video_dash_manifest'):
-                    self.add_video_url(f'https://www.instagram.com/p/{shortcode}')
+                    self.add_video_url(f'https://www.instagram.com/p/{shortcode}/')
                 else:
                     try:
                         self.save_comments(edge)
@@ -259,7 +250,7 @@ class InstagramClient:
                     'Unknown type: `%s`. Item %s will not be processed.',
                     edge['node']['__typename'], edge['node']['id'])
                 shortcode = edge['node']['code']
-                self.failed_urls.add(f'https://www.instagram.com/p/{shortcode}')
+                self.failed_urls.add(f'https://www.instagram.com/p/{shortcode}/')
 
     def get_json(self, url: str, *, cast_to: type[T], params: Mapping[str, str] | None = None) -> T:
         """Get JSON data from a URL."""

@@ -65,6 +65,7 @@ def test_save_comments_does_nothing_when_disabled(mocker: MockerFixture,
                 'id': '67890',
                 'username': 'username'
             },
+            'pk': '92834',
             'video_dash_manifest': None
         }
     })
@@ -92,6 +93,7 @@ def test_save_comments(mocker: MockerFixture, mock_setup_session: None) -> None:
                 'id': '67890',
                 'username': 'username'
             },
+            'pk': '1111',
             'video_dash_manifest': None
         }
     })
@@ -468,6 +470,7 @@ def test_process_saved_with_unsaving(mocker: MockerFixture, mock_setup_session: 
                                         'id': '67890',
                                         'username': 'username'
                                     },
+                                    'pk': 'pk',
                                     'video_dash_manifest': None
                                 }
                             }]
@@ -483,6 +486,7 @@ def test_process_saved_with_unsaving(mocker: MockerFixture, mock_setup_session: 
                 'id': '67890',
                 'username': 'username'
             },
+            'pk': 'pk',
             'video_dash_manifest': None
         }
     }]
@@ -505,6 +509,7 @@ def test_process_saved(mocker: MockerFixture, mock_setup_session: None) -> None:
                                         'id': '67890',
                                         'username': 'username'
                                     },
+                                    'pk': 'pk',
                                     'video_dash_manifest': None
                                 }
                             }],
@@ -522,6 +527,7 @@ def test_process_saved(mocker: MockerFixture, mock_setup_session: None) -> None:
                 'id': '67890',
                 'username': 'username'
             },
+            'pk': 'pk',
             'video_dash_manifest': None
         }
     }]

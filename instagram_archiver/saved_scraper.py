@@ -69,6 +69,7 @@ class SavedScraper(InstagramClient, SaveCommentsCheckDisabledMixin):
                     'id': item['media']['id'],
                     'code': item['media']['code'],
                     'owner': item['media']['owner'],
+                    'pk': item['media']['pk'],
                     'video_dash_manifest': item['media'].get('video_dash_manifest')
                 }
             } for item in feed['items'])
