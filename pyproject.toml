@@ -26,6 +26,7 @@ name = "Andrew Udvare"
 
 [project.scripts]
 instagram-archiver = "instagram_archiver.main:main"
+instagram-save-saved = "instagram_archiver.main:save_saved_main"
 
 [project.urls]
 Issues = "https://github.com/Tatsh/instagram-archiver/issues"
@@ -43,6 +44,7 @@ version_files = [
   "README.md",
   "package.json",
   "instagram_archiver/__init__.py",
+  "docs/index.rst",
 ]
 version_provider = "pep621"
 
@@ -82,8 +84,10 @@ warn_unreachable = true
 include = ["man"]
 
 [tool.poetry.dependencies]
+beautifulsoup4 = "^4.13.4"
 click = "^8.2.0"
 colorlog = "^6.9.0"
+html5lib = "^1.1"
 python = ">=3.12,<3.14"
 requests = "^2.32.3"
 typing-extensions = "^4.13.1"

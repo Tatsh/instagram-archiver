@@ -15,6 +15,7 @@ local utils = import 'utils.libjsonnet';
     project+: {
       scripts: {
         'instagram-archiver': 'instagram_archiver.main:main',
+        'instagram-save-saved': 'instagram_archiver.main:save_saved_main',
       },
     },
     tool+: {

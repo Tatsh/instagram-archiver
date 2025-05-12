@@ -39,18 +39,17 @@ pip install instagram-archiver
 ## Usage
 
 ```plain
-Usage: instagram-archiver [OPTIONS] [USERNAME]
+Usage: instagram-archiver [OPTIONS] USERNAME
 
   Archive a profile's posts.
 
 Options:
   -o, --output-dir DIRECTORY      Output directory.
   -b, --browser [brave|chrome|chromium|edge|opera|vivaldi|firefox|safari]
-                                  Browser to read cookies from. Must match yt-
-                                  dlp settings.
-  -p, --profile TEXT              Browser profile. Must match yt-dlp settings.
+                                  Browser to read cookies from.
+  -p, --profile TEXT              Browser profile.
   -d, --debug                     Enable debug output.
-  --no-log                        Ignore log (re-fetch everything)
+  --no-log                        Ignore log (re-fetch everything).
   -C, --include-comments          Also download all comments (extends download
                                   time significantly).
   -h, --help                      Show this message and exit.
@@ -59,7 +58,9 @@ Options:
 Typical use:
 
 ```shell
-instagram-archiver -o ~/instagram-backups username
+instagram-archiver -o ~/instagram-backups/username username
 ```
+
+The default output path is the username under the current working directory.
 
 Videos are saved using yt-dlp and its respective configuration.

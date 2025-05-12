@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "INSTAGRAM-ARCHIVER" "1" "May 11, 2025" "0.2.1" "instagram-archiver"
+.TH "INSTAGRAM-ARCHIVER" "1" "May 12, 2025" "0.2.1" "instagram-archiver"
 .SH NAME
 instagram-archiver \- instagram-archiver v0.2.1
 .SH COMMANDS
@@ -38,7 +38,7 @@ Archive a profile\(aqs posts.
 .INDENT 3.5
 .sp
 .EX
-instagram\-archiver [OPTIONS] [USERNAME]
+instagram\-archiver [OPTIONS] USERNAME
 .EE
 .UNINDENT
 .UNINDENT
@@ -52,7 +52,7 @@ Output directory.
 .INDENT 0.0
 .TP
 .B \-b, \-\-browser <browser>
-Browser to read cookies from. Must match yt\-dlp settings.
+Browser to read cookies from.
 .INDENT 7.0
 .TP
 .B Options
@@ -62,7 +62,7 @@ brave | chrome | chromium | edge | opera | vivaldi | firefox | safari
 .INDENT 0.0
 .TP
 .B \-p, \-\-profile <profile>
-Browser profile. Must match yt\-dlp settings.
+Browser profile.
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -72,7 +72,7 @@ Enable debug output.
 .INDENT 0.0
 .TP
 .B \-\-no\-log
-Ignore log (re\-fetch everything)
+Ignore log (re\-fetch everything).
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -84,7 +84,55 @@ Arguments
 .INDENT 0.0
 .TP
 .B USERNAME
-Optional argument
+Required argument
+.UNINDENT
+.SS instagram\-save\-saved
+.sp
+Archive your saved posts.
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.EX
+instagram\-save\-saved [OPTIONS]
+.EE
+.UNINDENT
+.UNINDENT
+.sp
+Options
+.INDENT 0.0
+.TP
+.B \-o, \-\-output\-dir <output_dir>
+Output directory.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-b, \-\-browser <browser>
+Browser to read cookies from.
+.INDENT 7.0
+.TP
+.B Options
+brave | chrome | chromium | edge | opera | vivaldi | firefox | safari
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-p, \-\-profile <profile>
+Browser profile.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-d, \-\-debug
+Enable debug output.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-C, \-\-include\-comments
+Also download all comments (extends download time significantly).
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-u, \-\-unsave
+Unsave posts after successful archive.
 .UNINDENT
 .SS Typical use
 .INDENT 0.0

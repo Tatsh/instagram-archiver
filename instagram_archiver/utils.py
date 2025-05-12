@@ -2,15 +2,18 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Literal, TypeVar, override
+from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeVar, override
 import json
 import logging
 import logging.config
 
 import click
 
-__all__ = ('UnknownMimetypeError', 'get_extension', 'json_dumps_formatted', 'setup_logging',
-           'write_if_new')
+if TYPE_CHECKING:
+    from .typing import Edge
+
+__all__ = ('JSONFormattedString', 'UnknownMimetypeError', 'get_extension', 'json_dumps_formatted',
+           'setup_logging', 'write_if_new')
 
 T = TypeVar('T')
 
@@ -109,3 +112,23 @@ def get_extension(mimetype: str) -> Literal['png', 'jpg']:
     if mimetype == 'image/png':
         return 'png'
     raise UnknownMimetypeError(mimetype)
+
+
+if TYPE_CHECKING:
+
+    class InstagramClientInterface(Protocol):
+        should_save_comments: bool
+
+        def save_comments(self, edge: Edge) -> None:
+            ...
+else:
+    InstagramClientInterface = object
+
+
+class SaveCommentsCheckDisabledMixin(InstagramClientInterface):
+    """Mixin to control saving comments."""
+    @override
+    def save_comments(self, edge: Edge) -> None:
+        if not self.should_save_comments:
+            return
+        super().save_comments(edge)  # type: ignore[safe-super]

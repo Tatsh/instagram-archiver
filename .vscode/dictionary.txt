@@ -1,6 +1,8 @@
+apng
 asbd
 autodoc
 automodule
+beautifulsoup
 besties
 bsky
 codeowners
@@ -67,9 +69,11 @@ testpaths
 toctree
 tryfirst
 udvare
+unsaving
 urlgen
 virtualenv
 wiswa
 xdtapiv
+xdtmediadict
 yapf
 yapfignore
