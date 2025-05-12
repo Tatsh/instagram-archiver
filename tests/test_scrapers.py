@@ -10,14 +10,14 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 
-def test_profile_scraper_no_log(mocker: MockerFixture) -> None:
+def test_profile_scraper_no_log(mocker: MockerFixture, mock_setup_session: None) -> None:
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mocker.patch('instagram_archiver.profile_scraper.Path')
     scraper_with_no_logging: Any = ProfileScraper('test_user', disable_log=True)
     scraper_with_no_logging._cursor.execute.assert_not_called()  # noqa: SLF001
 
 
-def test_profile_scraper_with_empty_log(mocker: MockerFixture) -> None:
+def test_profile_scraper_with_empty_log(mocker: MockerFixture, mock_setup_session: None) -> None:
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mock_path = mocker.patch('instagram_archiver.profile_scraper.Path')
     mock_path.return_value.exists.return_value = True
@@ -26,7 +26,7 @@ def test_profile_scraper_with_empty_log(mocker: MockerFixture) -> None:
     scraper._cursor.execute.assert_called_once()  # noqa: SLF001
 
 
-def test_profile_scraper_with_no_log(mocker: MockerFixture) -> None:
+def test_profile_scraper_with_no_log(mocker: MockerFixture, mock_setup_session: None) -> None:
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mock_path = mocker.patch('instagram_archiver.profile_scraper.Path')
     mock_path.return_value.exists.return_value = False
@@ -34,7 +34,7 @@ def test_profile_scraper_with_no_log(mocker: MockerFixture) -> None:
     scraper._cursor.execute.assert_called_once()  # noqa: SLF001
 
 
-def test_profile_scraper_with_log_existing(mocker: MockerFixture) -> None:
+def test_profile_scraper_with_log_existing(mocker: MockerFixture, mock_setup_session: None) -> None:
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mock_path = mocker.patch('instagram_archiver.profile_scraper.Path')
     mock_path.return_value.exists.return_value = True
@@ -43,7 +43,8 @@ def test_profile_scraper_with_log_existing(mocker: MockerFixture) -> None:
     scraper._cursor.execute.assert_not_called()  # noqa: SLF001
 
 
-def test_save_comments_does_nothing_when_disabled(mocker: MockerFixture) -> None:
+def test_save_comments_does_nothing_when_disabled(mocker: MockerFixture,
+                                                  mock_setup_session: None) -> None:
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mock_path = mocker.patch('instagram_archiver.profile_scraper.Path')
     mock_path.return_value.exists.return_value = True
@@ -70,7 +71,7 @@ def test_save_comments_does_nothing_when_disabled(mocker: MockerFixture) -> None
     mock_save_comments.assert_not_called()
 
 
-def test_save_comments(mocker: MockerFixture) -> None:
+def test_save_comments(mocker: MockerFixture, mock_setup_session: None) -> None:
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mock_path = mocker.patch('instagram_archiver.profile_scraper.Path')
     mock_path.return_value.exists.return_value = True
@@ -97,7 +98,7 @@ def test_save_comments(mocker: MockerFixture) -> None:
     mock_save_comments.assert_called_once()
 
 
-def test_save_to_log_disabled(mocker: MockerFixture) -> None:
+def test_save_to_log_disabled(mocker: MockerFixture, mock_setup_session: None) -> None:
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mock_path = mocker.patch('instagram_archiver.profile_scraper.Path')
     mock_path.return_value.exists.return_value = True
@@ -110,7 +111,7 @@ def test_save_to_log_disabled(mocker: MockerFixture) -> None:
     mock_cursor.execute.assert_not_called()
 
 
-def test_save_to_log(mocker: MockerFixture) -> None:
+def test_save_to_log(mocker: MockerFixture, mock_setup_session: None) -> None:
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mock_path = mocker.patch('instagram_archiver.profile_scraper.Path')
     mock_path.return_value.exists.return_value = True
@@ -123,7 +124,7 @@ def test_save_to_log(mocker: MockerFixture) -> None:
     mock_cursor.execute.assert_called_once()
 
 
-def test_is_saved(mocker: MockerFixture) -> None:
+def test_is_saved(mocker: MockerFixture, mock_setup_session: None) -> None:
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mock_path = mocker.patch('instagram_archiver.profile_scraper.Path')
     mock_path.return_value.exists.return_value = True
@@ -137,7 +138,7 @@ def test_is_saved(mocker: MockerFixture) -> None:
     mock_cursor.execute.assert_called_once()
 
 
-def test_is_saved_log_disabled(mocker: MockerFixture) -> None:
+def test_is_saved_log_disabled(mocker: MockerFixture, mock_setup_session: None) -> None:
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mock_path = mocker.patch('instagram_archiver.profile_scraper.Path')
     mock_path.return_value.exists.return_value = True
@@ -150,7 +151,7 @@ def test_is_saved_log_disabled(mocker: MockerFixture) -> None:
     mock_cursor.execute.assert_not_called()
 
 
-def test_exit_cleans_up(mocker: MockerFixture) -> None:
+def test_exit_cleans_up(mocker: MockerFixture, mock_setup_session: None) -> None:
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mock_path = mocker.patch('instagram_archiver.profile_scraper.Path')
     mock_path.return_value.exists.return_value = True
@@ -164,7 +165,7 @@ def test_exit_cleans_up(mocker: MockerFixture) -> None:
     mock_connection.close.assert_called_once()
 
 
-def test_process(mocker: MockerFixture) -> None:
+def test_process(mocker: MockerFixture, mock_setup_session: None) -> None:
     mock_log_error = mocker.patch('instagram_archiver.profile_scraper.log.error')
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mocker.patch('instagram_archiver.profile_scraper.chdir')
@@ -196,7 +197,7 @@ def test_process(mocker: MockerFixture) -> None:
     mock_log_error.assert_called_once_with('First GraphQL query failed.')
 
 
-def test_process_already_saved_profile_pic(mocker: MockerFixture) -> None:
+def test_process_already_saved_profile_pic(mocker: MockerFixture, mock_setup_session: None) -> None:
     mock_log_error = mocker.patch('instagram_archiver.profile_scraper.log.error')
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mocker.patch('instagram_archiver.profile_scraper.chdir')
@@ -231,7 +232,7 @@ def test_process_already_saved_profile_pic(mocker: MockerFixture) -> None:
     mock_log_error.assert_called_once_with('First GraphQL query failed.')
 
 
-def test_process_highlights(mocker: MockerFixture) -> None:
+def test_process_highlights(mocker: MockerFixture, mock_setup_session: None) -> None:
     mock_log_error = mocker.patch('instagram_archiver.profile_scraper.log.error')
     mock_add_video_url = mocker.patch(
         'instagram_archiver.profile_scraper.ProfileScraper.add_video_url')
@@ -274,7 +275,7 @@ def test_process_highlights(mocker: MockerFixture) -> None:
         'https://www.instagram.com/stories/highlights/12345/')
 
 
-def test_process_highlights_error(mocker: MockerFixture) -> None:
+def test_process_highlights_error(mocker: MockerFixture, mock_setup_session: None) -> None:
     mock_log_exception = mocker.patch('instagram_archiver.profile_scraper.log.exception')
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mocker.patch('instagram_archiver.profile_scraper.chdir')
@@ -308,7 +309,7 @@ def test_process_highlights_error(mocker: MockerFixture) -> None:
     mock_log_exception.assert_called_once_with('Failed to get highlights data.')
 
 
-def test_process_edges(mocker: MockerFixture) -> None:
+def test_process_edges(mocker: MockerFixture, mock_setup_session: None) -> None:
     mocker.patch('instagram_archiver.profile_scraper.log.error')
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mocker.patch('instagram_archiver.profile_scraper.chdir')
@@ -354,7 +355,7 @@ def test_process_edges(mocker: MockerFixture) -> None:
     assert mock_graphql_query.call_count == 1
 
 
-def test_process_edges_and_pagination(mocker: MockerFixture) -> None:
+def test_process_edges_and_pagination(mocker: MockerFixture, mock_setup_session: None) -> None:
     mocker.patch('instagram_archiver.profile_scraper.log.error')
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mocker.patch('instagram_archiver.profile_scraper.chdir')
@@ -408,7 +409,7 @@ def test_process_edges_and_pagination(mocker: MockerFixture) -> None:
     assert mock_graphql_query.call_count == 3
 
 
-def test_process_video_urls(mocker: MockerFixture) -> None:
+def test_process_video_urls(mocker: MockerFixture, mock_setup_session: None) -> None:
     mocker.patch('instagram_archiver.profile_scraper.log.error')
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mocker.patch('instagram_archiver.profile_scraper.chdir')
@@ -451,7 +452,7 @@ def test_process_video_urls(mocker: MockerFixture) -> None:
     mock_path.assert_called_with('failed.txt')
 
 
-def test_process_saved_with_unsaving(mocker: MockerFixture) -> None:
+def test_process_saved_with_unsaving(mocker: MockerFixture, mock_setup_session: None) -> None:
     mocker.patch('instagram_archiver.saved_scraper.Path')
     mocker.patch('instagram_archiver.saved_scraper.chdir')
     scraper = SavedScraper()
@@ -487,7 +488,7 @@ def test_process_saved_with_unsaving(mocker: MockerFixture) -> None:
     }]
 
 
-def test_process_saved(mocker: MockerFixture) -> None:
+def test_process_saved(mocker: MockerFixture, mock_setup_session: None) -> None:
     mock_log_warning = mocker.patch('instagram_archiver.saved_scraper.log.warning')
     mocker.patch('instagram_archiver.saved_scraper.Path')
     mocker.patch('instagram_archiver.saved_scraper.chdir')

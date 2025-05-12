@@ -1,11 +1,14 @@
 """Configuration for Pytest."""
 from __future__ import annotations
 
-from typing import NoReturn
+from typing import TYPE_CHECKING, NoReturn
 import os
 
 from click.testing import CliRunner
 import pytest
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 if os.getenv('_PYTEST_RAISE', '0') != '0':  # pragma no cover
 
@@ -22,3 +25,9 @@ if os.getenv('_PYTEST_RAISE', '0') != '0':  # pragma no cover
 @pytest.fixture
 def runner() -> CliRunner:
     return CliRunner()
+
+
+@pytest.fixture
+def mock_setup_session(mocker: MockerFixture) -> None:
+    """Mock the setup_session function."""
+    mocker.patch('instagram_archiver.client.setup_session')
