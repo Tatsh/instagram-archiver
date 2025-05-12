@@ -20,7 +20,7 @@ __all__ = ('SavedScraper',)
 log = logging.getLogger(__name__)
 
 
-class SavedScraper(InstagramClient, SaveCommentsCheckDisabledMixin):
+class SavedScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
     """Scrape saved posts."""
     def __init__(
         self,
