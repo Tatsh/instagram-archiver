@@ -86,6 +86,18 @@ Arguments
 .B USERNAME
 Required argument
 .UNINDENT
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.EX
+instagram\-archiver \-o ~/instagram\-backups username
+.EE
+.UNINDENT
+.UNINDENT
+.sp
+The default output path is the username under the current working directory.
+.sp
+Videos are saved using yt\-dlp and its respective configuration.
 .SS instagram\-save\-saved
 .sp
 Archive your saved posts.
@@ -134,17 +146,6 @@ Also download all comments (extends download time significantly).
 .B \-u, \-\-unsave
 Unsave posts after successful archive.
 .UNINDENT
-.SS Typical use
-.INDENT 0.0
-.INDENT 3.5
-.sp
-.EX
-instagram\-archiver \-o ~/instagram\-backups username
-.EE
-.UNINDENT
-.UNINDENT
-.sp
-Videos are saved using yt\-dlp and its respective configuration.
 .SH INDICES AND TABLES
 .INDENT 0.0
 .IP \(bu 2

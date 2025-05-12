@@ -61,6 +61,29 @@ Typical use:
 instagram-archiver -o ~/instagram-backups/username username
 ```
 
+### `instagram-save-saved`
+
+This tool saves your saved posts (at `www.instagram.com/username/saved/all-posts`).
+
+```plain
+Usage: instagram-save-saved [OPTIONS]
+
+  Archive your saved posts.
+
+Options:
+  -o, --output-dir DIRECTORY      Output directory.
+  -b, --browser [brave|chrome|chromium|edge|opera|vivaldi|firefox|safari]
+                                  Browser to read cookies from.
+  -p, --profile TEXT              Browser profile.
+  -d, --debug                     Enable debug output.
+  -C, --include-comments          Also download all comments (extends download
+                                  time significantly).
+  -u, --unsave                    Unsave posts after successful archive.
+  -h, --help                      Show this message and exit.
+```
+
+## Notes
+
 The default output path is the username under the current working directory.
 
 Videos are saved using yt-dlp and its respective configuration.

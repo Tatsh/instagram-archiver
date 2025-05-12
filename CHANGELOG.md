@@ -15,6 +15,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
-- Bring it back to working state.
+- Back to working state.
 
-[unreleased]: https://github.com/Tatsh/instagram-archiver/compare/v0.2.1...HEAD
+### Added
+
+- Save saved posts (and unsave them too).
+
+[unreleased]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.0...HEAD
