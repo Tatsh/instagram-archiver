@@ -40,6 +40,10 @@ class CSRFTokenNotFound(RuntimeError):
     """CSRF token not found in cookies."""
 
 
+class UnexpectedRedirect(RuntimeError):
+    """Unexpected redirect in a request."""
+
+
 class InstagramClient:
     """Generic client for Instagram."""
     def __init__(self, browser: BrowserName = 'chrome', browser_profile: str = 'Default') -> None:
@@ -191,13 +195,22 @@ class InstagramClient:
             json.dump(top_comment_data, f, sort_keys=True, indent=2)
 
     def save_media(self, edge: Edge) -> None:
-        """Save media for an edge node."""
+        """
+        Save media for an edge node.
+
+        Raises
+        ------
+        UnexpectedRedirect
+            If a redirect occurs unexpectedly.
+        """
         media_info_url = f'https://www.instagram.com/api/v1/media/{edge["node"]["pk"]}/info/'
         log.info('Saving media at URL: %s', media_info_url)
         if self.is_saved(media_info_url):
             return
-        r = self.session.get(media_info_url, headers=API_HEADERS)
+        r = self.session.get(media_info_url, headers=API_HEADERS, allow_redirects=False)
         if r.status_code != HTTPStatus.OK:
+            if r.status_code in {HTTPStatus.MOVED_PERMANENTLY, HTTPStatus.FOUND}:
+                raise UnexpectedRedirect
             log.warning('GET request failed with status code %s.', r.status_code)
             log.debug('Content: %s', r.text)
             return

@@ -273,7 +273,8 @@ def test_save_media_get_request_failure(client: MagicMock, mocker: MockerFixture
 
     mock_is_saved.assert_called_once_with('https://www.instagram.com/api/v1/media/pk/info/')
     client.session.get.assert_called_once_with('https://www.instagram.com/api/v1/media/pk/info/',
-                                               headers=mocker.ANY)
+                                               headers=mocker.ANY,
+                                               allow_redirects=False)
     mock_log_warning.assert_called_once_with('GET request failed with status code %s.', 404)
 
 
@@ -290,7 +291,8 @@ def test_save_media_invalid_response(client: MagicMock, mocker: MockerFixture) -
 
     mock_is_saved.assert_called_once_with('https://www.instagram.com/api/v1/media/pk/info/')
     client.session.get.assert_called_once_with('https://www.instagram.com/api/v1/media/pk/info/',
-                                               headers=mocker.ANY)
+                                               headers=mocker.ANY,
+                                               allow_redirects=False)
     mock_log_warning.assert_called_once_with('Invalid response. image_versions2 dict not found.')
 
 
@@ -307,7 +309,8 @@ def test_save_media_success(client: MagicMock, mocker: MockerFixture) -> None:
     edge = {'node': {'code': 'test_code', 'id': '123', 'pk': 'pk'}}
     client.save_media(edge)
     client.session.get.assert_called_once_with('https://www.instagram.com/api/v1/media/pk/info/',
-                                               headers=mocker.ANY)
+                                               headers=mocker.ANY,
+                                               allow_redirects=False)
     mock_is_saved.assert_called_once_with('https://www.instagram.com/api/v1/media/pk/info/')
     mock_write_if_new.assert_any_call('123.json', mocker.ANY)
     mock_write_if_new.assert_any_call('123-media-info-0000.json', mocker.ANY)

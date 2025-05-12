@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 import click
 
+from .client import UnexpectedRedirect
 from .constants import BROWSER_CHOICES
 from .profile_scraper import ProfileScraper
 from .saved_scraper import SavedScraper
@@ -55,6 +56,9 @@ def main(output_dir: str,
                                         if '%(username)s' in output_dir else Path(output_dir)),
                             username=username) as client:
             client.process()
+    except UnexpectedRedirect as e:
+        click.echo('Unexpected redirect. Assuming request limit has been reached.', err=True)
+        raise click.Abort from e
     except Exception as e:
         if isinstance(e, KeyboardInterrupt) or debug:
             raise
@@ -91,6 +95,9 @@ def save_saved_main(output_dir: str,
     setup_logging(debug=debug)
     try:
         SavedScraper(browser, profile, output_dir, comments=include_comments).process(unsave=unsave)
+    except UnexpectedRedirect as e:
+        click.echo('Unexpected redirect. Assuming request limit has been reached.', err=True)
+        raise click.Abort from e
     except Exception as e:
         if isinstance(e, KeyboardInterrupt) or debug:
             raise
