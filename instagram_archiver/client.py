@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
     from .typing import BrowserName
 
-__all__ = ('CSRFTokenNotFound', 'InstagramClient')
+__all__ = ('CSRFTokenNotFound', 'InstagramClient', 'UnexpectedRedirect')
 
 T = TypeVar('T')
 log = logging.getLogger(__name__)
