@@ -3,7 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from instagram_archiver.main import UnexpectedRedirect, main, save_saved_main
+from instagram_archiver.client import UnexpectedRedirect
+from instagram_archiver.main import main, save_saved_main
 
 if TYPE_CHECKING:
     from click.testing import CliRunner
