@@ -9,6 +9,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+[0.3.1]
+
+### Changed
+
+- Improve fetching media information
+- Stop processing on first indication of being blocked (including fetching videos).
+
+## [0.3.0]
+
 ### Changed
 
 - Main program is now named `instagram-archiver`.
@@ -21,4 +30,4 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Save saved posts (and unsave them too).
 
-[unreleased]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.0...HEAD
+[unreleased]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.1...HEAD
