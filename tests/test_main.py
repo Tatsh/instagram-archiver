@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from instagram_archiver.main import main, save_saved_main
+from instagram_archiver.main import UnexpectedRedirect, main, save_saved_main
 
 if TYPE_CHECKING:
     from click.testing import CliRunner
@@ -40,6 +40,23 @@ def test_main_debug_flag(runner: CliRunner, mocker: MockerFixture) -> None:
                                         username='testuser')
     mock_client.return_value.__enter__.assert_called_once()
     mock_client.return_value.__exit__.assert_called_once()
+
+
+def test_main_unexpected_redirect(runner: CliRunner, mocker: MockerFixture) -> None:
+    mock_setup_logging = mocker.patch('instagram_archiver.main.setup_logging')
+    mock_client = mocker.patch('instagram_archiver.main.ProfileScraper', autospec=True)
+
+    mock_client.side_effect = UnexpectedRedirect('Test redirect')
+    result = runner.invoke(main, ['testuser'])
+    assert result.exit_code == 1
+    assert 'Unexpected redirect. Assuming request limit has been reached.' in result.output
+    mock_setup_logging.assert_called_once_with(debug=False)
+    mock_client.assert_called_once_with(browser='chrome',
+                                        browser_profile='Default',
+                                        comments=False,
+                                        disable_log=False,
+                                        output_dir=Path('testuser'),
+                                        username='testuser')
 
 
 def test_main_exception(runner: CliRunner, mocker: MockerFixture) -> None:
@@ -134,3 +151,14 @@ def test_save_saved_main_exception_debug(runner: CliRunner, mocker: MockerFixtur
     mock_setup_logging.assert_called_once_with(debug=True)
     mock_scraper.assert_called_once_with('chrome', 'Default', '.', comments=False)
     mock_scraper.return_value.process.assert_called_once_with(unsave=False)
+
+
+def test_save_saved_main_unexpected_redirect(runner: CliRunner, mocker: MockerFixture) -> None:
+    mock_setup_logging = mocker.patch('instagram_archiver.main.setup_logging')
+    mock_client = mocker.patch('instagram_archiver.main.SavedScraper', autospec=True)
+    mock_client.side_effect = UnexpectedRedirect('Test redirect')
+    result = runner.invoke(save_saved_main)
+    assert result.exit_code == 1
+    assert 'Unexpected redirect. Assuming request limit has been reached.' in result.output
+    mock_setup_logging.assert_called_once_with(debug=False)
+    mock_client.assert_called_once_with('chrome', 'Default', '.', comments=False)

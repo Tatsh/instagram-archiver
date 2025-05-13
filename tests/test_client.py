@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock
 
-from instagram_archiver.client import CSRFTokenNotFound, InstagramClient
+from instagram_archiver.client import CSRFTokenNotFound, InstagramClient, UnexpectedRedirect
 from instagram_archiver.typing import Comments, HighlightsTray
 from requests import HTTPError
 import pytest
@@ -278,6 +278,22 @@ def test_save_media_get_request_failure(client: MagicMock, mocker: MockerFixture
     mock_log_warning.assert_called_once_with('GET request failed with status code %s.', 404)
 
 
+def test_save_media_redirect_error(client: MagicMock, mocker: MockerFixture) -> None:
+    mock_is_saved = mocker.patch.object(client, 'is_saved', return_value=False)
+    mock_response = MagicMock()
+    mock_response.status_code = 301
+    client.session.get.return_value = mock_response
+
+    edge = {'node': {'code': 'test_code', 'pk': 'pk'}}
+    with pytest.raises(UnexpectedRedirect):
+        client.save_media(edge)
+
+    mock_is_saved.assert_called_once_with('https://www.instagram.com/api/v1/media/pk/info/')
+    client.session.get.assert_called_once_with('https://www.instagram.com/api/v1/media/pk/info/',
+                                               headers=mocker.ANY,
+                                               allow_redirects=False)
+
+
 def test_save_media_invalid_response(client: MagicMock, mocker: MockerFixture) -> None:
     mock_is_saved = mocker.patch.object(client, 'is_saved', return_value=False)
     mock_response = MagicMock()
@@ -302,7 +318,18 @@ def test_save_media_success(client: MagicMock, mocker: MockerFixture) -> None:
     mock_utime = mocker.patch('instagram_archiver.client.utime')
     mocker.patch.object(client, 'save_image_versions2')
     mock_save_to_log = mocker.patch.object(client, 'save_to_log')
-    mock_response = MagicMock(json=MagicMock(return_value={'items': [{'taken_at': 1234567890}]}))
+    mock_response = MagicMock(json=MagicMock(
+        return_value={
+            'items': [{
+                'taken_at': 1234567890,
+                'carousel_media': [{}]
+            }, {
+                'taken_at': 1234567890,
+                'image_versions2': {}
+            }, {
+                'taken_at': 1234567890
+            }]
+        }))
     mock_response.status_code = 200
     mock_response.text = '{"image_versions2": {}, "taken_at": 1234567890}'
     client.session.get.return_value = mock_response
