@@ -19,8 +19,8 @@ Instagram Archiver
       :target: https://github.com/Tatsh/instagram-archiver/blob/master/LICENSE.txt
       :alt: License
 
-   .. image:: https://img.shields.io/github/commits-since/Tatsh/instagram-archiver/v0.3.1/master
-      :target: https://github.com/Tatsh/instagram-archiver/compare/v0.3.1...master
+   .. image:: https://img.shields.io/github/commits-since/Tatsh/instagram-archiver/v0.3.2/master
+      :target: https://github.com/Tatsh/instagram-archiver/compare/v0.3.2...master
       :alt: GitHub commits since latest release (by SemVer including pre-releases)
 
    .. image:: https://github.com/Tatsh/instagram-archiver/actions/workflows/qa.yml/badge.svg
