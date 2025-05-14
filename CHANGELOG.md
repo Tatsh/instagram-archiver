@@ -9,6 +9,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+[0.3.2]
+
+### Fixed
+
+- Handle when profile data lacks a `data` key. In this case, processing is likely to fail entirely.
+
 [0.3.1]
 
 ### Changed
@@ -30,4 +36,4 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Save saved posts (and unsave them too).
 
-[unreleased]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.1...HEAD
+[unreleased]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.2...HEAD
