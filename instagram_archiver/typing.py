@@ -163,7 +163,7 @@ class WebProfileInfoData(TypedDict):
 
 class WebProfileInfo(TypedDict):
     """Profile information container."""
-    data: WebProfileInfoData
+    data: NotRequired[WebProfileInfoData]
     """Profile data."""
 
 
