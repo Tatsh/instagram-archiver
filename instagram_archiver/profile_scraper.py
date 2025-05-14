@@ -184,10 +184,10 @@ class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
                 with get_configured_yt_dlp() as ydl:
                     while self.video_urls and (url := self.video_urls.pop()):
                         if self.is_saved(url):
-                            log.info('`%s` is already saved.', url)
+                            log.info('%s is already saved.', url)
                             continue
                         if ydl.extract_info(url):
-                            log.info('Extracting `%s`.', url)
+                            log.info('Downloading video: %s', url)
                             self.save_to_log(url)
                         else:
                             self.failed_urls.add(url)
