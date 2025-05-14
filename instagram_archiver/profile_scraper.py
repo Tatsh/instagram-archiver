@@ -116,22 +116,26 @@ class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
             r = self.get_json('https://i.instagram.com/api/v1/users/web_profile_info/',
                               params={'username': self._username},
                               cast_to=WebProfileInfo)
-            with Path('web_profile_info.json').open('w', encoding='utf-8') as f:
-                json.dump(r, f, indent=2, sort_keys=True)
-            user_info = r['data']['user']
-            if not self.is_saved(user_info['profile_pic_url_hd']):
-                with Path('profile_pic.jpg').open('wb') as f:
-                    f.writelines(
-                        self.session.get(user_info['profile_pic_url_hd'],
-                                         stream=True).iter_content(chunk_size=512))
-                self.save_to_log(user_info['profile_pic_url_hd'])
-            try:
-                for item in self.highlights_tray(user_info['id'])['tray']:
-                    self.add_video_url('https://www.instagram.com/stories/highlights/'
-                                       f'{item["id"].split(":")[-1]}/')
-            except HTTPError:
-                log.exception('Failed to get highlights data.')
-            self.save_edges(user_info['edge_owner_to_timeline_media']['edges'])
+            if 'data' in r:
+                with Path('web_profile_info.json').open('w', encoding='utf-8') as f:
+                    json.dump(r, f, indent=2, sort_keys=True)
+                user_info = r['data']['user']
+                if not self.is_saved(user_info['profile_pic_url_hd']):
+                    with Path('profile_pic.jpg').open('wb') as f:
+                        f.writelines(
+                            self.session.get(user_info['profile_pic_url_hd'],
+                                             stream=True).iter_content(chunk_size=512))
+                    self.save_to_log(user_info['profile_pic_url_hd'])
+                try:
+                    for item in self.highlights_tray(user_info['id'])['tray']:
+                        self.add_video_url('https://www.instagram.com/stories/highlights/'
+                                           f'{item["id"].split(":")[-1]}/')
+                except HTTPError:
+                    log.exception('Failed to get highlights data.')
+                self.save_edges(user_info['edge_owner_to_timeline_media']['edges'])
+            else:
+                log.warning(
+                    'Failed to get user info. Profile information and image will not be saved.')
             d = self.graphql_query(
                 {
                     'data': {
@@ -188,7 +192,7 @@ class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
                         else:
                             self.failed_urls.add(url)
             if self.failed_urls:
-                log.warning('Some video URIs failed. Check failed.txt.')
+                log.warning('Some URIs failed. Check failed.txt.')
                 with Path('failed.txt').open('w', encoding='utf-8') as f:
                     for url in self.failed_urls:
                         f.write(f'{url}\n')

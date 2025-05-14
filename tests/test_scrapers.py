@@ -199,6 +199,30 @@ def test_process(mocker: MockerFixture, mock_setup_session: None) -> None:
     mock_log_error.assert_called_once_with('First GraphQL query failed.')
 
 
+def test_process_data_not_in_profile_info(mocker: MockerFixture, mock_setup_session: None) -> None:
+    mock_log_error = mocker.patch('instagram_archiver.profile_scraper.log.error')
+    mock_log_warning = mocker.patch('instagram_archiver.profile_scraper.log.warning')
+    mocker.patch('instagram_archiver.profile_scraper.sqlite3')
+    mocker.patch('instagram_archiver.profile_scraper.chdir')
+    mocker.patch('instagram_archiver.profile_scraper.ProfileScraper.get_json', return_value={})
+    mocker.patch('instagram_archiver.profile_scraper.ProfileScraper.get_text')
+    mocker.patch('instagram_archiver.profile_scraper.ProfileScraper.highlights_tray',
+                 return_value={'tray': []})
+    mock_path = mocker.patch('instagram_archiver.profile_scraper.Path')
+    mock_path.return_value.exists.return_value = True
+    mock_cursor = mocker.MagicMock()
+    mock_cursor.fetchone.return_value = (0,)
+    mock_connection = mocker.MagicMock()
+    mock_connection.cursor.return_value = mock_cursor
+    mocker.patch('instagram_archiver.profile_scraper.sqlite3.connect', return_value=mock_connection)
+    scraper = ProfileScraper('test_user')
+    scraper.session = mocker.MagicMock()
+    scraper.process()
+    mock_log_error.assert_called_once_with('First GraphQL query failed.')
+    mock_log_warning.assert_called_once_with(
+        'Failed to get user info. Profile information and image will not be saved.')
+
+
 def test_process_already_saved_profile_pic(mocker: MockerFixture, mock_setup_session: None) -> None:
     mock_log_error = mocker.patch('instagram_archiver.profile_scraper.log.error')
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
