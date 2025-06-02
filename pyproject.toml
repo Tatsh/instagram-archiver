@@ -103,7 +103,7 @@ optional = true
 commitizen = "^4.8.2"
 djlint = "^1.36.4"
 mypy = ">=1.12,<1.17"
-ruff = "^0.11.11"
+ruff = "^0.11.12"
 types-requests = "^2.32.0.20250515"
 yapf = "^0.43.0"
 
