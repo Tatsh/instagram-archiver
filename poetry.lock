@@ -881,14 +881,14 @@ tqdm = ">=4.62.2"
 
 [[package]]
 name = "doc8"
-version = "1.1.2"
+version = "2.0.0"
 description = "Style checker for Sphinx (or other) RST documentation"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.10"
 groups = ["docs"]
 files = [
-    {file = "doc8-1.1.2-py3-none-any.whl", hash = "sha256:e787b3076b391b8b49400da5d018bacafe592dfc0a04f35a9be22d0122b82b59"},
-    {file = "doc8-1.1.2.tar.gz", hash = "sha256:1225f30144e1cc97e388dbaf7fe3e996d2897473a53a6dae268ddde21c354b98"},
+    {file = "doc8-2.0.0-py3-none-any.whl", hash = "sha256:9862710027f793c25f9b1899150660e4bf1d4c9a6738742e71f32011e2e3f590"},
+    {file = "doc8-2.0.0.tar.gz", hash = "sha256:1267ad32758971fbcf991442417a3935c7bc9e52550e73622e0e56ba55ea1d40"},
 ]
 
 [package.dependencies]
@@ -3105,4 +3105,4 @@ yt-dlp = {version = ">=2025.5.22,<2026.0.0", extras = ["default"]}
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.14"
-content-hash = "759cc1b7efefac9b31efe88cfb7b3b73e8ee9851a10c44f98cef4d9ec5c3da62"
+content-hash = "6cbfc77070bc7d110c9acc78313b9ca50a568172af53f45663bdf46266bba1f7"
