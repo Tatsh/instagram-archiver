@@ -91,7 +91,7 @@ colorlog = "^6.9.0"
 html5lib = "^1.1"
 python = ">=3.12,<3.14"
 requests = "^2.32.4"
-typing-extensions = "^4.14.0"
+typing-extensions = "^4.14.1"
 yt-dlp-utils = "^0.0.5"
 
 [tool.poetry.group]
