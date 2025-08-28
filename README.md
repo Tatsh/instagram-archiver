@@ -5,6 +5,7 @@
 [![GitHub tag (with filter)](https://img.shields.io/github/v/tag/Tatsh/instagram-archiver)](https://github.com/Tatsh/instagram-archiver/tags)
 [![License](https://img.shields.io/github/license/Tatsh/instagram-archiver)](https://github.com/Tatsh/instagram-archiver/blob/master/LICENSE.txt)
 [![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/instagram-archiver/v0.3.2/master)](https://github.com/Tatsh/instagram-archiver/compare/v0.3.2...master)
+[![CodeQL](https://github.com/Tatsh/instagram-archiver/actions/workflows/codeql.yml/badge.svg)](https://github.com/Tatsh/instagram-archiver/actions/workflows/codeql.yml)
 [![QA](https://github.com/Tatsh/instagram-archiver/actions/workflows/qa.yml/badge.svg)](https://github.com/Tatsh/instagram-archiver/actions/workflows/qa.yml)
 [![Tests](https://github.com/Tatsh/instagram-archiver/actions/workflows/tests.yml/badge.svg)](https://github.com/Tatsh/instagram-archiver/actions/workflows/tests.yml)
 [![Coverage Status](https://coveralls.io/repos/github/Tatsh/instagram-archiver/badge.svg?branch=master)](https://coveralls.io/github/Tatsh/instagram-archiver?branch=master)
