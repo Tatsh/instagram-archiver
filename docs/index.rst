@@ -9,7 +9,7 @@ Instagram Archiver
 
    .. image:: https://img.shields.io/pypi/v/instagram-archiver
       :target: https://pypi.org/project/instagram-archiver/
-      :alt: PyPI - Version
+      :alt: PyPI Version
 
    .. image:: https://img.shields.io/github/v/tag/Tatsh/instagram-archiver
       :target: https://github.com/Tatsh/instagram-archiver/tags
@@ -22,6 +22,10 @@ Instagram Archiver
    .. image:: https://img.shields.io/github/commits-since/Tatsh/instagram-archiver/v0.3.2/master
       :target: https://github.com/Tatsh/instagram-archiver/compare/v0.3.2...master
       :alt: GitHub commits since latest release (by SemVer including pre-releases)
+
+   .. image:: https://github.com/Tatsh/instagram-archiver/actions/workflows/codeql.yml/badge.svg
+      :target: https://github.com/Tatsh/instagram-archiver/actions/workflows/codeql.yml
+      :alt: CodeQL
 
    .. image:: https://github.com/Tatsh/instagram-archiver/actions/workflows/qa.yml/badge.svg
       :target: https://github.com/Tatsh/instagram-archiver/actions/workflows/qa.yml
