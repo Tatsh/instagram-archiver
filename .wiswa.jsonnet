@@ -8,8 +8,8 @@ local utils = import 'utils.libjsonnet';
   version: '0.3.2',
   want_main: true,
   supported_python_versions: ['3.%d' % i for i in std.range(12, 13)],
-  citation+: {
-    'date-released': '2025-05-10',
+  copilot: {
+    intro: 'Instagram Archiver is a command line tool to save Instagram content you have access to.',
   },
   pyproject+: {
     project+: {

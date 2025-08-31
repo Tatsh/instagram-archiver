@@ -32,7 +32,7 @@ def test_main_debug_flag(runner: CliRunner, mocker: MockerFixture) -> None:
     mock_client = mocker.patch('instagram_archiver.main.ProfileScraper', autospec=True)
     result = runner.invoke(main, ['--debug', 'testuser'])
     assert result.exit_code == 0
-    mock_setup_logging.assert_called_once_with(debug=True)
+    mock_setup_logging.assert_called_once_with(debug=True, loggers=mocker.ANY)
     mock_client.assert_called_once_with(browser='chrome',
                                         browser_profile='Default',
                                         comments=False,
@@ -51,7 +51,7 @@ def test_main_unexpected_redirect(runner: CliRunner, mocker: MockerFixture) -> N
     result = runner.invoke(main, ['testuser'])
     assert result.exit_code == 1
     assert 'Unexpected redirect. Assuming request limit has been reached.' in result.output
-    mock_setup_logging.assert_called_once_with(debug=False)
+    mock_setup_logging.assert_called_once_with(debug=False, loggers=mocker.ANY)
     mock_client.assert_called_once_with(browser='chrome',
                                         browser_profile='Default',
                                         comments=False,
@@ -90,7 +90,7 @@ def test_save_saved_main_no_options(runner: CliRunner, mocker: MockerFixture) ->
     mock_scraper = mocker.patch('instagram_archiver.main.SavedScraper', autospec=True)
     result = runner.invoke(save_saved_main, [])
     assert result.exit_code == 0
-    mock_setup_logging.assert_called_once_with(debug=False)
+    mock_setup_logging.assert_called_once_with(debug=False, loggers=mocker.ANY)
     mock_scraper.assert_called_once_with('chrome', 'Default', '.', comments=False)
     mock_scraper.return_value.process.assert_called_once_with(unsave=False)
 
@@ -101,7 +101,7 @@ def test_save_saved_main_debug_flag(runner: CliRunner, mocker: MockerFixture) ->
     mock_scraper = mocker.patch('instagram_archiver.main.SavedScraper', autospec=True)
     result = runner.invoke(save_saved_main, ['--debug'])
     assert result.exit_code == 0
-    mock_setup_logging.assert_called_once_with(debug=True)
+    mock_setup_logging.assert_called_once_with(debug=True, loggers=mocker.ANY)
     mock_scraper.assert_called_once_with('chrome', 'Default', '.', comments=False)
     mock_scraper.return_value.process.assert_called_once_with(unsave=False)
 
@@ -112,7 +112,7 @@ def test_save_saved_main_include_comments(runner: CliRunner, mocker: MockerFixtu
     mock_scraper = mocker.patch('instagram_archiver.main.SavedScraper', autospec=True)
     result = runner.invoke(save_saved_main, ['--include-comments'])
     assert result.exit_code == 0
-    mock_setup_logging.assert_called_once_with(debug=False)
+    mock_setup_logging.assert_called_once_with(debug=False, loggers=mocker.ANY)
     mock_scraper.assert_called_once_with('chrome', 'Default', '.', comments=True)
     mock_scraper.return_value.process.assert_called_once_with(unsave=False)
 
@@ -123,7 +123,7 @@ def test_save_saved_main_unsave_flag(runner: CliRunner, mocker: MockerFixture) -
     mock_scraper = mocker.patch('instagram_archiver.main.SavedScraper', autospec=True)
     result = runner.invoke(save_saved_main, ['--unsave'])
     assert result.exit_code == 0
-    mock_setup_logging.assert_called_once_with(debug=False)
+    mock_setup_logging.assert_called_once_with(debug=False, loggers=mocker.ANY)
     mock_scraper.assert_called_once_with('chrome', 'Default', '.', comments=False)
     mock_scraper.return_value.process.assert_called_once_with(unsave=True)
 
@@ -136,7 +136,7 @@ def test_save_saved_main_exception(runner: CliRunner, mocker: MockerFixture) -> 
     result = runner.invoke(save_saved_main, [])
     assert result.exit_code == 1
     assert 'Run with --debug for more information.' in result.output
-    mock_setup_logging.assert_called_once_with(debug=False)
+    mock_setup_logging.assert_called_once_with(debug=False, loggers=mocker.ANY)
     mock_scraper.assert_called_once_with('chrome', 'Default', '.', comments=False)
     mock_scraper.return_value.process.assert_called_once_with(unsave=False)
 
@@ -149,7 +149,7 @@ def test_save_saved_main_exception_debug(runner: CliRunner, mocker: MockerFixtur
     result = runner.invoke(save_saved_main, ['--debug'])
     assert result.exit_code == 1
     assert 'Run with --debug for more information.' not in result.output
-    mock_setup_logging.assert_called_once_with(debug=True)
+    mock_setup_logging.assert_called_once_with(debug=True, loggers=mocker.ANY)
     mock_scraper.assert_called_once_with('chrome', 'Default', '.', comments=False)
     mock_scraper.return_value.process.assert_called_once_with(unsave=False)
 
@@ -161,5 +161,5 @@ def test_save_saved_main_unexpected_redirect(runner: CliRunner, mocker: MockerFi
     result = runner.invoke(save_saved_main)
     assert result.exit_code == 1
     assert 'Unexpected redirect. Assuming request limit has been reached.' in result.output
-    mock_setup_logging.assert_called_once_with(debug=False)
+    mock_setup_logging.assert_called_once_with(debug=False, loggers=mocker.ANY)
     mock_client.assert_called_once_with('chrome', 'Default', '.', comments=False)

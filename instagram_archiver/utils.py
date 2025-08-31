@@ -4,8 +4,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeVar, override
 import json
-import logging
-import logging.config
 
 import click
 
@@ -13,53 +11,9 @@ if TYPE_CHECKING:
     from .typing import Edge
 
 __all__ = ('JSONFormattedString', 'UnknownMimetypeError', 'get_extension', 'json_dumps_formatted',
-           'setup_logging', 'write_if_new')
+           'write_if_new')
 
 T = TypeVar('T')
-
-
-def setup_logging(*,
-                  debug: bool = False,
-                  force_color: bool = False,
-                  no_color: bool = False) -> None:  # pragma: no cover
-    """Set up logging configuration."""
-    logging.config.dictConfig({
-        'version': 1,
-        'disable_existing_loggers': True,
-        'root': {
-            'handlers': ('console',),
-            'level': 'DEBUG' if debug else 'INFO',
-        },
-        'formatters': {
-            'default': {
-                '()': 'colorlog.ColoredFormatter',
-                'force_color': force_color,
-                'format':
-                    '%(log_color)s%(levelname)-8s%(reset)s | %(light_green)s%(name)s%(reset)s:'
-                    '%(light_red)s%(funcName)s%(reset)s:%(blue)s%(lineno)d%(reset)s - %(message)s',
-                'no_color': no_color,
-            },
-            'simple': {
-                'format': '%(message)s',
-            },
-        },
-        'handlers': {
-            'console': {
-                'class': 'colorlog.StreamHandler',
-                'formatter': 'default' if debug else 'simple',
-            },
-        },
-        'loggers': {
-            'instagram_archiver': {
-                'handlers': ('console',),
-                'propagate': False,
-            },
-            'urllib3': {
-                'handlers': ('console',),
-                'propagate': False,
-            }
-        },
-    })
 
 
 class JSONFormattedString:

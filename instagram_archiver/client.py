@@ -87,11 +87,12 @@ class InstagramClient:
             raise CSRFTokenNotFound
         self.session.headers.update({'x-csrftoken': token})
 
-    def graphql_query(self,
-                      variables: Mapping[str, Any],
-                      *,
-                      cast_to: type[T],
-                      doc_id: str = '9806959572732215') -> T | None:
+    def graphql_query(
+            self,
+            variables: Mapping[str, Any],
+            *,
+            cast_to: type[T],  # noqa: ARG002
+            doc_id: str = '9806959572732215') -> T | None:
         """Make a GraphQL query."""
         with self.session.post('https://www.instagram.com/graphql/query',
                                headers={
@@ -135,7 +136,7 @@ class InstagramClient:
                  ___: TracebackType | None) -> None:
         """Clean up."""
 
-    def is_saved(self, url: str) -> bool:  # pragma: no cover
+    def is_saved(self, url: str) -> bool:  # pragma: no cover  # noqa: ARG002, PLR6301
         """Check if a URL is already saved."""
         return False
 
@@ -265,7 +266,12 @@ class InstagramClient:
                 shortcode = edge['node']['code']
                 self.failed_urls.add(f'https://www.instagram.com/p/{shortcode}/')
 
-    def get_json(self, url: str, *, cast_to: type[T], params: Mapping[str, str] | None = None) -> T:
+    def get_json(
+            self,
+            url: str,
+            *,
+            cast_to: type[T],  # noqa: ARG002
+            params: Mapping[str, str] | None = None) -> T:
         """Get JSON data from a URL."""
         with self.session.get(url, params=params, headers=API_HEADERS) as r:
             r.raise_for_status()

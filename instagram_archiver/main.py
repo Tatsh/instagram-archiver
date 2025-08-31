@@ -4,13 +4,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bascom import setup_logging
 import click
 
 from .client import UnexpectedRedirect
 from .constants import BROWSER_CHOICES
 from .profile_scraper import ProfileScraper
 from .saved_scraper import SavedScraper
-from .utils import setup_logging
 
 if TYPE_CHECKING:
     from .typing import BrowserName
@@ -46,7 +46,11 @@ def main(output_dir: str,
          include_comments: bool = False,
          no_log: bool = False) -> None:
     """Archive a profile's posts."""  # noqa: DOC501
-    setup_logging(debug=debug)
+    setup_logging(debug=debug,
+                  loggers={'instagram_archiver': {
+                      'handlers': ('console',),
+                      'propagate': False
+                  }})
     try:
         with ProfileScraper(browser=browser,
                             browser_profile=profile,
@@ -92,7 +96,11 @@ def save_saved_main(output_dir: str,
                     include_comments: bool = False,
                     unsave: bool = False) -> None:
     """Archive your saved posts."""  # noqa: DOC501
-    setup_logging(debug=debug)
+    setup_logging(debug=debug,
+                  loggers={'instagram_archiver': {
+                      'handlers': ('console',),
+                      'propagate': False
+                  }})
     try:
         SavedScraper(browser, profile, output_dir, comments=include_comments).process(unsave=unsave)
     except UnexpectedRedirect as e:
