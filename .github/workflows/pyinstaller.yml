@@ -101,13 +101,19 @@ jobs:
           name: instagram-archiver-binaries-${{ matrix.suffix }}
           path: |
             ${{ matrix.dist_path }}
-      - if: github.ref_type == 'tag'
+      - if: "(matrix.os == 'macos-latest' || matrix.os == 'macos-15-intel') && github.ref_type == 'tag'"
         name: 'Zip files'
         run: |
           rm -fR _out
           mkdir _out
-          zip -j _out/instagram-archiver-${{ github.ref_name }}.zip ${{ matrix.dist_path }}
-        shell: bash
+          zip -j _out/instagram-archiver-${{ github.ref_name }}-${{ matrix.suffix }}.zip ${{ matrix.dist_path }}
+      - if: "(matrix.os == 'windows-latest' || matrix.os == 'windows-11-arm') && github.ref_type == 'tag'"
+        name: 'Zip files'
+        run: |
+          Remove-Item -Force _out -ErrorAction Continue
+          New-Item -ItemType Directory -Name _out
+          Compress-Archive -Path ${{ matrix.dist_path }} -DestinationPath _out/instagram-archiver-${{ github.ref_name }}-${{ matrix.suffix }}.zip
+        shell: pwsh
       - if: github.ref_type == 'tag'
         name: Upload package
         uses: softprops/action-gh-release@v2
