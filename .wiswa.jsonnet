@@ -4,7 +4,7 @@ local utils = import 'utils.libjsonnet';
   description: 'Save Instagram content you have access to.',
   keywords: ['command line', 'instagram'],
   project_name: 'instagram-archiver',
-  version: '0.3.2',
+  version: '0.3.3',
   want_main: true,
   security_policy_supported_versions: { '0.3.x': ':white_check_mark:' },
   supported_python_versions: ['3.%d' % i for i in std.range(12, 13)],
