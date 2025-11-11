@@ -1,4 +1,5 @@
 """Utility functions."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -10,14 +11,20 @@ import click
 if TYPE_CHECKING:
     from .typing import Edge
 
-__all__ = ('JSONFormattedString', 'UnknownMimetypeError', 'get_extension', 'json_dumps_formatted',
-           'write_if_new')
+__all__ = (
+    'JSONFormattedString',
+    'UnknownMimetypeError',
+    'get_extension',
+    'json_dumps_formatted',
+    'write_if_new',
+)
 
 T = TypeVar('T')
 
 
 class JSONFormattedString:
     """Contains a formatted version of the JSON str and the original value."""
+
     def __init__(self, formatted: str, original: Any) -> None:
         self.formatted = formatted
         """Formatted JSON string."""
@@ -73,14 +80,15 @@ if TYPE_CHECKING:
     class InstagramClientInterface(Protocol):
         should_save_comments: bool
 
-        def save_comments(self, edge: Edge) -> None:
-            ...
+        def save_comments(self, edge: Edge) -> None: ...
+
 else:
     InstagramClientInterface = object
 
 
 class SaveCommentsCheckDisabledMixin(InstagramClientInterface):
     """Mixin to control saving comments."""
+
     @override
     def save_comments(self, edge: Edge) -> None:
         if not self.should_save_comments:

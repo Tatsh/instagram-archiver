@@ -2,7 +2,7 @@ authors:
   - family-names: 'Udvare'
     given-names: 'Andrew'
 cff-version: '1.2.0'
-date-released: '2025-09-22'
+date-released: '2025-11-11'
 message: 'If you use this software, please cite it as below.'
 title: 'instagram-archiver'
 version: '0.3.2'

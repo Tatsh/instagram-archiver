@@ -1,4 +1,5 @@
 """Instagram client."""
+
 from __future__ import annotations
 
 from contextlib import chdir
@@ -37,15 +38,18 @@ def _clean_url(url: str) -> str:
 
 class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
     """The scraper."""
-    def __init__(self,
-                 username: str,
-                 *,
-                 log_file: str | Path | None = None,
-                 output_dir: str | Path | None = None,
-                 disable_log: bool = False,
-                 browser: BrowserName = 'chrome',
-                 browser_profile: str = 'Default',
-                 comments: bool = False) -> None:
+
+    def __init__(
+        self,
+        username: str,
+        *,
+        log_file: str | Path | None = None,
+        output_dir: str | Path | None = None,
+        disable_log: bool = False,
+        browser: BrowserName = 'chrome',
+        browser_profile: str = 'Default',
+        comments: bool = False,
+    ) -> None:
         """
         Initialise ``ProfileScraper``.
 
@@ -98,12 +102,13 @@ class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
             return False
         self._cursor.execute('SELECT COUNT(url) FROM log WHERE url = ?', (_clean_url(url),))
         count: int
-        count, = self._cursor.fetchone()
+        (count,) = self._cursor.fetchone()
         return count == 1
 
     @override
-    def __exit__(self, _: type[BaseException] | None, __: BaseException | None,
-                 ___: TracebackType | None) -> None:
+    def __exit__(
+        self, _: type[BaseException] | None, __: BaseException | None, ___: TracebackType | None
+    ) -> None:
         """Clean up."""
         self._cursor.close()
         self._connection.close()
@@ -113,9 +118,11 @@ class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
         with chdir(self._output_dir):
             self.get_text(f'https://www.instagram.com/{self._username}/')
             self.add_csrf_token_header()
-            r = self.get_json('https://i.instagram.com/api/v1/users/web_profile_info/',
-                              params={'username': self._username},
-                              cast_to=WebProfileInfo)
+            r = self.get_json(
+                'https://i.instagram.com/api/v1/users/web_profile_info/',
+                params={'username': self._username},
+                cast_to=WebProfileInfo,
+            )
             if 'data' in r:
                 with Path('web_profile_info.json').open('w', encoding='utf-8') as f:
                     json.dump(r, f, indent=2, sort_keys=True)
@@ -123,19 +130,24 @@ class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
                 if not self.is_saved(user_info['profile_pic_url_hd']):
                     with Path('profile_pic.jpg').open('wb') as f:
                         f.writelines(
-                            self.session.get(user_info['profile_pic_url_hd'],
-                                             stream=True).iter_content(chunk_size=512))
+                            self.session.get(
+                                user_info['profile_pic_url_hd'], stream=True
+                            ).iter_content(chunk_size=512)
+                        )
                     self.save_to_log(user_info['profile_pic_url_hd'])
                 try:
                     for item in self.highlights_tray(user_info['id'])['tray']:
-                        self.add_video_url('https://www.instagram.com/stories/highlights/'
-                                           f'{item["id"].split(":")[-1]}/')
+                        self.add_video_url(
+                            'https://www.instagram.com/stories/highlights/'
+                            f'{item["id"].split(":")[-1]}/'
+                        )
                 except HTTPError:
                     log.exception('Failed to get highlights data.')
                 self.save_edges(user_info['edge_owner_to_timeline_media']['edges'])
             else:
                 log.warning(
-                    'Failed to get user info. Profile information and image will not be saved.')
+                    'Failed to get user info. Profile information and image will not be saved.'
+                )
             d = self.graphql_query(
                 {
                     'data': {
@@ -143,13 +155,14 @@ class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
                         'include_reel_media_seen_timestamp': True,
                         'include_relationship_info': True,
                         'latest_besties_reel_media': True,
-                        'latest_reel_media': True
+                        'latest_reel_media': True,
                     },
                     'username': self._username,
                     '__relay_internal__pv__PolarisIsLoggedInrelayprovider': True,
                     '__relay_internal__pv__PolarisShareSheetV3relayprovider': True,
                 },
-                cast_to=XDTAPIV1FeedUserTimelineGraphQLConnectionContainer)
+                cast_to=XDTAPIV1FeedUserTimelineGraphQLConnectionContainer,
+            )
             if not d:
                 log.error('First GraphQL query failed.')
             else:
@@ -173,13 +186,16 @@ class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
                             '__relay_internal__pv__PolarisIsLoggedInrelayprovider': True,
                             '__relay_internal__pv__PolarisShareSheetV3relayprovider': True,
                         },
-                        cast_to=XDTAPIV1FeedUserTimelineGraphQLConnectionContainer)
+                        cast_to=XDTAPIV1FeedUserTimelineGraphQLConnectionContainer,
+                    )
                     if not d:
                         break
                     page_info = d['xdt_api__v1__feed__user_timeline_graphql_connection'][
-                        'page_info']
+                        'page_info'
+                    ]
                     self.save_edges(
-                        d['xdt_api__v1__feed__user_timeline_graphql_connection']['edges'])
+                        d['xdt_api__v1__feed__user_timeline_graphql_connection']['edges']
+                    )
             if self.video_urls:
                 with get_configured_yt_dlp() as ydl:
                     while self.video_urls and (url := self.video_urls.pop()):

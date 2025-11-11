@@ -1,4 +1,5 @@
 """Typing helpers."""
+
 # ruff: noqa: D101
 from __future__ import annotations
 
@@ -7,10 +8,23 @@ from typing import TYPE_CHECKING, Literal, NotRequired, TypedDict
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-__all__ = ('BrowserName', 'CarouselMedia', 'Comments', 'Edge', 'HasID', 'HighlightsTray',
-           'MediaInfo', 'MediaInfoItem', 'MediaInfoItemImageVersions2Candidate', 'UserInfo',
-           'WebProfileInfo', 'WebProfileInfoData', 'XDTAPIV1FeedUserTimelineGraphQLConnection',
-           'XDTAPIV1FeedUserTimelineGraphQLConnectionContainer', 'XDTMediaDict')
+__all__ = (
+    'BrowserName',
+    'CarouselMedia',
+    'Comments',
+    'Edge',
+    'HasID',
+    'HighlightsTray',
+    'MediaInfo',
+    'MediaInfoItem',
+    'MediaInfoItemImageVersions2Candidate',
+    'UserInfo',
+    'WebProfileInfo',
+    'WebProfileInfoData',
+    'XDTAPIV1FeedUserTimelineGraphQLConnection',
+    'XDTAPIV1FeedUserTimelineGraphQLConnectionContainer',
+    'XDTMediaDict',
+)
 
 
 class MediaInfoItemVideoVersion(TypedDict):
@@ -53,6 +67,7 @@ class EdgeOwnerToTimelineMedia(TypedDict):
 
 class UserInfo(TypedDict):
     """User information."""
+
     edge_owner_to_timeline_media: EdgeOwnerToTimelineMedia
     """Timeline media edge."""
     id: str
@@ -75,12 +90,14 @@ class CarouselMedia(TypedDict):
 
 class HasID(TypedDict):
     """Dictionary with an ``id`` field."""
+
     id: str
     """Identifier."""
 
 
 class MediaInfoItem(TypedDict):
     """Media information item."""
+
     carousel_media: NotRequired[Sequence[CarouselMedia] | None]
     """Carousel media items."""
     image_versions2: MediaInfoItemImageVersions2
@@ -101,6 +118,7 @@ class MediaInfoItem(TypedDict):
 
 class Comments(TypedDict):
     """Comments container."""
+
     can_view_more_preview_comments: bool
     """Whether more preview comments can be viewed."""
     comments: Sequence[HasID]
@@ -111,6 +129,7 @@ class Comments(TypedDict):
 
 class MediaInfo(TypedDict):
     """Media information."""
+
     items: Sequence[MediaInfoItem]
     """List of media items."""
 
@@ -139,6 +158,7 @@ class XDTMediaDict(TypedDict):
 
 class Edge(TypedDict):
     """Edge of a graph."""
+
     node: XDTMediaDict
     """Node at this edge."""
 
@@ -152,6 +172,7 @@ class XDTAPIV1FeedUserTimelineGraphQLConnection(TypedDict):
 
 class XDTAPIV1FeedUserTimelineGraphQLConnectionContainer(TypedDict):
     """Container for :py:class:`XDTAPIV1FeedUserTimelineGraphQLConnection`."""
+
     xdt_api__v1__feed__user_timeline_graphql_connection: XDTAPIV1FeedUserTimelineGraphQLConnection
     """User timeline data."""
 
@@ -163,10 +184,12 @@ class WebProfileInfoData(TypedDict):
 
 class WebProfileInfo(TypedDict):
     """Profile information container."""
+
     data: NotRequired[WebProfileInfoData]
     """Profile data."""
 
 
-BrowserName = Literal['brave', 'chrome', 'chromium', 'edge', 'firefox', 'opera', 'safari',
-                      'vivaldi']
+BrowserName = Literal[
+    'brave', 'chrome', 'chromium', 'edge', 'firefox', 'opera', 'safari', 'vivaldi'
+]
 """Possible browser choices to get cookies from."""

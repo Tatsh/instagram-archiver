@@ -33,12 +33,14 @@ def test_main_debug_flag(runner: CliRunner, mocker: MockerFixture) -> None:
     result = runner.invoke(main, ['--debug', 'testuser'])
     assert result.exit_code == 0
     mock_setup_logging.assert_called_once_with(debug=True, loggers=mocker.ANY)
-    mock_client.assert_called_once_with(browser='chrome',
-                                        browser_profile='Default',
-                                        comments=False,
-                                        disable_log=False,
-                                        output_dir=Path('testuser'),
-                                        username='testuser')
+    mock_client.assert_called_once_with(
+        browser='chrome',
+        browser_profile='Default',
+        comments=False,
+        disable_log=False,
+        output_dir=Path('testuser'),
+        username='testuser',
+    )
     mock_client.return_value.__enter__.assert_called_once()
     mock_client.return_value.__exit__.assert_called_once()
 
@@ -52,12 +54,14 @@ def test_main_unexpected_redirect(runner: CliRunner, mocker: MockerFixture) -> N
     assert result.exit_code == 1
     assert 'Unexpected redirect. Assuming request limit has been reached.' in result.output
     mock_setup_logging.assert_called_once_with(debug=False, loggers=mocker.ANY)
-    mock_client.assert_called_once_with(browser='chrome',
-                                        browser_profile='Default',
-                                        comments=False,
-                                        disable_log=False,
-                                        output_dir=Path('testuser'),
-                                        username='testuser')
+    mock_client.assert_called_once_with(
+        browser='chrome',
+        browser_profile='Default',
+        comments=False,
+        disable_log=False,
+        output_dir=Path('testuser'),
+        username='testuser',
+    )
 
 
 def test_main_exception(runner: CliRunner, mocker: MockerFixture) -> None:
@@ -67,12 +71,14 @@ def test_main_exception(runner: CliRunner, mocker: MockerFixture) -> None:
     result = runner.invoke(main, ['testuser'])
     assert result.exit_code == 1
     assert 'Run with --debug for more information.' in result.output
-    mock_client.assert_called_once_with(browser='chrome',
-                                        browser_profile='Default',
-                                        comments=False,
-                                        disable_log=False,
-                                        output_dir=Path('testuser'),
-                                        username='testuser')
+    mock_client.assert_called_once_with(
+        browser='chrome',
+        browser_profile='Default',
+        comments=False,
+        disable_log=False,
+        output_dir=Path('testuser'),
+        username='testuser',
+    )
 
 
 def test_main_exception_debug(runner: CliRunner, mocker: MockerFixture) -> None:

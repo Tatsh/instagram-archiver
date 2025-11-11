@@ -1,10 +1,13 @@
 """Constants."""
+
 from __future__ import annotations
 
 __all__ = ('API_HEADERS', 'BROWSER_CHOICES', 'PAGE_FETCH_HEADERS', 'SHARED_HEADERS', 'USER_AGENT')
 
-USER_AGENT = ('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
-              'Chrome/137.0.0.0 Safari/537.36')
+USER_AGENT = (
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
+    'Chrome/137.0.0.0 Safari/537.36'
+)
 """
 User agent.
 
@@ -36,7 +39,7 @@ Headers to use for API requests.
 """
 PAGE_FETCH_HEADERS = {
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,'
-              'image/apng,*/*;q=0.8',
+    'image/apng,*/*;q=0.8',
     'dpr': '1.5',
     'sec-fetch-mode': 'navigate',  # Definitely required.
     'viewport-width': '3840',

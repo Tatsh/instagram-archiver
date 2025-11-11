@@ -1,4 +1,5 @@
 """Generic client."""
+
 from __future__ import annotations
 
 from http import HTTPStatus
@@ -46,6 +47,7 @@ class UnexpectedRedirect(RuntimeError):
 
 class InstagramClient:
     """Generic client for Instagram."""
+
     def __init__(self, browser: BrowserName = 'chrome', browser_profile: str = 'Default') -> None:
         """
         Initialise the client.
@@ -58,11 +60,13 @@ class InstagramClient:
         browser_profile : str
             The browser profile to use.
         """
-        self.session = setup_session(browser,
-                                     browser_profile,
-                                     SHARED_HEADERS,
-                                     domains={'instagram.com'},
-                                     status_forcelist=(413, 429, 500, 502, 503, 504))
+        self.session = setup_session(
+            browser,
+            browser_profile,
+            SHARED_HEADERS,
+            domains={'instagram.com'},
+            status_forcelist=(413, 429, 500, 502, 503, 504),
+        )
         self.failed_urls: set[str] = set()
         """Set of failed URLs."""
         self.video_urls: list[str] = []
@@ -88,20 +92,21 @@ class InstagramClient:
         self.session.headers.update({'x-csrftoken': token})
 
     def graphql_query(
-            self,
-            variables: Mapping[str, Any],
-            *,
-            cast_to: type[T],  # noqa: ARG002
-            doc_id: str = '9806959572732215') -> T | None:
+        self,
+        variables: Mapping[str, Any],
+        *,
+        cast_to: type[T],  # noqa: ARG002
+        doc_id: str = '9806959572732215',
+    ) -> T | None:
         """Make a GraphQL query."""
-        with self.session.post('https://www.instagram.com/graphql/query',
-                               headers={
-                                   'content-type': 'application/x-www-form-urlencoded',
-                               } | API_HEADERS,
-                               data={
-                                   'doc_id': doc_id,
-                                   'variables': json.dumps(variables, separators=(',', ':'))
-                               }) as r:
+        with self.session.post(
+            'https://www.instagram.com/graphql/query',
+            headers={
+                'content-type': 'application/x-www-form-urlencoded',
+            }
+            | API_HEADERS,
+            data={'doc_id': doc_id, 'variables': json.dumps(variables, separators=(',', ':'))},
+        ) as r:
             if r.status_code != HTTPStatus.OK:
                 return None
             data = r.json()
@@ -126,14 +131,16 @@ class InstagramClient:
         """Get the highlights tray data for a user."""
         return self.get_json(
             f'https://i.instagram.com/api/v1/highlights/{user_id}/highlights_tray/',
-            cast_to=HighlightsTray)
+            cast_to=HighlightsTray,
+        )
 
     def __enter__(self) -> Self:  # pragma: no cover
         """Recommended way to initialise the client."""
         return self
 
-    def __exit__(self, _: type[BaseException] | None, __: BaseException | None,
-                 ___: TracebackType | None) -> None:
+    def __exit__(
+        self, _: type[BaseException] | None, __: BaseException | None, ___: TracebackType | None
+    ) -> None:
         """Clean up."""
 
     def is_saved(self, url: str) -> bool:  # pragma: no cover  # noqa: ARG002, PLR6301
@@ -145,6 +152,7 @@ class InstagramClient:
 
     def save_image_versions2(self, sub_item: CarouselMedia | MediaInfoItem, timestamp: int) -> None:
         """Save images in the image_versions2 dictionary."""
+
         def key(x: MediaInfoItemImageVersions2Candidate) -> int:
             return x['width'] * x['height']
 
@@ -164,33 +172,34 @@ class InstagramClient:
 
     def save_comments(self, edge: Edge) -> None:
         """Save comments for an edge node."""
-        comment_url = ('https://www.instagram.com/api/v1/media/'
-                       f'{edge["node"]["id"]}/comments/')
+        comment_url = f'https://www.instagram.com/api/v1/media/{edge["node"]["id"]}/comments/'
         shared_params = {'can_support_threading': 'true'}
         try:
-            comment_data = self.get_json(comment_url,
-                                         params={
-                                             **shared_params, 'permalink_enabled': 'false'
-                                         },
-                                         cast_to=Comments)
+            comment_data = self.get_json(
+                comment_url,
+                params={**shared_params, 'permalink_enabled': 'false'},
+                cast_to=Comments,
+            )
         except HTTPError:
             log.exception('Failed to get comments.')
             return
         top_comment_data: Any = comment_data
         while comment_data['can_view_more_preview_comments'] and comment_data['next_min_id']:
             try:
-                comment_data = self.get_json(comment_url,
-                                             params={
-                                                 **shared_params,
-                                                 'min_id':
-                                                     comment_data['next_min_id'],
-                                             },
-                                             cast_to=Comments)
+                comment_data = self.get_json(
+                    comment_url,
+                    params={
+                        **shared_params,
+                        'min_id': comment_data['next_min_id'],
+                    },
+                    cast_to=Comments,
+                )
             except HTTPError:
                 log.exception('Failed to get comments.')
                 break
-            top_comment_data['comments'] = (list(top_comment_data['comments']) +
-                                            list(comment_data['comments']))
+            top_comment_data['comments'] = list(top_comment_data['comments']) + list(
+                comment_data['comments']
+            )
         comments_json = f'{edge["node"]["id"]}-comments.json'
         with Path(comments_json).open('w+', encoding='utf-8') as f:
             json.dump(top_comment_data, f, sort_keys=True, indent=2)
@@ -229,7 +238,7 @@ class InstagramClient:
         self.save_to_log(media_info_url)
         for item in media_info['items']:
             timestamp = item['taken_at']
-            if (carousel_media := item.get('carousel_media')):
+            if carousel_media := item.get('carousel_media'):
                 for sub_item in carousel_media:
                     self.save_image_versions2(sub_item, timestamp)
             elif 'image_versions2' in item:
@@ -262,16 +271,19 @@ class InstagramClient:
             else:
                 log.warning(  # type: ignore[unreachable]
                     'Unknown type: `%s`. Item %s will not be processed.',
-                    edge['node']['__typename'], edge['node']['id'])
+                    edge['node']['__typename'],
+                    edge['node']['id'],
+                )
                 shortcode = edge['node']['code']
                 self.failed_urls.add(f'https://www.instagram.com/p/{shortcode}/')
 
     def get_json(
-            self,
-            url: str,
-            *,
-            cast_to: type[T],  # noqa: ARG002
-            params: Mapping[str, str] | None = None) -> T:
+        self,
+        url: str,
+        *,
+        cast_to: type[T],  # noqa: ARG002
+        params: Mapping[str, str] | None = None,
+    ) -> T:
         """Get JSON data from a URL."""
         with self.session.get(url, params=params, headers=API_HEADERS) as r:
             r.raise_for_status()
