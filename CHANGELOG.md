@@ -9,13 +9,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-[0.3.2]
+## [0.3.3] - 2025-11-10
+
+Release for testing the publishing process.
+
+### Changed
+
+- Increased upper bound of Python version requirement.
+
+## [0.3.2]
 
 ### Fixed
 
 - Handle when profile data lacks a `data` key. In this case, processing is likely to fail entirely.
 
-[0.3.1]
+## [0.3.1]
 
 ### Changed
 
@@ -36,7 +44,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Save saved posts (and unsave them too).
 
-[unreleased]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.2...HEAD
+[unreleased]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.3...HEAD
+[0.3.3]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Tatsh/instagram-archiver/compare/v0.2.1...v0.3.0
