@@ -50,12 +50,12 @@ version_provider = "pep621"
 
 [tool.coverage.report]
 exclude_also = ["if TYPE_CHECKING:"]
-omit = ["__main__.py", "conftest.py", "tests.py", "tests/test_*.py"]
+omit = ["__main__.py", "conftest.py", "tests.py", "tests/*/test_*.py", "tests/test_*.py"]
 show_missing = true
 
 [tool.coverage.run]
 branch = true
-omit = ["__main__.py", "conftest.py", "tests.py", "tests/test_*.py"]
+omit = ["__main__.py", "conftest.py", "tests.py", "tests/*/test_*.py", "tests/test_*.py"]
 
 [tool.djlint]
 max_line_length = 100
@@ -82,8 +82,8 @@ warn_unreachable = true
 include = ["man", { format = "sdist", path = "tests" }]
 
 [tool.poetry.dependencies]
-bascom = "^0.0.4"
-click = "^8.3.0"
+bascom = "^0.1.0"
+click = "^8.3.1"
 python = ">=3.12,<4.0"
 requests = "^2.32.5"
 typing-extensions = "^4.15.0"
@@ -93,11 +93,11 @@ yt-dlp-utils = "^0.0.6"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-commitizen = "^4.10.0"
+commitizen = "^4.10.1"
 cz-path = "^0.0.4"
 djlint = "^1.36.4"
-mypy = "^1.18.2"
-ruff = "^0.14.4"
+mypy = "^1.19.0"
+ruff = "^0.14.9"
 types-requests = "^2.32.4.20250913"
 
 [tool.poetry.group.docs]
@@ -108,11 +108,10 @@ autodoc-pydantic = "^2.2.0"
 doc8 = "^2.0.0"
 docutils = "<0.22"
 esbonio = "^1.0.0"
-numpydoc = "^1.9.0"
-restructuredtext-lint = "^1.4.0"
-sphinx-click = "^6.1.0"
+numpydoc = "^1.10.0"
+restructuredtext-lint = "^2.0.2"
+sphinx-click = "^6.2.0"
 sphinx-datatables = "^0.3.1"
-sphinx-hoverxref = "^1.4.2"
 sphinx-immaterial = "^0.13.8"
 tomlkit = "^0.13.3"
 
@@ -122,7 +121,7 @@ version = "^0.13.0"
 
 [[tool.poetry.group.docs.dependencies.sphinx]]
 python = ">=3.11"
-version = "^8.2.3"
+version = "<9.0.0"
 
 [[tool.poetry.group.docs.dependencies.sphinx]]
 python = "<3.11"
@@ -133,7 +132,7 @@ optional = true
 
 [tool.poetry.group.tests.dependencies]
 mock = "^5.2.0"
-pytest = "^9.0.0"
+pytest = "^9.0.2"
 pytest-cov = "^7.0.0"
 pytest-mock = "^3.15.1"
 
@@ -155,7 +154,6 @@ reportImplicitOverride = "warning"
 reportImportCycles = "error"
 reportMissingModuleSource = "error"
 reportPropertyTypeMismatch = "error"
-reportShadowedImports = "error"
 reportUnnecessaryTypeIgnoreComment = "none"
 typeCheckingMode = "off"
 useLibraryCodeForTypes = false

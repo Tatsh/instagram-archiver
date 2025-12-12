@@ -15,6 +15,7 @@ colorlog
 commitizen
 conftest
 coveragerc
+coverallsapp
 dataclasses
 datatable
 datatables
@@ -43,6 +44,7 @@ jsonschema
 khtml
 launchable
 lextudio
+libera
 libjsonnet
 linters
 modindex
@@ -52,6 +54,7 @@ norecursedirs
 numpy
 numpydoc
 onefile
+pavelzw
 pipx
 prodvers
 pycache

@@ -24,7 +24,6 @@ copyright = str(datetime.now(UTC).year)  # noqa: A001
 project = name
 release = f'v{version}'
 extensions = [
-    'hoverxref.extension',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
