@@ -9,6 +9,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.3.4] - 2025-12-11
+
+### Added
+
+- Attestation.
+
 ## [0.3.3] - 2025-11-10
 
 Release for testing the publishing process.
@@ -44,7 +50,8 @@ Release for testing the publishing process.
 
 - Save saved posts (and unsave them too).
 
-[unreleased]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.3...HEAD
+[unreleased]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.4...HEAD
+[0.3.4]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.0...v0.3.1
