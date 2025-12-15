@@ -95,7 +95,7 @@ jobs:
               "./${file}" --help
           done
       - name: 'Upload Artifacts'
-        uses: 'actions/upload-artifact@v5'
+        uses: 'actions/upload-artifact@v6'
         with:
           if-no-files-found: error
           name: instagram-archiver-binaries-${{ matrix.suffix }}
