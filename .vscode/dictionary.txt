@@ -32,7 +32,6 @@ forcelist
 foxundermoon
 genindex
 globaltoc
-hoverxref
 htmlcov
 inrelayprovider
 intersphinx
@@ -47,6 +46,7 @@ lextudio
 libera
 libjsonnet
 linters
+manylinux
 modindex
 mypy
 namedtuples
