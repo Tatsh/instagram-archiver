@@ -32,7 +32,6 @@ forcelist
 foxundermoon
 genindex
 globaltoc
-hoverxref
 htmlcov
 inrelayprovider
 intersphinx
