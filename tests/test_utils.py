@@ -67,8 +67,14 @@ def test_get_extension_png(mocker: MockerFixture) -> None:
     assert result == 'png'
 
 
+def test_get_extension_webp(mocker: MockerFixture) -> None:
+    mimetype = 'image/webp'
+    result = get_extension(mimetype)
+    assert result == 'webp'
+
+
 def test_get_extension_unknown_mimetype(mocker: MockerFixture) -> None:
-    mimetype = 'application/pdf'
+    mimetype = 'application/fffffffffffffffffffffffffffffffff'
     with pytest.raises(UnknownMimetypeError) as exc_info:
         get_extension(mimetype)
     assert str(exc_info.value) == mimetype

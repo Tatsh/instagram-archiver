@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeVar, override
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar, override
 import json
+import mimetypes
 
 import click
 
@@ -59,20 +60,23 @@ class UnknownMimetypeError(Exception):
     """Raised when an unknown mimetype is encountered in :py:func:`~get_extension`."""
 
 
-def get_extension(mimetype: str) -> Literal['png', 'jpg']:
+def get_extension(mimetype: str) -> str:
     """
-    Get the appropriate three-letter extension for a mimetype.
+    Get the appropriate extension for a mimetype.
+
+    Parameters
+    ----------
+    mimetype : str
+        Mimetype to be converted.
 
     Raises
     ------
     UnknownMimetypeError
         If the mimetype is not recognised.
     """
-    if mimetype == 'image/jpeg':
-        return 'jpg'
-    if mimetype == 'image/png':
-        return 'png'
-    raise UnknownMimetypeError(mimetype)
+    if not (extension := mimetypes.guess_extension(mimetype, strict=False)):
+        raise UnknownMimetypeError(mimetype)
+    return extension[1:]
 
 
 if TYPE_CHECKING:
