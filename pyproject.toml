@@ -93,12 +93,12 @@ yt-dlp-utils = "^0.0.6"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-commitizen = "^4.11.0"
+commitizen = "^4.12.1"
 cz-path = "^0.0.4"
 djlint = "^1.36.4"
 mypy = "^1.19.1"
-ruff = "^0.14.10"
-types-requests = "^2.32.4.20250913"
+ruff = "^0.14.14"
+types-requests = "^2.32.4.20260107"
 
 [tool.poetry.group.docs]
 optional = true
@@ -113,7 +113,7 @@ restructuredtext-lint = "^2.0.2"
 sphinx-click = "^6.2.0"
 sphinx-datatables = "^0.5.0"
 sphinx-immaterial = "^0.13.8"
-tomlkit = "^0.13.3"
+tomlkit = "^0.14.0"
 
 [tool.poetry.group.docs.dependencies.enum-tools]
 extras = ["sphinx"]

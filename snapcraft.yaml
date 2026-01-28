@@ -1,0 +1,24 @@
+apps:
+  instagram-archiver:
+    command: 'bin/instagram-archiver'
+    plugs:
+      - 'home'
+      - 'network'
+      - 'network-bind'
+base: 'core24'
+confinement: 'strict'
+description: 'Save Instagram content you have access to.'
+grade: 'stable'
+name: 'instagram-archiver'
+parts:
+  instagram-archiver:
+    plugin: 'poetry'
+    source: '.'
+    stage-packages: []
+platforms:
+  amd64:
+    build-on: 'amd64'
+  arm64:
+    build-on: 'arm64'
+summary: 'Save Instagram content you have access to.'
+version: '0.3.4'

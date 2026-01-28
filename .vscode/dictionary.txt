@@ -10,7 +10,6 @@ bascom
 besties
 bsky
 charliermarsh
-codeowners
 colorlog
 commitizen
 conftest
@@ -31,6 +30,7 @@ fontawesome
 forcelist
 foxundermoon
 genindex
+getline
 globaltoc
 htmlcov
 inrelayprovider
@@ -72,6 +72,8 @@ rstcheck
 schemafile
 sdist
 shellformat
+snapcore
+snapcraft
 softprops
 sphinxcontrib
 tatsh
