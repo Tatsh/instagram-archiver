@@ -10,7 +10,6 @@ bascom
 besties
 bsky
 charliermarsh
-codeowners
 colorlog
 commitizen
 conftest
