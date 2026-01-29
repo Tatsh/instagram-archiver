@@ -47,6 +47,7 @@ libera
 libjsonnet
 linters
 manylinux
+mimetypes
 modindex
 mypy
 namedtuples
