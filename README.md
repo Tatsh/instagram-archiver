@@ -4,7 +4,7 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/instagram-archiver)](https://pypi.org/project/instagram-archiver/)
 [![GitHub tag (with filter)](https://img.shields.io/github/v/tag/Tatsh/instagram-archiver)](https://github.com/Tatsh/instagram-archiver/tags)
 [![License](https://img.shields.io/github/license/Tatsh/instagram-archiver)](https://github.com/Tatsh/instagram-archiver/blob/master/LICENSE.txt)
-[![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/instagram-archiver/v0.3.4/master)](https://github.com/Tatsh/instagram-archiver/compare/v0.3.4...master)
+[![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/instagram-archiver/v0.3.5/master)](https://github.com/Tatsh/instagram-archiver/compare/v0.3.5...master)
 [![CodeQL](https://github.com/Tatsh/instagram-archiver/actions/workflows/codeql.yml/badge.svg)](https://github.com/Tatsh/instagram-archiver/actions/workflows/codeql.yml)
 [![QA](https://github.com/Tatsh/instagram-archiver/actions/workflows/qa.yml/badge.svg)](https://github.com/Tatsh/instagram-archiver/actions/workflows/qa.yml)
 [![Tests](https://github.com/Tatsh/instagram-archiver/actions/workflows/tests.yml/badge.svg)](https://github.com/Tatsh/instagram-archiver/actions/workflows/tests.yml)

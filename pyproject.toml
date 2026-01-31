@@ -17,7 +17,7 @@ keywords = ["command line", "instagram"]
 license = "MIT"
 name = "instagram-archiver"
 readme = "README.md"
-version = "0.3.4"
+version = "0.3.5"
 
 [[project.authors]]
 email = "audvare@gmail.com"
