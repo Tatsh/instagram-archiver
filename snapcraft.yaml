@@ -21,4 +21,4 @@ platforms:
   arm64:
     build-on: 'arm64'
 summary: 'Save Instagram content you have access to.'
-version: '0.3.4'
+version: '0.3.5'

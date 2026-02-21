@@ -87,17 +87,17 @@ click = "^8.3.1"
 python = ">=3.12,<4.0"
 requests = "^2.32.5"
 typing-extensions = "^4.15.0"
-yt-dlp-utils = "^0.0.6"
+yt-dlp-utils = "^0.0.7"
 
 [tool.poetry.group.dev]
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-commitizen = "^4.12.1"
+commitizen = "^4.13.8"
 cz-path = "^0.0.4"
 djlint = "^1.36.4"
 mypy = "^1.19.1"
-ruff = "^0.14.14"
+ruff = "^0.15.2"
 types-requests = "^2.32.4.20260107"
 
 [tool.poetry.group.docs]
@@ -107,12 +107,12 @@ optional = true
 autodoc-pydantic = "^2.2.0"
 doc8 = "^2.0.0"
 docutils = "<0.22"
-esbonio = "^1.0.0"
+esbonio = "^1.1.0"
 numpydoc = "^1.10.0"
 restructuredtext-lint = "^2.0.2"
 sphinx-click = "^6.2.0"
-sphinx-datatables = "^0.5.0"
-sphinx-immaterial = "^0.13.8"
+sphinx-datatables = "^1.0.0"
+sphinx-immaterial = "^0.13.9"
 tomlkit = "^0.14.0"
 
 [tool.poetry.group.docs.dependencies.enum-tools]
