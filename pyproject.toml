@@ -87,7 +87,7 @@ click = "^8.3.1"
 python = ">=3.12,<4.0"
 requests = "^2.32.5"
 typing-extensions = "^4.15.0"
-yt-dlp-utils = "^0.0.7"
+yt-dlp-utils = "^0.0.8"
 
 [tool.poetry.group.dev]
 optional = true
@@ -146,6 +146,7 @@ include = "instagram_archiver"
 [tool.pyright]
 deprecateTypingAliases = true
 enableExperimentalFeatures = true
+exclude = ["**/.*", "**/__pycache__", "**/node_modules"]
 include = ["./instagram_archiver", "./tests"]
 pythonPlatform = "Linux"
 pythonVersion = "3.12"
