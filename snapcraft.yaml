@@ -7,12 +7,19 @@ apps:
       - 'network-bind'
 base: 'core24'
 confinement: 'strict'
+contact: 'https://github.com/Tatsh/instagram-archiver/issues'
 description: 'Save Instagram content you have access to.'
+donation: 'https://buymeacoffee.com/Tatsh'
 grade: 'stable'
+issues: 'https://github.com/Tatsh/instagram-archiver/issues'
+license: 'MIT'
 name: 'instagram-archiver'
 parts:
   instagram-archiver:
-    plugin: 'poetry'
+    build-packages: []
+    plugin: 'python'
+    python-packages:
+      - '.'
     source: '.'
     stage-packages: []
 platforms:
@@ -20,5 +27,8 @@ platforms:
     build-on: 'amd64'
   arm64:
     build-on: 'arm64'
+source-code: 'https://github.com/Tatsh/instagram-archiver'
 summary: 'Save Instagram content you have access to.'
+title: 'instagram-archiver'
 version: '0.3.5'
+website: 'https://tatsh.github.io/instagram-archiver/'

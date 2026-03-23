@@ -7,7 +7,7 @@ local utils = import 'utils.libjsonnet';
   version: '0.3.5',
   want_main: true,
   security_policy_supported_versions: { '0.3.x': ':white_check_mark:' },
-  supported_python_versions: ['3.%d' % i for i in std.range(12, 13)],
+  supported_python_versions: ['3.%d' % i for i in std.range(12, 14)],
   copilot: {
     intro: 'Instagram Archiver is a command line tool to save Instagram content you have access to.',
   },
