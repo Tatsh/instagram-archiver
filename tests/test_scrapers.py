@@ -14,7 +14,8 @@ def test_profile_scraper_no_log(mocker: MockerFixture, mock_setup_session: None)
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mocker.patch('instagram_archiver.profile_scraper.Path')
     scraper_with_no_logging: Any = ProfileScraper('test_user', disable_log=True)
-    scraper_with_no_logging._cursor.execute.assert_not_called()  # noqa: SLF001
+    ex = scraper_with_no_logging._cursor.execute  # noqa: SLF001
+    ex.assert_not_called()  # ty: ignore[unresolved-attribute]
 
 
 def test_profile_scraper_with_empty_log(mocker: MockerFixture, mock_setup_session: None) -> None:
@@ -23,7 +24,7 @@ def test_profile_scraper_with_empty_log(mocker: MockerFixture, mock_setup_sessio
     mock_path.return_value.exists.return_value = True
     mock_path.return_value.stat.return_value.st_size = 0
     scraper: Any = ProfileScraper('test_user')
-    scraper._cursor.execute.assert_called_once()  # noqa: SLF001
+    scraper._cursor.execute.assert_called_once()  # noqa: SLF001  # ty: ignore[unresolved-attribute]
 
 
 def test_profile_scraper_with_no_log(mocker: MockerFixture, mock_setup_session: None) -> None:
@@ -31,7 +32,7 @@ def test_profile_scraper_with_no_log(mocker: MockerFixture, mock_setup_session: 
     mock_path = mocker.patch('instagram_archiver.profile_scraper.Path')
     mock_path.return_value.exists.return_value = False
     scraper: Any = ProfileScraper('test_user')
-    scraper._cursor.execute.assert_called_once()  # noqa: SLF001
+    scraper._cursor.execute.assert_called_once()  # noqa: SLF001  # ty: ignore[unresolved-attribute]
 
 
 def test_profile_scraper_with_log_existing(mocker: MockerFixture, mock_setup_session: None) -> None:
@@ -40,11 +41,12 @@ def test_profile_scraper_with_log_existing(mocker: MockerFixture, mock_setup_ses
     mock_path.return_value.exists.return_value = True
     mock_path.return_value.stat.return_value.st_size = 1
     scraper: Any = ProfileScraper('test_user')
-    scraper._cursor.execute.assert_not_called()  # noqa: SLF001
+    scraper._cursor.execute.assert_not_called()  # noqa: SLF001  # ty: ignore[unresolved-attribute]
 
 
 def test_save_comments_does_nothing_when_disabled(
-    mocker: MockerFixture, mock_setup_session: None
+    mocker: MockerFixture,
+    mock_setup_session: None,
 ) -> None:
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mock_path = mocker.patch('instagram_archiver.profile_scraper.Path')
@@ -54,8 +56,7 @@ def test_save_comments_does_nothing_when_disabled(
     mock_connection.cursor.return_value = mock_cursor
     mocker.patch('instagram_archiver.profile_scraper.sqlite3.connect', return_value=mock_connection)
     mock_save_comments = mocker.patch(
-        'instagram_archiver.profile_scraper.InstagramClient.save_comments'
-    )
+        'instagram_archiver.profile_scraper.InstagramClient.save_comments')
 
     scraper = ProfileScraper('test_user')
     scraper.save_comments({
@@ -63,10 +64,13 @@ def test_save_comments_does_nothing_when_disabled(
             '__typename': 'XDTMediaDict',
             'code': '12345',
             'id': '12345',
-            'owner': {'id': '67890', 'username': 'username'},
+            'owner': {
+                'id': '67890',
+                'username': 'username'
+            },
             'pk': '92834',
             'video_dash_manifest': None,
-        }
+        },
     })
     mock_save_comments.assert_not_called()
 
@@ -80,8 +84,7 @@ def test_save_comments(mocker: MockerFixture, mock_setup_session: None) -> None:
     mock_connection.cursor.return_value = mock_cursor
     mocker.patch('instagram_archiver.profile_scraper.sqlite3.connect', return_value=mock_connection)
     mock_save_comments = mocker.patch(
-        'instagram_archiver.profile_scraper.InstagramClient.save_comments'
-    )
+        'instagram_archiver.profile_scraper.InstagramClient.save_comments')
 
     scraper = ProfileScraper('test_user', comments=True)
     scraper.save_comments({
@@ -89,10 +92,13 @@ def test_save_comments(mocker: MockerFixture, mock_setup_session: None) -> None:
             '__typename': 'XDTMediaDict',
             'code': '12345',
             'id': '12345',
-            'owner': {'id': '67890', 'username': 'username'},
+            'owner': {
+                'id': '67890',
+                'username': 'username'
+            },
             'pk': '1111',
             'video_dash_manifest': None,
-        }
+        },
     })
     mock_save_comments.assert_called_once()
 
@@ -173,11 +179,13 @@ def test_process(mocker: MockerFixture, mock_setup_session: None) -> None:
         return_value={
             'data': {
                 'user': {
-                    'edge_owner_to_timeline_media': {'edges': []},
+                    'edge_owner_to_timeline_media': {
+                        'edges': []
+                    },
                     'id': '12345',
                     'profile_pic_url_hd': 'https://test_url',
-                }
-            }
+                },
+            },
         },
     )
     mocker.patch('instagram_archiver.profile_scraper.ProfileScraper.get_text')
@@ -221,8 +229,7 @@ def test_process_data_not_in_profile_info(mocker: MockerFixture, mock_setup_sess
     scraper.process()
     mock_log_error.assert_called_once_with('First GraphQL query failed.')
     mock_log_warning.assert_called_once_with(
-        'Failed to get user info. Profile information and image will not be saved.'
-    )
+        'Failed to get user info. Profile information and image will not be saved.')
 
 
 def test_process_already_saved_profile_pic(mocker: MockerFixture, mock_setup_session: None) -> None:
@@ -234,11 +241,13 @@ def test_process_already_saved_profile_pic(mocker: MockerFixture, mock_setup_ses
         return_value={
             'data': {
                 'user': {
-                    'edge_owner_to_timeline_media': {'edges': []},
+                    'edge_owner_to_timeline_media': {
+                        'edges': []
+                    },
                     'id': '12345',
                     'profile_pic_url_hd': 'https://test_url',
-                }
-            }
+                },
+            },
         },
     )
     mocker.patch('instagram_archiver.profile_scraper.ProfileScraper.get_text')
@@ -265,8 +274,7 @@ def test_process_already_saved_profile_pic(mocker: MockerFixture, mock_setup_ses
 def test_process_highlights(mocker: MockerFixture, mock_setup_session: None) -> None:
     mock_log_error = mocker.patch('instagram_archiver.profile_scraper.log.error')
     mock_add_video_url = mocker.patch(
-        'instagram_archiver.profile_scraper.ProfileScraper.add_video_url'
-    )
+        'instagram_archiver.profile_scraper.ProfileScraper.add_video_url')
     mocker.patch('instagram_archiver.profile_scraper.sqlite3')
     mocker.patch('instagram_archiver.profile_scraper.chdir')
     mocker.patch(
@@ -274,20 +282,23 @@ def test_process_highlights(mocker: MockerFixture, mock_setup_session: None) -> 
         return_value={
             'data': {
                 'user': {
-                    'edge_owner_to_timeline_media': {'edges': []},
+                    'edge_owner_to_timeline_media': {
+                        'edges': []
+                    },
                     'id': '12345',
                     'profile_pic_url_hd': 'https://test_url',
-                }
-            }
+                },
+            },
         },
     )
-    mock_yt_dlp = mocker.patch(
-        'instagram_archiver.profile_scraper.get_configured_yt_dlp'
-    ).return_value.__enter__.return_value
+    mock_yt_dlp = mocker.patch('instagram_archiver.profile_scraper.get_configured_yt_dlp',
+                               ).return_value.__enter__.return_value
     mocker.patch('instagram_archiver.profile_scraper.ProfileScraper.get_text')
     mocker.patch(
         'instagram_archiver.profile_scraper.ProfileScraper.highlights_tray',
-        return_value={'tray': [{'id': 'f:12345'}]},
+        return_value={'tray': [{
+            'id': 'f:12345'
+        }]},
     )
     mock_path = mocker.patch('instagram_archiver.profile_scraper.Path')
     mock_path.return_value.exists.return_value = True
@@ -302,11 +313,9 @@ def test_process_highlights(mocker: MockerFixture, mock_setup_session: None) -> 
     scraper.process()
     mock_log_error.assert_called_once_with('First GraphQL query failed.')
     mock_add_video_url.assert_called_once_with(
-        'https://www.instagram.com/stories/highlights/12345/'
-    )
+        'https://www.instagram.com/stories/highlights/12345/')
     mock_yt_dlp.extract_info.assert_called_once_with(
-        'https://www.instagram.com/stories/highlights/12345/'
-    )
+        'https://www.instagram.com/stories/highlights/12345/')
 
 
 def test_process_highlights_error(mocker: MockerFixture, mock_setup_session: None) -> None:
@@ -318,17 +327,20 @@ def test_process_highlights_error(mocker: MockerFixture, mock_setup_session: Non
         return_value={
             'data': {
                 'user': {
-                    'edge_owner_to_timeline_media': {'edges': []},
+                    'edge_owner_to_timeline_media': {
+                        'edges': []
+                    },
                     'id': '12345',
                     'profile_pic_url_hd': 'https://test_url',
-                }
-            }
+                },
+            },
         },
     )
     mocker.patch('instagram_archiver.profile_scraper.get_configured_yt_dlp')
     mocker.patch('instagram_archiver.profile_scraper.ProfileScraper.get_text')
     mocker.patch(
-        'instagram_archiver.profile_scraper.ProfileScraper.highlights_tray', side_effect=HTTPError
+        'instagram_archiver.profile_scraper.ProfileScraper.highlights_tray',
+        side_effect=HTTPError,
     )
     mock_path = mocker.patch('instagram_archiver.profile_scraper.Path')
     mock_path.return_value.exists.return_value = True
@@ -353,11 +365,13 @@ def test_process_edges(mocker: MockerFixture, mock_setup_session: None) -> None:
         return_value={
             'data': {
                 'user': {
-                    'edge_owner_to_timeline_media': {'edges': []},
+                    'edge_owner_to_timeline_media': {
+                        'edges': []
+                    },
                     'id': '12345',
                     'profile_pic_url_hd': 'https://test_url',
-                }
-            }
+                },
+            },
         },
     )
     mocker.patch('instagram_archiver.profile_scraper.ProfileScraper.get_text')
@@ -382,9 +396,12 @@ def test_process_edges(mocker: MockerFixture, mock_setup_session: None) -> None:
             {
                 'xdt_api__v1__feed__user_timeline_graphql_connection': {
                     'edges': [],
-                    'page_info': {'has_next_page': False, 'end_cursor': None},
-                }
-            }
+                    'page_info': {
+                        'has_next_page': False,
+                        'end_cursor': None
+                    },
+                },
+            },
         ],
     )
     scraper.process()
@@ -401,11 +418,13 @@ def test_process_edges_and_pagination(mocker: MockerFixture, mock_setup_session:
         return_value={
             'data': {
                 'user': {
-                    'edge_owner_to_timeline_media': {'edges': []},
+                    'edge_owner_to_timeline_media': {
+                        'edges': []
+                    },
                     'id': '12345',
                     'profile_pic_url_hd': 'https://test_url',
-                }
-            }
+                },
+            },
         },
     )
     mocker.patch('instagram_archiver.profile_scraper.ProfileScraper.get_text')
@@ -430,14 +449,20 @@ def test_process_edges_and_pagination(mocker: MockerFixture, mock_setup_session:
             {
                 'xdt_api__v1__feed__user_timeline_graphql_connection': {
                     'edges': [],
-                    'page_info': {'has_next_page': True, 'end_cursor': None},
-                }
+                    'page_info': {
+                        'has_next_page': True,
+                        'end_cursor': None
+                    },
+                },
             },
             {
                 'xdt_api__v1__feed__user_timeline_graphql_connection': {
                     'edges': [],
-                    'page_info': {'has_next_page': True, 'end_cursor': None},
-                }
+                    'page_info': {
+                        'has_next_page': True,
+                        'end_cursor': None
+                    },
+                },
             },
             {},
         ],
@@ -456,22 +481,29 @@ def test_process_video_urls(mocker: MockerFixture, mock_setup_session: None) -> 
         return_value={
             'data': {
                 'user': {
-                    'edge_owner_to_timeline_media': {'edges': []},
+                    'edge_owner_to_timeline_media': {
+                        'edges': []
+                    },
                     'id': '12345',
                     'profile_pic_url_hd': 'https://test_url',
-                }
-            }
+                },
+            },
         },
     )
     mocker.patch('instagram_archiver.profile_scraper.ProfileScraper.get_text')
     mocker.patch(
         'instagram_archiver.profile_scraper.ProfileScraper.highlights_tray',
-        return_value={'tray': [{'id': 'f:12345'}, {'id': 'f:67890'}, {'id': 'f:54321'}]},
+        return_value={'tray': [{
+            'id': 'f:12345'
+        }, {
+            'id': 'f:67890'
+        }, {
+            'id': 'f:54321'
+        }]},
     )
     mock_path = mocker.patch('instagram_archiver.profile_scraper.Path')
-    mock_yt_dlp = mocker.patch(
-        'instagram_archiver.profile_scraper.get_configured_yt_dlp'
-    ).return_value.__enter__.return_value
+    mock_yt_dlp = mocker.patch('instagram_archiver.profile_scraper.get_configured_yt_dlp',
+                               ).return_value.__enter__.return_value
     mock_yt_dlp.extract_info.side_effect = [True, False, True]
     mock_path.return_value.exists.return_value = True
     scraper = ProfileScraper('test_user')
@@ -496,17 +528,18 @@ def test_process_saved_with_unsaving(mocker: MockerFixture, mock_setup_session: 
         scraper,
         'get_json',
         return_value={
-            'items': [
-                {
-                    'media': {
-                        'id': '12345',
-                        'code': '12345',
-                        'owner': {'id': '67890', 'username': 'username'},
-                        'pk': 'pk',
-                        'video_dash_manifest': None,
-                    }
-                }
-            ]
+            'items': [{
+                'media': {
+                    'id': '12345',
+                    'code': '12345',
+                    'owner': {
+                        'id': '67890',
+                        'username': 'username'
+                    },
+                    'pk': 'pk',
+                    'video_dash_manifest': None,
+                },
+            }],
         },
     )
     mock_save_edges = mocker.patch.object(scraper, 'save_edges')
@@ -517,11 +550,14 @@ def test_process_saved_with_unsaving(mocker: MockerFixture, mock_setup_session: 
                 '__typename': 'XDTMediaDict',
                 'id': '12345',
                 'code': '12345',
-                'owner': {'id': '67890', 'username': 'username'},
+                'owner': {
+                    'id': '67890',
+                    'username': 'username'
+                },
                 'pk': 'pk',
                 'video_dash_manifest': None,
-            }
-        }
+            },
+        },
     ]
 
 
@@ -535,17 +571,18 @@ def test_process_saved(mocker: MockerFixture, mock_setup_session: None) -> None:
         scraper,
         'get_json',
         return_value={
-            'items': [
-                {
-                    'media': {
-                        'id': '12345',
-                        'code': '12345',
-                        'owner': {'id': '67890', 'username': 'username'},
-                        'pk': 'pk',
-                        'video_dash_manifest': None,
-                    }
-                }
-            ],
+            'items': [{
+                'media': {
+                    'id': '12345',
+                    'code': '12345',
+                    'owner': {
+                        'id': '67890',
+                        'username': 'username'
+                    },
+                    'pk': 'pk',
+                    'video_dash_manifest': None,
+                },
+            }],
             'more_available': True,
         },
     )
@@ -558,11 +595,14 @@ def test_process_saved(mocker: MockerFixture, mock_setup_session: None) -> None:
                 '__typename': 'XDTMediaDict',
                 'id': '12345',
                 'code': '12345',
-                'owner': {'id': '67890', 'username': 'username'},
+                'owner': {
+                    'id': '67890',
+                    'username': 'username'
+                },
                 'pk': 'pk',
                 'video_dash_manifest': None,
-            }
-        }
+            },
+        },
     ]
     mock_unsave.assert_not_called()
     mock_log_warning.assert_called_once_with('Unhandled pagination.')

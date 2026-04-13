@@ -56,20 +56,21 @@ def main(
 ) -> None:
     """Archive a profile's posts."""  # noqa: DOC501
     setup_logging(
-        debug=debug, loggers={'instagram_archiver': {'handlers': ('console',), 'propagate': False}}
+        debug=debug,
+        loggers={'instagram_archiver': {
+            'handlers': ('console',),
+            'propagate': False
+        }},
     )
     try:
         with ProfileScraper(
-            browser=browser,
-            browser_profile=profile,
-            comments=include_comments,
-            disable_log=no_log,
-            output_dir=(
-                Path(output_dir % {'username': username})
-                if '%(username)s' in output_dir
-                else Path(output_dir)
-            ),
-            username=username,
+                browser=browser,
+                browser_profile=profile,
+                comments=include_comments,
+                disable_log=no_log,
+                output_dir=(Path(output_dir % {'username': username})
+                            if '%(username)s' in output_dir else Path(output_dir)),
+                username=username,
         ) as client:
             client.process()
     except UnexpectedRedirect as e:
@@ -117,7 +118,11 @@ def save_saved_main(
 ) -> None:
     """Archive your saved posts."""  # noqa: DOC501
     setup_logging(
-        debug=debug, loggers={'instagram_archiver': {'handlers': ('console',), 'propagate': False}}
+        debug=debug,
+        loggers={'instagram_archiver': {
+            'handlers': ('console',),
+            'propagate': False
+        }},
     )
     try:
         SavedScraper(browser, profile, output_dir, comments=include_comments).process(unsave=unsave)

@@ -2,19 +2,19 @@
 
 from __future__ import annotations
 
-from contextlib import chdir
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 import logging
 
 from .client import InstagramClient
+from .compat import chdir
 from .constants import API_HEADERS, PAGE_FETCH_HEADERS
 from .utils import SaveCommentsCheckDisabledMixin
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from .typing import BrowserName
+    from .typing import BrowserName, Edge
 
 __all__ = ('SavedScraper',)
 log = logging.getLogger(__name__)
@@ -22,7 +22,6 @@ log = logging.getLogger(__name__)
 
 class SavedScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
     """Scrape saved posts."""
-
     def __init__(
         self,
         browser: BrowserName = 'chrome',
@@ -55,7 +54,8 @@ class SavedScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
         for item in items:
             log.info('Unsaving %s.', item)
             self.session.post(
-                f'https://www.instagram.com/web/save/{item}/unsave/', headers=API_HEADERS
+                f'https://www.instagram.com/web/save/{item}/unsave/',
+                headers=API_HEADERS,
             )
 
     def process(self, *, unsave: bool = False) -> None:
@@ -64,21 +64,23 @@ class SavedScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
             self.add_csrf_token_header()
             self.session.get('https://www.instagram.com/', headers=PAGE_FETCH_HEADERS)
             feed = self.get_json(
-                'https://www.instagram.com/api/v1/feed/saved/posts/', cast_to=dict[str, Any]
+                'https://www.instagram.com/api/v1/feed/saved/posts/',
+                cast_to=dict[str, Any],
             )
             self.save_edges(
-                {
-                    'node': {
-                        '__typename': 'XDTMediaDict',
-                        'id': item['media']['id'],
-                        'code': item['media']['code'],
-                        'owner': item['media']['owner'],
-                        'pk': item['media']['pk'],
-                        'video_dash_manifest': item['media'].get('video_dash_manifest'),
-                    }
-                }
-                for item in feed['items']
-            )
+                cast(
+                    'Iterable[Edge]',
+                    ({
+                        'node': {
+                            '__typename': 'XDTMediaDict',
+                            'id': item['media']['id'],
+                            'code': item['media']['code'],
+                            'owner': item['media']['owner'],
+                            'pk': item['media']['pk'],
+                            'video_dash_manifest': item['media'].get('video_dash_manifest'),
+                        },
+                    } for item in feed['items']),
+                ))
             if unsave:
                 self.unsave(item['media']['code'] for item in feed['items'])
             if feed.get('more_available'):

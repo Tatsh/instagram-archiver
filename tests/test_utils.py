@@ -20,7 +20,8 @@ def test_json_dumps_formatted(mocker: MockerFixture) -> None:
     obj = {'key': 'value'}
     formatted_json = json.dumps(obj, sort_keys=True, indent=2)
     mock_json_dumps = mocker.patch(
-        'instagram_archiver.utils.json.dumps', return_value=formatted_json
+        'instagram_archiver.utils.json.dumps',
+        return_value=formatted_json,
     )
     result = json_dumps_formatted(obj)
     assert isinstance(result, JSONFormattedString)

@@ -3,7 +3,9 @@
 # ruff: noqa: D101
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, NotRequired, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
+
+from typing_extensions import NotRequired
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -190,6 +192,13 @@ class WebProfileInfo(TypedDict):
 
 
 BrowserName = Literal[
-    'brave', 'chrome', 'chromium', 'edge', 'firefox', 'opera', 'safari', 'vivaldi'
+    'brave',
+    'chrome',
+    'chromium',
+    'edge',
+    'firefox',
+    'opera',
+    'safari',
+    'vivaldi',
 ]
 """Possible browser choices to get cookies from."""

@@ -5,11 +5,12 @@ from __future__ import annotations
 from http import HTTPStatus
 from os import utime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Self, TypeVar, cast
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 import json
 import logging
 
 from requests import HTTPError
+from typing_extensions import Self
 from yt_dlp_utils import setup_session
 import requests
 
@@ -47,7 +48,6 @@ class UnexpectedRedirect(RuntimeError):
 
 class InstagramClient:
     """Generic client for Instagram."""
-
     def __init__(self, browser: BrowserName = 'chrome', browser_profile: str = 'Default') -> None:
         """
         Initialise the client.
@@ -98,19 +98,40 @@ class InstagramClient:
         cast_to: type[T],  # noqa: ARG002
         doc_id: str = '9806959572732215',
     ) -> T | None:
-        """Make a GraphQL query."""
+        """
+        Make a GraphQL query.
+
+        Parameters
+        ----------
+        variables : Mapping[str, Any]
+            Variables passed to the query.
+        cast_to : type[T]
+            Expected type of the ``data`` field in a successful response.
+        doc_id : str
+            GraphQL document identifier.
+
+        Returns
+        -------
+        T | None
+            The ``data`` payload, or ``None`` if the request failed or the response was invalid.
+        """
         with self.session.post(
-            'https://www.instagram.com/graphql/query',
-            headers={
-                'content-type': 'application/x-www-form-urlencoded',
-            }
-            | API_HEADERS,
-            data={'doc_id': doc_id, 'variables': json.dumps(variables, separators=(',', ':'))},
+                'https://www.instagram.com/graphql/query',
+                headers={
+                    'content-type': 'application/x-www-form-urlencoded',
+                    **API_HEADERS,
+                },
+                data={
+                    'doc_id': doc_id,
+                    'variables': json.dumps(variables, separators=(',', ':'))
+                },
         ) as r:
             if r.status_code != HTTPStatus.OK:
                 return None
             data = r.json()
-            assert isinstance(data, dict)
+            if not isinstance(data, dict):
+                log.error('GraphQL response was not a JSON object.')
+                return None
             if (status := data.get('status')) != 'ok':
                 log.error('GraphQL status not "ok": %s', status)
                 return None
@@ -122,29 +143,77 @@ class InstagramClient:
             return cast('T', data['data'])
 
     def get_text(self, url: str, *, params: Mapping[str, str] | None = None) -> str:
-        """Get text from a URL."""
+        """
+        Get text from a URL.
+
+        Parameters
+        ----------
+        url : str
+            URL to fetch.
+        params : Mapping[str, str] | None
+            Optional query string parameters.
+
+        Returns
+        -------
+        str
+            Response body as text.
+        """
         with self.session.get(url, params=params, headers=API_HEADERS) as r:
             r.raise_for_status()
             return r.text
 
     def highlights_tray(self, user_id: int | str) -> HighlightsTray:
-        """Get the highlights tray data for a user."""
+        """
+        Get the highlights tray data for a user.
+
+        Parameters
+        ----------
+        user_id : int | str
+            Instagram user identifier.
+
+        Returns
+        -------
+        HighlightsTray
+            Highlights tray payload from the API.
+        """
         return self.get_json(
             f'https://i.instagram.com/api/v1/highlights/{user_id}/highlights_tray/',
             cast_to=HighlightsTray,
         )
 
     def __enter__(self) -> Self:  # pragma: no cover
-        """Recommended way to initialise the client."""
+        """
+        Enter the context manager.
+
+        Returns
+        -------
+        Self
+            This client instance.
+        """
         return self
 
     def __exit__(
-        self, _: type[BaseException] | None, __: BaseException | None, ___: TracebackType | None
+        self,
+        _: type[BaseException] | None,
+        __: BaseException | None,
+        ___: TracebackType | None,
     ) -> None:
         """Clean up."""
 
     def is_saved(self, url: str) -> bool:  # pragma: no cover  # noqa: ARG002, PLR6301
-        """Check if a URL is already saved."""
+        """
+        Check if a URL is already saved.
+
+        Parameters
+        ----------
+        url : str
+            URL to check.
+
+        Returns
+        -------
+        bool
+            ``False`` in the base implementation.
+        """
         return False
 
     def save_to_log(self, url: str) -> None:
@@ -152,7 +221,6 @@ class InstagramClient:
 
     def save_image_versions2(self, sub_item: CarouselMedia | MediaInfoItem, timestamp: int) -> None:
         """Save images in the image_versions2 dictionary."""
-
         def key(x: MediaInfoItemImageVersions2Candidate) -> int:
             return x['width'] * x['height']
 
@@ -177,7 +245,9 @@ class InstagramClient:
         try:
             comment_data = self.get_json(
                 comment_url,
-                params={**shared_params, 'permalink_enabled': 'false'},
+                params={
+                    **shared_params, 'permalink_enabled': 'false'
+                },
                 cast_to=Comments,
             )
         except HTTPError:
@@ -198,8 +268,7 @@ class InstagramClient:
                 log.exception('Failed to get comments.')
                 break
             top_comment_data['comments'] = list(top_comment_data['comments']) + list(
-                comment_data['comments']
-            )
+                comment_data['comments'])
         comments_json = f'{edge["node"]["id"]}-comments.json'
         with Path(comments_json).open('w+', encoding='utf-8') as f:
             json.dump(top_comment_data, f, sort_keys=True, indent=2)
@@ -284,7 +353,23 @@ class InstagramClient:
         cast_to: type[T],  # noqa: ARG002
         params: Mapping[str, str] | None = None,
     ) -> T:
-        """Get JSON data from a URL."""
+        """
+        Get JSON data from a URL.
+
+        Parameters
+        ----------
+        url : str
+            URL to fetch.
+        cast_to : type[T]
+            Expected type of the decoded JSON body.
+        params : Mapping[str, str] | None
+            Optional query string parameters.
+
+        Returns
+        -------
+        T
+            Response body decoded from JSON.
+        """
         with self.session.get(url, params=params, headers=API_HEADERS) as r:
             r.raise_for_status()
             return cast('T', r.json())

@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Protocol, TypeVar, override
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar
 import json
 import mimetypes
 
+from typing_extensions import override
 import click
 
 if TYPE_CHECKING:
@@ -25,7 +26,6 @@ T = TypeVar('T')
 
 class JSONFormattedString:
     """Contains a formatted version of the JSON str and the original value."""
-
     def __init__(self, formatted: str, original: Any) -> None:
         self.formatted = formatted
         """Formatted JSON string."""
@@ -45,6 +45,11 @@ def json_dumps_formatted(obj: Any) -> JSONFormattedString:
     ----------
     obj : Any
         The object to be formatted.
+
+    Returns
+    -------
+    JSONFormattedString
+        Formatted JSON text together with the original value.
     """
     return JSONFormattedString(json.dumps(obj, sort_keys=True, indent=2), obj)
 
@@ -69,6 +74,11 @@ def get_extension(mimetype: str) -> str:
     mimetype : str
         Mimetype to be converted.
 
+    Returns
+    -------
+    str
+        File extension without the leading dot.
+
     Raises
     ------
     UnknownMimetypeError
@@ -84,7 +94,8 @@ if TYPE_CHECKING:
     class InstagramClientInterface(Protocol):
         should_save_comments: bool
 
-        def save_comments(self, edge: Edge) -> None: ...
+        def save_comments(self, edge: Edge) -> None:
+            ...
 
 else:
     InstagramClientInterface = object
@@ -92,7 +103,6 @@ else:
 
 class SaveCommentsCheckDisabledMixin(InstagramClientInterface):
     """Mixin to control saving comments."""
-
     @override
     def save_comments(self, edge: Edge) -> None:
         if not self.should_save_comments:
