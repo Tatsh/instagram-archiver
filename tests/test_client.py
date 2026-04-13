@@ -179,6 +179,18 @@ def test_graphql_query_http_error(client: MagicMock, mocker: MockerFixture) -> N
     assert result is None
 
 
+def test_graphql_query_json_not_object(client: MagicMock, mocker: MockerFixture) -> None:
+    mock_log_error = mocker.patch('instagram_archiver.client.log.error')
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = []
+    client.session.post.return_value.__enter__.return_value = mock_response
+
+    result = client.graphql_query({'key': 'value'}, cast_to=dict)
+    assert result is None
+    mock_log_error.assert_called_once_with('GraphQL response was not a JSON object.')
+
+
 def test_save_image_versions2_already_saved(client: MagicMock, mocker: MockerFixture) -> None:
     mock_is_saved = mocker.patch.object(client, 'is_saved', return_value=True)
     sub_item = {
