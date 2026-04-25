@@ -10,23 +10,10 @@ from typing_extensions import NotRequired
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-__all__ = (
-    'BrowserName',
-    'CarouselMedia',
-    'Comments',
-    'Edge',
-    'HasID',
-    'HighlightsTray',
-    'MediaInfo',
-    'MediaInfoItem',
-    'MediaInfoItemImageVersions2Candidate',
-    'UserInfo',
-    'WebProfileInfo',
-    'WebProfileInfoData',
-    'XDTAPIV1FeedUserTimelineGraphQLConnection',
-    'XDTAPIV1FeedUserTimelineGraphQLConnectionContainer',
-    'XDTMediaDict',
-)
+__all__ = ('BrowserName', 'CarouselMedia', 'Comments', 'Edge', 'HasID', 'HighlightsTray',
+           'MediaInfo', 'MediaInfoItem', 'MediaInfoItemImageVersions2Candidate', 'UserInfo',
+           'WebProfileInfo', 'WebProfileInfoData', 'XDTAPIV1FeedUserTimelineGraphQLConnection',
+           'XDTAPIV1FeedUserTimelineGraphQLConnectionContainer', 'XDTMediaDict')
 
 
 class MediaInfoItemVideoVersion(TypedDict):
@@ -191,14 +178,6 @@ class WebProfileInfo(TypedDict):
     """Profile data."""
 
 
-BrowserName = Literal[
-    'brave',
-    'chrome',
-    'chromium',
-    'edge',
-    'firefox',
-    'opera',
-    'safari',
-    'vivaldi',
-]
+BrowserName = Literal['brave', 'chrome', 'chromium', 'edge', 'firefox', 'opera', 'safari',
+                      'vivaldi']
 """Possible browser choices to get cookies from."""

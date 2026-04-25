@@ -17,7 +17,7 @@ SHARED_HEADERS = {
     'cache-control': 'no-cache',
     'dnt': '1',
     'pragma': 'no-cache',
-    'user-agent': USER_AGENT,
+    'user-agent': USER_AGENT
     # 'x-asbd-id': '359341',
     # 'x-ig-app-id': '936619743392459',
 }
@@ -26,10 +26,7 @@ Headers to use for requests.
 
 :meta hide-value:
 """
-API_HEADERS = {
-    'x-asbd-id': '359341',
-    'x-ig-app-id': '936619743392459',
-}
+API_HEADERS = {'x-asbd-id': '359341', 'x-ig-app-id': '936619743392459'}
 """
 Headers to use for API requests.
 
@@ -40,7 +37,7 @@ PAGE_FETCH_HEADERS = {
               'image/apng,*/*;q=0.8',
     'dpr': '1.5',
     'sec-fetch-mode': 'navigate',  # Definitely required.
-    'viewport-width': '3840',
+    'viewport-width': '3840'
 }
 """
 Headers to use for fetching HTML pages.

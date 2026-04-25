@@ -13,13 +13,8 @@ import click
 if TYPE_CHECKING:
     from .typing import Edge
 
-__all__ = (
-    'JSONFormattedString',
-    'UnknownMimetypeError',
-    'get_extension',
-    'json_dumps_formatted',
-    'write_if_new',
-)
+__all__ = ('JSONFormattedString', 'UnknownMimetypeError', 'get_extension', 'json_dumps_formatted',
+           'write_if_new')
 
 T = TypeVar('T')
 
