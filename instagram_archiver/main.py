@@ -10,6 +10,7 @@ import logging
 import signal
 import sys
 
+from archiver_stats import STATUS_REFRESH_HZ, StatusDisplay
 from bascom import setup_logging
 from yt_dlp_utils.aio import get_configured_yt_dlp
 import click
@@ -18,7 +19,6 @@ from .client import UnexpectedRedirect
 from .constants import BROWSER_CHOICES
 from .profile_scraper import ProfileScraper
 from .saved_scraper import SavedScraper
-from .status_display import STATUS_REFRESH_HZ, StatusDisplay
 from .typing import Stats, YTDLPState
 
 if TYPE_CHECKING:
