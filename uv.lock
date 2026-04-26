@@ -9,7 +9,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-04-19T04:07:10.668789926Z"
+exclude-newer = "2026-04-19T07:59:51.299159355Z"
 exclude-newer-span = "P1W"
 
 [[package]]
@@ -936,7 +936,7 @@ wheels = [
 
 [[package]]
 name = "instagram-archiver"
-version = "0.3.5"
+version = "0.4.0"
 source = { editable = "." }
 dependencies = [
     { name = "anyio" },

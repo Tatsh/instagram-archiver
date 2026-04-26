@@ -9,6 +9,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-04-25
+
 ### Removed
 
 - `instagram-save-saved` console script. Its functionality is now folded into `instagram-archiver`
@@ -113,7 +115,8 @@ Release for testing the publishing process.
 
 - Client logging improvements.
 
-[unreleased]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.5...HEAD
+[unreleased]: https://github.com/Tatsh/instagram-archiver/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.5...v0.4.0
 [0.3.5]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.2...v0.3.3

@@ -5,7 +5,7 @@ local utils = import 'utils.libjsonnet';
   description: 'Save Instagram content you have access to.',
   keywords: ['command line', 'instagram'],
   project_name: 'instagram-archiver',
-  version: '0.3.5',
+  version: '0.4.0',
   want_main: true,
   want_flatpak: true,
   publishing+: { flathub: 'sh.tat.instagram-archiver' },
