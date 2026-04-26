@@ -12,15 +12,13 @@ Commands
 
 .. code-block:: shell
 
-   instagram-archiver -o ~/instagram-backups username
+   instagram-archiver -o ~/instagram-backups/username username
+   instagram-archiver --saved -o ~/instagram-backups/saved
 
-The default output path is the username under the current working directory.
+In profile mode the default output path is the username under the current working directory; in
+``--saved`` mode it is the current working directory.
 
 Videos are saved using yt-dlp and its respective configuration.
-
-.. click:: instagram_archiver.main:save_saved_main
-   :prog: instagram-save-saved
-   :nested: full
 
 .. only:: html
 
@@ -33,6 +31,12 @@ Videos are saved using yt-dlp and its respective configuration.
       :members:
 
    .. automodule:: instagram_archiver.saved_scraper
+      :members:
+
+   .. automodule:: instagram_archiver.workers
+      :members:
+
+   .. automodule:: instagram_archiver.dedup
       :members:
 
    Constants
