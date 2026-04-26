@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, NoReturn
+from unittest.mock import AsyncMock
 import os
 
 from click.testing import CliRunner
@@ -29,6 +30,6 @@ def runner() -> CliRunner:
 
 
 @pytest.fixture
-def mock_setup_session(mocker: MockerFixture) -> None:
-    """Mock the setup_session function."""
-    mocker.patch('instagram_archiver.client.setup_session')
+def mock_setup_session(mocker: MockerFixture) -> AsyncMock:
+    """Mock the async :py:func:`yt_dlp_utils.aio.setup_session` import in client.py."""
+    return mocker.patch('instagram_archiver.client.setup_session', new_callable=AsyncMock)

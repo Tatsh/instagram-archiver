@@ -59,6 +59,9 @@ Options:
                                   Browser to read cookies from.
   -p, --profile TEXT              Browser profile.
   -d, --debug                     Enable debug output.
+  -q, --quiet                     Disable progress display updates.
+  -S, --sleep-time INTEGER        Number of seconds yt-dlp waits between
+                                  requests.
   --no-log                        Ignore log (re-fetch everything).
   -C, --include-comments          Also download all comments (extends download
                                   time significantly).
@@ -70,6 +73,17 @@ Typical use:
 ```shell
 instagram-archiver -o ~/instagram-backups/username username
 ```
+
+When neither `--debug` nor `--quiet` is passed, a Rich-based live progress
+display (provided by the `archiver-stats` library) is shown on stderr. Pass
+`--quiet` to disable it for non-interactive use, or `--debug` to see verbose
+log output instead.
+
+Downloads run concurrently using `niquests.AsyncSession` and
+producer/consumer queues: one worker for media posts, one for comments
+(when `-C` is passed), and one for yt-dlp video downloads. Each worker
+handles at most one in-flight HTTP request at a time, which keeps Instagram
+rate-limiting at bay while still overlapping image downloads with yt-dlp.
 
 ### `instagram-save-saved`
 
@@ -86,6 +100,9 @@ Options:
                                   Browser to read cookies from.
   -p, --profile TEXT              Browser profile.
   -d, --debug                     Enable debug output.
+  -q, --quiet                     Disable progress display updates.
+  -S, --sleep-time INTEGER        Number of seconds yt-dlp waits between
+                                  requests.
   -C, --include-comments          Also download all comments (extends download
                                   time significantly).
   -u, --unsave                    Unsave posts after successful archive.

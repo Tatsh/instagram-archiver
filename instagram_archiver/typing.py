@@ -3,17 +3,86 @@
 # ruff: noqa: D101
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict
+from collections.abc import Callable
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Literal, TypeAlias, TypedDict
 
+from archiver_stats import Category, Stats as _BaseStats, StatusLine
 from typing_extensions import NotRequired
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-__all__ = ('BrowserName', 'CarouselMedia', 'Comments', 'Edge', 'HasID', 'HighlightsTray',
-           'MediaInfo', 'MediaInfoItem', 'MediaInfoItemImageVersions2Candidate', 'UserInfo',
-           'WebProfileInfo', 'WebProfileInfoData', 'XDTAPIV1FeedUserTimelineGraphQLConnection',
-           'XDTAPIV1FeedUserTimelineGraphQLConnectionContainer', 'XDTMediaDict')
+__all__ = ('COMMENTS_PROCESSED', 'IMAGES_PROCESSED', 'POSTS_HANDLED', 'VIDEOS_PROCESSED',
+           'YT_DLP_STATUS', 'BrowserName', 'CarouselMedia', 'Comments', 'Edge', 'HasID',
+           'HighlightsTray', 'MediaInfo', 'MediaInfoItem', 'MediaInfoItemImageVersions2Candidate',
+           'OnMessage', 'Stats', 'UserInfo', 'WebProfileInfo', 'WebProfileInfoData',
+           'XDTAPIV1FeedUserTimelineGraphQLConnection',
+           'XDTAPIV1FeedUserTimelineGraphQLConnectionContainer', 'XDTMediaDict', 'YTDLPState')
+
+OnMessage: TypeAlias = Callable[[str], None]
+"""Callback used to report human-readable progress updates."""
+
+COMMENTS_PROCESSED = 'comments_processed'
+"""Counter key for posts whose comments have been saved successfully.
+
+:meta hide-value:
+"""
+IMAGES_PROCESSED = 'images_processed'
+"""Counter key for image posts that have been saved successfully.
+
+:meta hide-value:
+"""
+POSTS_HANDLED = 'posts_handled'
+"""Counter key for posts routed by the producer.
+
+:meta hide-value:
+"""
+VIDEOS_PROCESSED = 'videos_processed'
+"""Counter key for video URLs handed to yt-dlp successfully.
+
+:meta hide-value:
+"""
+YT_DLP_STATUS = 'yt_dlp_status'
+"""Status-line key for the current yt-dlp URL.
+
+:meta hide-value:
+"""
+
+
+class Stats(_BaseStats):
+    """Live pipeline statistics shown in the progress spinner."""
+    def __init__(self) -> None:
+        super().__init__((Category(
+            POSTS_HANDLED, 'Total posts fetched:'), Category(
+                IMAGES_PROCESSED, 'Image posts:'), Category(VIDEOS_PROCESSED, 'Videos handled:'),
+                          Category(COMMENTS_PROCESSED, 'Comment threads:')),
+                         status_lines=(StatusLine(YT_DLP_STATUS, 'yt-dlp processing:',
+                                                  POSTS_HANDLED),))
+
+
+@dataclass
+class YTDLPState:
+    """Mutable yt-dlp progress state shared between the producer and the yt-dlp worker."""
+
+    current_index: int = 0
+    """1-based index of the URL currently being processed."""
+    current_url: str | None = None
+    """URL yt-dlp is currently downloading, or ``None`` when idle."""
+    total_urls: int = 0
+    """Running total of URLs enqueued for the yt-dlp worker."""
+    def render(self) -> str | None:
+        """
+        Build the :py:data:`YT_DLP_STATUS` value from the current state.
+
+        Returns
+        -------
+        str | None
+            Rendered status string, or ``None`` when no URL is active.
+        """
+        if self.current_url is None or self.total_urls == 0:
+            return None
+        return f'{self.current_url} ({self.current_index}/{self.total_urls})'
 
 
 class MediaInfoItemVideoVersion(TypedDict):

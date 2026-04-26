@@ -9,6 +9,28 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Rich-based live progress display (via the `archiver-stats` library) shown on stderr by default.
+  Use `--quiet` to suppress it for non-interactive runs, or `--debug` to fall back to verbose logs.
+- `--quiet` / `-q` flag on both `instagram-archiver` and `instagram-save-saved`.
+- `--sleep-time` / `-S` flag (forwarded to yt-dlp) on both commands.
+- Parallel downloads. Internally the scrapers now act as producers feeding a media worker, a
+  comments worker (active only with `-C`), and a yt-dlp worker. Each worker performs at most one
+  in-flight HTTP request, so concurrency is bounded but image, comment, and video work can overlap.
+
+### Changed
+
+- The whole HTTP layer is now asynchronous. The `requests` runtime dependency was replaced with
+  `niquests` (`niquests.AsyncSession`); `yt-dlp-utils` is now consumed via its `[asyncio]` extra
+  and `yt_dlp_utils.aio.AsyncYoutubeDL`.
+- `InstagramClient`, `ProfileScraper`, and `SavedScraper` are now async context managers
+  (`async with`). Their HTTP helpers and `process(...)` are coroutines.
+- `setup_logging` now manages `niquests`, `urllib3`, `urllib3.util.retry`, and `yt_dlp_utils`
+  loggers in addition to the package logger.
+- yt-dlp output is silenced (`quiet`, `noprogress`, `no_warnings`) when the live display is
+  active, so its `[download]` lines no longer interleave with the Rich panel.
+
 ## [0.3.5] - 2026-01-31
 
 ### Changed

@@ -1,5 +1,6 @@
 anchore
 Ångström
+anyio
 apng
 appdir
 appimage
@@ -17,6 +18,7 @@ colorlog
 commitizen
 conftest
 cooldown
+coro
 coveragerc
 coverallsapp
 ctypes
@@ -68,7 +70,9 @@ monkeypatch
 myproject
 mypy
 namedtuples
+niquests
 norecursedirs
+noprogress
 notarytool
 npmjs
 numpy
@@ -76,6 +80,7 @@ onefile
 oneline
 pathlib
 pavelzw
+pcode
 pipx
 plistlib
 prodvers
@@ -124,9 +129,11 @@ vers
 virtualenv
 wiswa
 wiswa's
+writeplus
 xcrun
 xdtapiv
 xdtmediadict
 yapf
 yapfignore
 yarnrc
+ytdlp

@@ -6,13 +6,18 @@ import json
 from instagram_archiver.utils import (
     JSONFormattedString,
     UnknownMimetypeError,
+    dump_json,
     get_extension,
     json_dumps_formatted,
+    write_bytes,
+    write_failed_urls,
     write_if_new,
 )
 import pytest
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pytest_mock import MockerFixture
 
 
@@ -54,25 +59,46 @@ def test_write_if_new_file_exists(mocker: MockerFixture) -> None:
     mock_open_file.assert_not_called()
 
 
-def test_get_extension_jpeg(mocker: MockerFixture) -> None:
-    mimetype = 'image/jpeg'
-    result = get_extension(mimetype)
-    assert result == 'jpg'
+def test_write_bytes(tmp_path: Path) -> None:
+    target = tmp_path / 'binary.bin'
+    write_bytes(target, b'\x00\x01\x02')
+    assert target.read_bytes() == b'\x00\x01\x02'
 
 
-def test_get_extension_png(mocker: MockerFixture) -> None:
-    mimetype = 'image/png'
-    result = get_extension(mimetype)
-    assert result == 'png'
+def test_dump_json(tmp_path: Path) -> None:
+    target = tmp_path / 'out.json'
+    dump_json(target, {'b': 2, 'a': 1})
+    parsed = json.loads(target.read_text(encoding='utf-8'))
+    assert parsed == {'a': 1, 'b': 2}
 
 
-def test_get_extension_webp(mocker: MockerFixture) -> None:
-    mimetype = 'image/webp'
-    result = get_extension(mimetype)
-    assert result == 'webp'
+def test_dump_json_writeplus(tmp_path: Path) -> None:
+    target = tmp_path / 'out.json'
+    dump_json(target, {'a': 1}, mode='w+')
+    parsed = json.loads(target.read_text(encoding='utf-8'))
+    assert parsed == {'a': 1}
 
 
-def test_get_extension_unknown_mimetype(mocker: MockerFixture) -> None:
+def test_write_failed_urls(tmp_path: Path) -> None:
+    target = tmp_path / 'failed.txt'
+    write_failed_urls(target, ['https://a/', 'https://b/'])
+    lines = target.read_text(encoding='utf-8').splitlines()
+    assert lines == ['https://a/', 'https://b/']
+
+
+def test_get_extension_jpeg() -> None:
+    assert get_extension('image/jpeg') == 'jpg'
+
+
+def test_get_extension_png() -> None:
+    assert get_extension('image/png') == 'png'
+
+
+def test_get_extension_webp() -> None:
+    assert get_extension('image/webp') == 'webp'
+
+
+def test_get_extension_unknown_mimetype() -> None:
     mimetype = 'application/fffffffffffffffffffffffffffffffff'
     with pytest.raises(UnknownMimetypeError) as exc_info:
         get_extension(mimetype)

@@ -10,6 +10,14 @@ local utils = import 'utils.libjsonnet';
   want_flatpak: true,
   publishing+: { flathub: 'sh.tat.instagram-archiver' },
   security_policy_supported_versions: { '0.3.x': ':white_check_mark:' },
+  docs_conf+: {
+    config+: {
+      intersphinx_mapping+: {
+        'archiver-stats': ['https://archiver-stats.readthedocs.io/en/latest/', null],
+        rich: ['https://rich.readthedocs.io/en/stable/', null],
+      },
+    },
+  },
   pyproject+: {
     project+: {
       scripts: {
@@ -20,17 +28,49 @@ local utils = import 'utils.libjsonnet';
     tool+: {
       poetry+: {
         dependencies+: {
-          requests: utils.latestPypiPackageVersionCaret('requests'),
-          'yt-dlp-utils': utils.latestPypiPackageVersionCaret('yt-dlp-utils'),
+          anyio: utils.latestPypiPackageVersionCaret('anyio'),
+          'archiver-stats': utils.latestPypiPackageVersionCaret('archiver-stats'),
+          niquests: utils.latestPypiPackageVersionCaret('niquests'),
+          rich: utils.latestPypiPackageVersionCaret('rich'),
+          'yt-dlp-utils': {
+            extras: ['asyncio'],
+            version: utils.latestPypiPackageVersionCaret('yt-dlp-utils'),
+          },
         },
         group+: {
-          dev+: {
+          tests+: {
             dependencies+: {
-              'types-requests': utils.latestPypiPackageVersionCaret('types-requests'),
+              'pytest-asyncio': utils.latestPypiPackageVersionCaret('pytest-asyncio'),
             },
           },
         },
       },
+      pytest+: {
+        ini_options+: {
+          asyncio_default_fixture_loop_scope: 'function',
+          asyncio_mode: 'auto',
+        },
+      },
+      uv+: {
+        'exclude-newer-package'+: {
+          'archiver-stats': false,
+          'yt-dlp-utils': false,
+        },
+      },
+    },
+  },
+  tests_pyproject+: {
+    tool+: {
+      ruff+: {
+        lint+: {
+          'extend-ignore'+: ['RUF029'],
+        },
+      },
+    },
+  },
+  readthedocs+: {
+    sphinx+: {
+      fail_on_warning: false,
     },
   },
 }

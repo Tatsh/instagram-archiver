@@ -11,10 +11,12 @@ from typing_extensions import override
 import click
 
 if TYPE_CHECKING:
+    from collections.abc import Awaitable, Iterable
+
     from .typing import Edge
 
-__all__ = ('JSONFormattedString', 'UnknownMimetypeError', 'get_extension', 'json_dumps_formatted',
-           'write_if_new')
+__all__ = ('JSONFormattedString', 'UnknownMimetypeError', 'dump_json', 'get_extension',
+           'json_dumps_formatted', 'write_bytes', 'write_failed_urls', 'write_if_new')
 
 T = TypeVar('T')
 
@@ -56,6 +58,52 @@ def write_if_new(target: Path | str, content: str | bytes, mode: str = 'w') -> N
             f.write(content)
 
 
+def write_bytes(target: Path | str, content: bytes) -> None:
+    """
+    Write bytes to a file.
+
+    Parameters
+    ----------
+    target : Path | str
+        File path to write to.
+    content : bytes
+        Bytes to write.
+    """
+    Path(target).write_bytes(content)
+
+
+def dump_json(target: Path | str, obj: Any, *, mode: str = 'w') -> None:
+    """
+    Dump ``obj`` to ``target`` as sorted, indented JSON.
+
+    Parameters
+    ----------
+    target : Path | str
+        File path to write to.
+    obj : Any
+        Object to serialise.
+    mode : str
+        File open mode (typically ``'w'`` or ``'w+'``).
+    """
+    with Path(target).open(mode, encoding='utf-8') as f:
+        json.dump(obj, f, sort_keys=True, indent=2)
+
+
+def write_failed_urls(target: Path | str, urls: Iterable[str]) -> None:
+    """
+    Write a newline-separated list of URLs to ``target``.
+
+    Parameters
+    ----------
+    target : Path | str
+        File path to write to.
+    urls : Iterable[str]
+        URLs to write, one per line.
+    """
+    with Path(target).open('w', encoding='utf-8') as f:
+        f.writelines(f'{url}\n' for url in urls)
+
+
 class UnknownMimetypeError(Exception):
     """Raised when an unknown mimetype is encountered in :py:func:`~get_extension`."""
 
@@ -89,7 +137,7 @@ if TYPE_CHECKING:
     class InstagramClientInterface(Protocol):
         should_save_comments: bool
 
-        def save_comments(self, edge: Edge) -> None:
+        def save_comments(self, edge: Edge) -> Awaitable[None]:
             ...
 
 else:
@@ -99,7 +147,15 @@ else:
 class SaveCommentsCheckDisabledMixin(InstagramClientInterface):
     """Mixin to control saving comments."""
     @override
-    def save_comments(self, edge: Edge) -> None:
+    async def save_comments(self, edge: Edge) -> None:
+        """
+        Save the comments for ``edge`` only when :py:attr:`should_save_comments` is ``True``.
+
+        Parameters
+        ----------
+        edge : Edge
+            Edge whose comments should be saved.
+        """
         if not self.should_save_comments:
             return
-        super().save_comments(edge)  # type: ignore[safe-super]
+        await super().save_comments(edge)  # type: ignore[safe-super]
