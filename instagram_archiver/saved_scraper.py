@@ -7,14 +7,18 @@ from typing import TYPE_CHECKING, Any, cast
 import asyncio
 import logging
 
+from typing_extensions import Self, override
+
 from .client import InstagramClient
 from .compat import chdir
 from .constants import API_HEADERS, PAGE_FETCH_HEADERS
+from .dedup import LogDB
 from .utils import SaveCommentsCheckDisabledMixin
 from .workers import WorkerAbort, comments_worker, image_worker, video_worker
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+    from types import TracebackType
 
     from yt_dlp_utils.aio import AsyncYoutubeDL
 
@@ -32,7 +36,9 @@ class SavedScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
                  browser_profile: str = 'Default',
                  output_dir: str | Path | None = None,
                  *,
-                 comments: bool = False) -> None:
+                 comments: bool = False,
+                 disable_log: bool = False,
+                 log_file: str | Path | None = None) -> None:
         """
         Initialise ``SavedScraper``.
 
@@ -46,11 +52,45 @@ class SavedScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
             The output directory to save the posts to.
         comments : bool
             Whether to save comments or not.
+        disable_log : bool
+            Whether to disable the SQLite dedup log.
+        log_file : str | Path | None
+            Custom path for the dedup log database. Defaults to ``.log.db`` inside
+            ``output_dir``.
         """
         super().__init__(browser, browser_profile)
         self._output_dir = Path(output_dir or Path.cwd() / '@@saved-posts@@')
         Path(self._output_dir).mkdir(parents=True, exist_ok=True)
+        self._log_db = LogDB(Path(log_file or self._output_dir / '.log.db'), disabled=disable_log)
         self.should_save_comments = comments
+
+    @override
+    def save_to_log(self, url: str) -> None:
+        self._log_db.save(url)
+
+    @override
+    def is_saved(self, url: str) -> bool:
+        return self._log_db.is_saved(url)
+
+    @override
+    async def __aenter__(self) -> Self:
+        """
+        Enter the context manager.
+
+        Returns
+        -------
+        Self
+            This scraper instance.
+        """
+        await super().__aenter__()
+        return self
+
+    @override
+    async def __aexit__(self, _: type[BaseException] | None, __: BaseException | None,
+                        ___: TracebackType | None) -> None:
+        """Close the SQLite log and the underlying session."""
+        self._log_db.close()
+        await super().__aexit__(_, __, ___)
 
     async def unsave(self, items: Iterable[str]) -> None:
         """

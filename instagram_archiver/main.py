@@ -260,9 +260,13 @@ async def _async_profile_main(browser: BrowserName, profile: str, username: str,
 
 
 async def _async_saved_main(browser: BrowserName, profile: str, output_dir: str, *, debug: bool,
-                            include_comments: bool, quiet: bool, sleep_time: int,
+                            include_comments: bool, no_log: bool, quiet: bool, sleep_time: int,
                             unsave: bool) -> None:
-    scraper = SavedScraper(browser, profile, output_dir, comments=include_comments)
+    scraper = SavedScraper(browser,
+                           profile,
+                           output_dir,
+                           comments=include_comments,
+                           disable_log=no_log)
 
     async def coro_factory(ydl: Any, **kwargs: Any) -> None:
         await scraper.process(ydl, unsave=unsave, **kwargs)
@@ -351,6 +355,7 @@ def main(output_dir: str,
               default=1,
               type=int,
               help='Number of seconds yt-dlp waits between requests.')
+@click.option('--no-log', is_flag=True, help='Ignore log (re-fetch everything).')
 @click.option('-C',
               '--include-comments',
               is_flag=True,
@@ -363,6 +368,7 @@ def save_saved_main(output_dir: str,
                     *,
                     debug: bool = False,
                     include_comments: bool = False,
+                    no_log: bool = False,
                     quiet: bool = False,
                     unsave: bool = False) -> None:
     """Archive your saved posts."""  # noqa: DOC501
@@ -374,6 +380,7 @@ def save_saved_main(output_dir: str,
                               output_dir,
                               debug=debug,
                               include_comments=include_comments,
+                              no_log=no_log,
                               quiet=quiet,
                               sleep_time=sleep_time,
                               unsave=unsave))

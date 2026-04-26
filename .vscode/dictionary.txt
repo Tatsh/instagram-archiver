@@ -27,6 +27,7 @@ dataclasses
 datatable
 datatables
 debugpy
+dedup
 docstrings
 doctree
 doctrees

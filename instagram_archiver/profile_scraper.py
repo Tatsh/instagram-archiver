@@ -4,17 +4,15 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import TYPE_CHECKING
-from urllib.parse import urlparse
 import asyncio
 import logging
-import sqlite3
 
 from niquests.exceptions import HTTPError
 from typing_extensions import Self, override
 
 from .client import InstagramClient
 from .compat import chdir
-from .constants import LOG_SCHEMA
+from .dedup import LogDB
 from .typing import (
     BrowserName,
     Edge,
@@ -34,11 +32,6 @@ if TYPE_CHECKING:
 __all__ = ('ProfileScraper',)
 
 log = logging.getLogger(__name__)
-
-
-def _clean_url(url: str) -> str:
-    parsed = urlparse(url)
-    return f'https://{parsed.netloc}{parsed.path}'
 
 
 class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
@@ -73,39 +66,19 @@ class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
             Whether to save comments or not.
         """
         super().__init__(browser, browser_profile)
-        self._no_log = disable_log
         self._output_dir = Path(output_dir or Path.cwd() / username)
         self._output_dir.mkdir(parents=True, exist_ok=True)
-        self._log_db = Path(log_file or self._output_dir / '.log.db')
-        self._connection = sqlite3.connect(self._log_db)
-        self._cursor = self._connection.cursor()
-        self._setup_db()
+        self._log_db = LogDB(Path(log_file or self._output_dir / '.log.db'), disabled=disable_log)
         self._username = username
         self.should_save_comments = comments
 
-    def _setup_db(self) -> None:
-        if self._no_log:
-            return
-        existed = self._log_db.exists()
-        if not existed or (existed and self._log_db.stat().st_size == 0):
-            log.debug('Creating schema.')
-            self._cursor.execute(LOG_SCHEMA)
-
     @override
     def save_to_log(self, url: str) -> None:
-        if self._no_log:
-            return
-        self._cursor.execute('INSERT INTO log (url) VALUES (?)', (_clean_url(url),))
-        self._connection.commit()
+        self._log_db.save(url)
 
     @override
     def is_saved(self, url: str) -> bool:
-        if self._no_log:
-            return False
-        self._cursor.execute('SELECT COUNT(url) FROM log WHERE url = ?', (_clean_url(url),))
-        count: int
-        (count,) = self._cursor.fetchone()
-        return count == 1
+        return self._log_db.is_saved(url)
 
     @override
     async def __aenter__(self) -> Self:
@@ -124,8 +97,7 @@ class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
     async def __aexit__(self, _: type[BaseException] | None, __: BaseException | None,
                         ___: TracebackType | None) -> None:
         """Close the SQLite log and the underlying session."""
-        self._cursor.close()
-        self._connection.close()
+        self._log_db.close()
         await super().__aexit__(_, __, ___)
 
     async def _producer(self,

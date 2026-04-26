@@ -34,14 +34,6 @@ Save Instagram content you have access to.
 
 ## Installation
 
-### Poetry
-
-```shell
-poetry add instagram-archiver
-```
-
-### Pip
-
 ```shell
 pip install instagram-archiver
 ```
@@ -103,11 +95,16 @@ Options:
   -q, --quiet                     Disable progress display updates.
   -S, --sleep-time INTEGER        Number of seconds yt-dlp waits between
                                   requests.
+  --no-log                        Ignore log (re-fetch everything).
   -C, --include-comments          Also download all comments (extends download
                                   time significantly).
   -u, --unsave                    Unsave posts after successful archive.
   -h, --help                      Show this message and exit.
 ```
+
+The dedup log lives at `<output_dir>/.log.db` and is honoured across runs of
+both `instagram-archiver` and `instagram-save-saved`. Pass `--no-log` to bypass
+it and re-fetch everything.
 
 ## Notes
 

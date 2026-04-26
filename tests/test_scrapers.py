@@ -15,27 +15,25 @@ if TYPE_CHECKING:
 
 def _patch_db(mocker: MockerFixture,
               *,
+              scraper_module: str = 'profile_scraper',
               exists: bool = True,
               size: int = 1,
               fetchone_value: tuple[int, ...] = (0,)) -> Any:
-    mocker.patch('instagram_archiver.profile_scraper.sqlite3')
-    mock_path = mocker.patch('instagram_archiver.profile_scraper.Path')
+    mock_path = mocker.patch(f'instagram_archiver.{scraper_module}.Path')
     mock_path.return_value.exists.return_value = exists
     mock_path.return_value.stat.return_value.st_size = size
     mock_cursor = mocker.MagicMock()
     mock_cursor.fetchone.return_value = fetchone_value
     mock_connection = mocker.MagicMock()
     mock_connection.cursor.return_value = mock_cursor
-    mocker.patch('instagram_archiver.profile_scraper.sqlite3.connect', return_value=mock_connection)
+    mocker.patch('instagram_archiver.dedup.sqlite3.connect', return_value=mock_connection)
     return mock_cursor
 
 
 def test_profile_scraper_no_log(mocker: MockerFixture, mock_setup_session: AsyncMock) -> None:
-    mocker.patch('instagram_archiver.profile_scraper.sqlite3')
-    mocker.patch('instagram_archiver.profile_scraper.Path')
-    scraper_with_no_logging: Any = ProfileScraper('test_user', disable_log=True)
-    ex = scraper_with_no_logging._cursor.execute  # noqa: SLF001
-    ex.assert_not_called()  # ty: ignore[unresolved-attribute]
+    mock_cursor = _patch_db(mocker)
+    ProfileScraper('test_user', disable_log=True)
+    mock_cursor.execute.assert_not_called()
 
 
 def test_profile_scraper_with_empty_log(mocker: MockerFixture,
@@ -375,7 +373,7 @@ async def test_process_worker_abort_swallowed(mocker: MockerFixture,
 
 async def test_process_saved_with_unsaving(mocker: MockerFixture,
                                            mock_setup_session: AsyncMock) -> None:
-    mocker.patch('instagram_archiver.saved_scraper.Path')
+    _patch_db(mocker, scraper_module='saved_scraper')
     mocker.patch('instagram_archiver.saved_scraper.chdir')
     mock_setup_session.return_value = mocker.MagicMock(headers=mocker.MagicMock(),
                                                        cookies=mocker.MagicMock())
@@ -409,7 +407,7 @@ async def test_process_saved_with_unsaving(mocker: MockerFixture,
 
 async def test_process_saved(mocker: MockerFixture, mock_setup_session: AsyncMock) -> None:
     mock_log_warning = mocker.patch('instagram_archiver.saved_scraper.log.warning')
-    mocker.patch('instagram_archiver.saved_scraper.Path')
+    _patch_db(mocker, scraper_module='saved_scraper')
     mocker.patch('instagram_archiver.saved_scraper.chdir')
     scraper = SavedScraper()
     scraper.session = mocker.MagicMock()
@@ -441,7 +439,7 @@ async def test_process_saved(mocker: MockerFixture, mock_setup_session: AsyncMoc
 
 
 async def test_saved_unsave_iterates(mocker: MockerFixture, mock_setup_session: AsyncMock) -> None:
-    mocker.patch('instagram_archiver.saved_scraper.Path')
+    _patch_db(mocker, scraper_module='saved_scraper')
     scraper = SavedScraper()
     scraper.session = mocker.MagicMock()
     scraper.session.post = AsyncMock()  # type: ignore[method-assign]
@@ -450,7 +448,7 @@ async def test_saved_unsave_iterates(mocker: MockerFixture, mock_setup_session: 
 
 
 async def test_saved_worker_abort(mocker: MockerFixture, mock_setup_session: AsyncMock) -> None:
-    mocker.patch('instagram_archiver.saved_scraper.Path')
+    _patch_db(mocker, scraper_module='saved_scraper')
     mocker.patch('instagram_archiver.saved_scraper.chdir')
     scraper = SavedScraper()
     scraper.session = mocker.MagicMock()
@@ -462,7 +460,7 @@ async def test_saved_worker_abort(mocker: MockerFixture, mock_setup_session: Asy
 
 async def test_saved_producer_exception_propagates(mocker: MockerFixture,
                                                    mock_setup_session: AsyncMock) -> None:
-    mocker.patch('instagram_archiver.saved_scraper.Path')
+    _patch_db(mocker, scraper_module='saved_scraper')
     mocker.patch('instagram_archiver.saved_scraper.chdir')
     scraper = SavedScraper()
     scraper.session = mocker.MagicMock()
@@ -474,3 +472,37 @@ async def test_saved_producer_exception_propagates(mocker: MockerFixture,
                         side_effect=RuntimeError('boom'))
     with pytest.raises(RuntimeError, match='boom'):
         await scraper.process(mocker.MagicMock())
+
+
+def test_saved_scraper_records_to_log(mocker: MockerFixture, mock_setup_session: AsyncMock) -> None:
+    mock_cursor = _patch_db(mocker, scraper_module='saved_scraper')
+    scraper = SavedScraper()
+    scraper.save_to_log('https://example.com/x/')
+    mock_cursor.execute.assert_called_with('INSERT INTO log (url) VALUES (?)',
+                                           ('https://example.com/x/',))
+
+
+def test_saved_scraper_is_saved(mocker: MockerFixture, mock_setup_session: AsyncMock) -> None:
+    _patch_db(mocker, scraper_module='saved_scraper', fetchone_value=(1,))
+    scraper = SavedScraper()
+    assert scraper.is_saved('https://example.com/x/') is True
+
+
+def test_saved_scraper_disable_log_short_circuits(mocker: MockerFixture,
+                                                  mock_setup_session: AsyncMock) -> None:
+    mock_cursor = _patch_db(mocker, scraper_module='saved_scraper')
+    scraper = SavedScraper(disable_log=True)
+    scraper.save_to_log('https://example.com/x/')
+    assert scraper.is_saved('https://example.com/x/') is False
+    mock_cursor.execute.assert_not_called()
+
+
+async def test_saved_aexit_closes_log(mocker: MockerFixture, mock_setup_session: AsyncMock) -> None:
+    mock_cursor = _patch_db(mocker, scraper_module='saved_scraper')
+    mock_setup_session.return_value = mocker.MagicMock(close=AsyncMock(),
+                                                       headers=mocker.MagicMock(),
+                                                       cookies=mocker.MagicMock())
+    scraper = SavedScraper()
+    async with scraper:
+        pass
+    mock_cursor.close.assert_called_once()

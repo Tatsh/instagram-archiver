@@ -18,6 +18,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Parallel downloads. Internally the scrapers now act as producers feeding a media worker, a
   comments worker (active only with `-C`), and a yt-dlp worker. Each worker performs at most one
   in-flight HTTP request, so concurrency is bounded but image, comment, and video work can overlap.
+- SQLite dedup log for `instagram-save-saved`. The `.log.db` file is shared between both
+  scrapers, so re-running `instagram-save-saved` against the same output directory now skips
+  posts whose media URLs (and the per-post info call) have already been recorded. New
+  `--no-log` flag on `instagram-save-saved` bypasses the log.
 
 ### Changed
 
