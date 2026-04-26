@@ -96,7 +96,7 @@ class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
             return False
         self._cursor.execute('SELECT COUNT(url) FROM log WHERE url = ?', (_clean_url(url),))
         count: int
-        (count) = self._cursor.fetchone()
+        (count,) = self._cursor.fetchone()
         return count == 1
 
     @override
