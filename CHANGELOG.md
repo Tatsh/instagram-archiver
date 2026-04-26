@@ -9,22 +9,31 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Removed
+
+- `instagram-save-saved` console script. Its functionality is now folded into `instagram-archiver`
+  via the new `--saved`/`-s` flag (see Changed below).
+
 ### Added
 
 - Rich-based live progress display (via the `archiver-stats` library) shown on stderr by default.
   Use `--quiet` to suppress it for non-interactive runs, or `--debug` to fall back to verbose logs.
-- `--quiet` / `-q` flag on both `instagram-archiver` and `instagram-save-saved`.
-- `--sleep-time` / `-S` flag (forwarded to yt-dlp) on both commands.
+- `--quiet` / `-q` flag on `instagram-archiver`.
+- `--sleep-time` / `-S` flag on `instagram-archiver` (forwarded to yt-dlp).
 - Parallel downloads. Internally the scrapers now act as producers feeding a media worker, a
   comments worker (active only with `-C`), and a yt-dlp worker. Each worker performs at most one
   in-flight HTTP request, so concurrency is bounded but image, comment, and video work can overlap.
-- SQLite dedup log for `instagram-save-saved`. The `.log.db` file is shared between both
-  scrapers, so re-running `instagram-save-saved` against the same output directory now skips
-  posts whose media URLs (and the per-post info call) have already been recorded. New
-  `--no-log` flag on `instagram-save-saved` bypasses the log.
+- SQLite dedup log for the `--saved` mode of `instagram-archiver`. The `.log.db` file is shared
+  with profile mode, so re-running against the same output directory now skips posts whose media
+  URLs (and the per-post info call) have already been recorded. The `--no-log` flag is also
+  available in `--saved` mode to bypass it.
 
 ### Changed
 
+- `instagram-archiver` now takes either a `USERNAME` positional argument _or_ a new `--saved`/`-s`
+  flag (mutually exclusive). With `--saved`, it archives your saved posts (the behaviour
+  previously exposed as the now-removed `instagram-save-saved` script). The `--unsave`/`-u` flag
+  is also now on `instagram-archiver` and only valid alongside `--saved`.
 - The whole HTTP layer is now asynchronous. The `requests` runtime dependency was replaced with
   `niquests` (`niquests.AsyncSession`); `yt-dlp-utils` is now consumed via its `[asyncio]` extra
   and `yt_dlp_utils.aio.AsyncYoutubeDL`.

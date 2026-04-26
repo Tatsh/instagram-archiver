@@ -68,7 +68,6 @@ name = "Andrew Udvare"
 
 [project.scripts]
 instagram-archiver = "instagram_archiver.main:main"
-instagram-save-saved = "instagram_archiver.main:save_saved_main"
 
 [project.urls]
 Issues = "https://github.com/Tatsh/instagram-archiver/issues"

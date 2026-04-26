@@ -41,12 +41,15 @@ pip install instagram-archiver
 ## Usage
 
 ```plain
-Usage: instagram-archiver [OPTIONS] USERNAME
+Usage: instagram-archiver [OPTIONS] [USERNAME]
 
-  Archive a profile's posts.
+  Archive a profile (USERNAME) or your saved posts (--saved).
+
+  Pass exactly one of: a USERNAME positional argument, or --saved/-s.
 
 Options:
-  -o, --output-dir DIRECTORY      Output directory.
+  -o, --output-dir DIRECTORY      Output directory. Defaults to the username
+                                  (profile mode) or `.` (saved mode).
   -b, --browser [brave|chrome|chromium|edge|opera|vivaldi|firefox|safari]
                                   Browser to read cookies from.
   -p, --profile TEXT              Browser profile.
@@ -57,6 +60,10 @@ Options:
   --no-log                        Ignore log (re-fetch everything).
   -C, --include-comments          Also download all comments (extends download
                                   time significantly).
+  -s, --saved                     Archive your saved posts instead of a
+                                  profile (mutually exclusive with USERNAME).
+  -u, --unsave                    Unsave posts after successful archive (only
+                                  with --saved).
   -h, --help                      Show this message and exit.
 ```
 
@@ -64,6 +71,7 @@ Typical use:
 
 ```shell
 instagram-archiver -o ~/instagram-backups/username username
+instagram-archiver --saved -o ~/instagram-backups/saved
 ```
 
 When neither `--debug` nor `--quiet` is passed, a Rich-based live progress
@@ -77,34 +85,9 @@ producer/consumer queues: one worker for media posts, one for comments
 handles at most one in-flight HTTP request at a time, which keeps Instagram
 rate-limiting at bay while still overlapping image downloads with yt-dlp.
 
-### `instagram-save-saved`
-
-This tool saves your saved posts (at `www.instagram.com/username/saved/all-posts`).
-
-```plain
-Usage: instagram-save-saved [OPTIONS]
-
-  Archive your saved posts.
-
-Options:
-  -o, --output-dir DIRECTORY      Output directory.
-  -b, --browser [brave|chrome|chromium|edge|opera|vivaldi|firefox|safari]
-                                  Browser to read cookies from.
-  -p, --profile TEXT              Browser profile.
-  -d, --debug                     Enable debug output.
-  -q, --quiet                     Disable progress display updates.
-  -S, --sleep-time INTEGER        Number of seconds yt-dlp waits between
-                                  requests.
-  --no-log                        Ignore log (re-fetch everything).
-  -C, --include-comments          Also download all comments (extends download
-                                  time significantly).
-  -u, --unsave                    Unsave posts after successful archive.
-  -h, --help                      Show this message and exit.
-```
-
-The dedup log lives at `<output_dir>/.log.db` and is honoured across runs of
-both `instagram-archiver` and `instagram-save-saved`. Pass `--no-log` to bypass
-it and re-fetch everything.
+The dedup log lives at `<output_dir>/.log.db` and is honoured across runs in
+both profile and `--saved` modes. Pass `--no-log` to bypass it and re-fetch
+everything.
 
 ## Notes
 

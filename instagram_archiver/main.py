@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
     from .typing import BrowserName, OnMessage
 
-__all__ = ('main', 'save_saved_main')
+__all__ = ('main',)
 
 log = logging.getLogger(__name__)
 
@@ -277,8 +277,8 @@ async def _async_saved_main(browser: BrowserName, profile: str, output_dir: str,
 @click.command(context_settings={'help_option_names': ('-h', '--help')})
 @click.option('-o',
               '--output-dir',
-              default='%(username)s',
-              help='Output directory.',
+              default=None,
+              help='Output directory. Defaults to the username (profile mode) or `.` (saved mode).',
               type=click.Path(file_okay=False, writable=True))
 @click.option('-b',
               '--browser',
@@ -298,9 +298,19 @@ async def _async_saved_main(browser: BrowserName, profile: str, output_dir: str,
               '--include-comments',
               is_flag=True,
               help='Also download all comments (extends download time significantly).')
-@click.argument('username')
-def main(output_dir: str,
-         username: str,
+@click.option('-s',
+              '--saved',
+              'saved',
+              is_flag=True,
+              help='Archive your saved posts instead of a profile (mutually exclusive with '
+              'USERNAME).')
+@click.option('-u',
+              '--unsave',
+              is_flag=True,
+              help='Unsave posts after successful archive (only with --saved).')
+@click.argument('username', required=False)
+def main(output_dir: str | None,
+         username: str | None,
          browser: BrowserName = 'chrome',
          profile: str = 'Default',
          sleep_time: int = 1,
@@ -308,82 +318,54 @@ def main(output_dir: str,
          debug: bool = False,
          include_comments: bool = False,
          no_log: bool = False,
-         quiet: bool = False) -> None:
-    """Archive a profile's posts."""  # noqa: DOC501
-    setup_logging(debug=debug, loggers=cast('Any', _build_loggers(debug=debug)))
-    resolved_output_dir = (Path(output_dir % {'username': username})
-                           if '%(username)s' in output_dir else Path(output_dir))
-    try:
-        asyncio.run(
-            _async_profile_main(browser,
-                                profile,
-                                username,
-                                resolved_output_dir,
-                                debug=debug,
-                                include_comments=include_comments,
-                                no_log=no_log,
-                                quiet=quiet,
-                                sleep_time=sleep_time))
-    except UnexpectedRedirect as e:
-        click.echo('Unexpected redirect. Assuming request limit has been reached.', err=True)
-        raise click.Abort from e
-    except click.Abort:
-        raise
-    except Exception as e:
-        if isinstance(e, KeyboardInterrupt) or debug:
-            raise
-        click.echo('Run with --debug for more information.', err=True)
-        raise click.Abort from e
+         quiet: bool = False,
+         saved: bool = False,
+         unsave: bool = False) -> None:
+    """
+    Archive a profile (USERNAME) or your saved posts (--saved).
 
-
-@click.command(context_settings={'help_option_names': ('-h', '--help')})
-@click.option('-o',
-              '--output-dir',
-              default='.',
-              help='Output directory.',
-              type=click.Path(file_okay=False, writable=True))
-@click.option('-b',
-              '--browser',
-              default='chrome',
-              type=click.Choice(BROWSER_CHOICES),
-              help='Browser to read cookies from.')
-@click.option('-p', '--profile', default='Default', help='Browser profile.')
-@click.option('-d', '--debug', is_flag=True, help='Enable debug output.')
-@click.option('-q', '--quiet', is_flag=True, help='Disable progress display updates.')
-@click.option('-S',
-              '--sleep-time',
-              default=1,
-              type=int,
-              help='Number of seconds yt-dlp waits between requests.')
-@click.option('--no-log', is_flag=True, help='Ignore log (re-fetch everything).')
-@click.option('-C',
-              '--include-comments',
-              is_flag=True,
-              help='Also download all comments (extends download time significantly).')
-@click.option('-u', '--unsave', is_flag=True, help='Unsave posts after successful archive.')
-def save_saved_main(output_dir: str,
-                    browser: BrowserName = 'chrome',
-                    profile: str = 'Default',
-                    sleep_time: int = 1,
-                    *,
-                    debug: bool = False,
-                    include_comments: bool = False,
-                    no_log: bool = False,
-                    quiet: bool = False,
-                    unsave: bool = False) -> None:
-    """Archive your saved posts."""  # noqa: DOC501
+    Pass exactly one of: a USERNAME positional argument, or ``--saved``/``-s``.
+    """  # noqa: DOC501
+    if saved and username is not None:
+        msg = 'USERNAME and --saved are mutually exclusive.'
+        raise click.UsageError(msg)
+    if not saved and username is None:
+        msg = 'Provide a USERNAME or pass --saved/-s.'
+        raise click.UsageError(msg)
+    if unsave and not saved:
+        msg = '--unsave only applies with --saved/-s.'
+        raise click.UsageError(msg)
     setup_logging(debug=debug, loggers=cast('Any', _build_loggers(debug=debug)))
     try:
-        asyncio.run(
-            _async_saved_main(browser,
-                              profile,
-                              output_dir,
-                              debug=debug,
-                              include_comments=include_comments,
-                              no_log=no_log,
-                              quiet=quiet,
-                              sleep_time=sleep_time,
-                              unsave=unsave))
+        if saved:
+            resolved_saved_output_dir = output_dir if output_dir is not None else '.'
+            asyncio.run(
+                _async_saved_main(browser,
+                                  profile,
+                                  resolved_saved_output_dir,
+                                  debug=debug,
+                                  include_comments=include_comments,
+                                  no_log=no_log,
+                                  quiet=quiet,
+                                  sleep_time=sleep_time,
+                                  unsave=unsave))
+        else:
+            # `username` is non-None here because the validation above re-raises
+            # ``UsageError`` when both `--saved` is unset and `username` is missing.
+            profile_username = cast('str', username)
+            resolved_profile_output_dir = (Path(output_dir % {'username': profile_username}) if
+                                           (output_dir and '%(username)s' in output_dir) else Path(
+                                               output_dir or profile_username))
+            asyncio.run(
+                _async_profile_main(browser,
+                                    profile,
+                                    profile_username,
+                                    resolved_profile_output_dir,
+                                    debug=debug,
+                                    include_comments=include_comments,
+                                    no_log=no_log,
+                                    quiet=quiet,
+                                    sleep_time=sleep_time))
     except UnexpectedRedirect as e:
         click.echo('Unexpected redirect. Assuming request limit has been reached.', err=True)
         raise click.Abort from e
