@@ -70,6 +70,27 @@ async def test_image_worker_records_first_exception() -> None:
     assert stop.is_set()
 
 
+async def test_image_worker_no_op_when_stop_already_set_during_save() -> None:
+    """If ``stop_event`` is already set when ``save_media`` raises, the worker doesn't append.
+
+    Exercises the ``_set_first_exception`` branch where ``stop_event.is_set()`` is True.
+    """
+    queue: asyncio.Queue[Any] = asyncio.Queue()
+    await queue.put({'node': {'id': 'x'}})
+    stop = asyncio.Event()
+
+    async def _set_then_raise(_edge: Any) -> None:
+        stop.set()
+        msg = 'after stop'
+        raise RuntimeError(msg)
+
+    first: list[BaseException] = []
+    await image_worker(queue, first, _set_then_raise, stop)
+    # `_set_first_exception` short-circuits because `stop` was already set, so `first`
+    # remains empty even though the worker observed an exception.
+    assert first == []
+
+
 async def test_image_worker_no_callbacks_no_stats() -> None:
     queue: asyncio.Queue[Any] = asyncio.Queue()
     await queue.put({'node': {'id': 'x'}})

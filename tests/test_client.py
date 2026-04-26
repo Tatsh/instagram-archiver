@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock
 import asyncio
 
 from instagram_archiver.client import CSRFTokenNotFound, InstagramClient, UnexpectedRedirect
-from instagram_archiver.typing import Comments, HighlightsTray
+from instagram_archiver.typing import POSTS_HANDLED, Comments, HighlightsTray, Stats, YTDLPState
 from niquests.exceptions import HTTPError, RetryError
 import pytest
 
@@ -567,6 +567,24 @@ async def test_dispatch_edges_video(client: MagicMock) -> None:
     assert video_q.get_nowait() == 'https://www.instagram.com/p/sc/'
     assert image_q.empty()
     assert comments_q.empty()
+
+
+async def test_dispatch_edges_increments_stats_and_yt_dlp_state(client: MagicMock) -> None:
+    """``stats=`` increments ``POSTS_HANDLED`` and ``yt_dlp_state=`` bumps ``total_urls``."""
+    image_q: asyncio.Queue[Any] = asyncio.Queue()
+    comments_q: asyncio.Queue[Any] = asyncio.Queue()
+    video_q: asyncio.Queue[Any] = asyncio.Queue()
+    stats = Stats()
+    state = YTDLPState()
+    edge = {'node': {'__typename': 'XDTMediaDict', 'code': 'sc', 'video_dash_manifest': 'manifest'}}
+    await client.dispatch_edges([edge],
+                                image_q,
+                                comments_q,
+                                video_q,
+                                stats=stats,
+                                yt_dlp_state=state)
+    assert stats[POSTS_HANDLED] == 1
+    assert state.total_urls == 1
 
 
 async def test_dispatch_edges_image_and_comments(client: MagicMock) -> None:

@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 from unittest.mock import AsyncMock
+import asyncio
 
 from instagram_archiver.profile_scraper import ProfileScraper
 from instagram_archiver.saved_scraper import SavedScraper
+from instagram_archiver.typing import YTDLPState
 from instagram_archiver.workers import WorkerAbort
 from niquests.exceptions import HTTPError
 import pytest
@@ -364,6 +366,222 @@ async def test_process_producer_exception_propagates(mocker: MockerFixture,
         await scraper.process(mocker.MagicMock())
 
 
+async def test_process_invokes_on_cleanup_callbacks(mocker: MockerFixture,
+                                                    mock_setup_session: AsyncMock) -> None:
+    scraper = _build_profile_scraper(mocker)
+    mocker.patch.object(scraper, 'get_text', new_callable=AsyncMock)
+    mocker.patch.object(scraper, 'get_json', new_callable=AsyncMock, return_value={})
+    mocker.patch.object(scraper, 'graphql_query', new_callable=AsyncMock, return_value=None)
+    cleanups: list[str] = []
+    await scraper.process(mocker.MagicMock(), on_cleanup=cleanups.append)
+    assert 'Queued image worker shutdown sentinel.' in cleanups
+    assert 'Queued comments worker shutdown sentinel.' in cleanups
+    assert 'Queued yt-dlp worker shutdown sentinel.' in cleanups
+    assert 'All worker tasks cleaned up.' in cleanups
+
+
+async def test_process_producer_cancelled_calls_on_cleanup(mocker: MockerFixture,
+                                                           mock_setup_session: AsyncMock) -> None:
+    scraper = _build_profile_scraper(mocker)
+    mocker.patch.object(scraper,
+                        'get_text',
+                        new_callable=AsyncMock,
+                        side_effect=asyncio.CancelledError)
+    cleanups: list[str] = []
+    with pytest.raises(asyncio.CancelledError):
+        await scraper.process(mocker.MagicMock(), on_cleanup=cleanups.append)
+    assert 'Producer cancellation received.' in cleanups
+
+
+async def test_process_writes_pic_when_content_present(mocker: MockerFixture,
+                                                       mock_setup_session: AsyncMock) -> None:
+    scraper = _build_profile_scraper(mocker)
+    mock_write_bytes = mocker.patch('instagram_archiver.profile_scraper.write_bytes')
+    mocker.patch.object(scraper,
+                        'get_json',
+                        new_callable=AsyncMock,
+                        return_value={
+                            'data': {
+                                'user': {
+                                    'edge_owner_to_timeline_media': {
+                                        'edges': []
+                                    },
+                                    'id': '12345',
+                                    'profile_pic_url_hd': 'https://pic'
+                                }
+                            }
+                        })
+    mocker.patch.object(scraper, 'get_text', new_callable=AsyncMock)
+    mocker.patch.object(scraper,
+                        'highlights_tray',
+                        new_callable=AsyncMock,
+                        return_value={'tray': []})
+    mocker.patch.object(scraper, 'graphql_query', new_callable=AsyncMock, return_value=None)
+    mocker.patch.object(scraper, 'is_saved', return_value=False)
+    mocker.patch.object(scraper, 'save_to_log')
+    await scraper.process(mocker.MagicMock())
+    mock_write_bytes.assert_called_with('profile_pic.jpg', b'pic')
+
+
+async def test_process_skips_pic_when_content_none(mocker: MockerFixture,
+                                                   mock_setup_session: AsyncMock) -> None:
+    scraper = _build_profile_scraper(mocker)
+    scraper.session.get = AsyncMock(  # type: ignore[method-assign]  # ty: ignore[invalid-assignment]
+        return_value=mocker.MagicMock(content=None))
+    mock_write_bytes = mocker.patch('instagram_archiver.profile_scraper.write_bytes')
+    mocker.patch.object(scraper,
+                        'get_json',
+                        new_callable=AsyncMock,
+                        return_value={
+                            'data': {
+                                'user': {
+                                    'edge_owner_to_timeline_media': {
+                                        'edges': []
+                                    },
+                                    'id': '12345',
+                                    'profile_pic_url_hd': 'https://pic'
+                                }
+                            }
+                        })
+    mocker.patch.object(scraper, 'get_text', new_callable=AsyncMock)
+    mocker.patch.object(scraper,
+                        'highlights_tray',
+                        new_callable=AsyncMock,
+                        return_value={'tray': []})
+    mocker.patch.object(scraper, 'graphql_query', new_callable=AsyncMock, return_value=None)
+    mocker.patch.object(scraper, 'is_saved', return_value=False)
+    mocker.patch.object(scraper, 'save_to_log')
+    await scraper.process(mocker.MagicMock())
+    mock_write_bytes.assert_not_called()
+
+
+async def test_process_pagination_completes_via_has_next_page_false(
+        mocker: MockerFixture, mock_setup_session: AsyncMock) -> None:
+    """Pagination exits via ``has_next_page == False`` (loop condition), not via break."""
+    scraper = _build_profile_scraper(mocker)
+    mocker.patch.object(scraper,
+                        'get_json',
+                        new_callable=AsyncMock,
+                        return_value={
+                            'data': {
+                                'user': {
+                                    'edge_owner_to_timeline_media': {
+                                        'edges': []
+                                    },
+                                    'id': '12345',
+                                    'profile_pic_url_hd': 'https://test_url'
+                                }
+                            }
+                        })
+    mocker.patch.object(scraper, 'get_text', new_callable=AsyncMock)
+    mocker.patch.object(scraper, 'is_saved', return_value=True)
+    mocker.patch.object(scraper,
+                        'highlights_tray',
+                        new_callable=AsyncMock,
+                        return_value={'tray': []})
+    mocker.patch.object(scraper,
+                        'graphql_query',
+                        new_callable=AsyncMock,
+                        side_effect=[
+                            {
+                                'xdt_api__v1__feed__user_timeline_graphql_connection': {
+                                    'edges': [],
+                                    'page_info': {
+                                        'has_next_page': True,
+                                        'end_cursor': 'cur'
+                                    }
+                                }
+                            },
+                            {
+                                'xdt_api__v1__feed__user_timeline_graphql_connection': {
+                                    'edges': [],
+                                    'page_info': {
+                                        'has_next_page': False,
+                                        'end_cursor': None
+                                    }
+                                }
+                            },
+                        ])
+    await scraper.process(mocker.MagicMock())
+
+
+async def test_process_cancelled_without_on_cleanup(mocker: MockerFixture,
+                                                    mock_setup_session: AsyncMock) -> None:
+    """Producer cancellation with ``on_cleanup=None`` skips the callback path."""
+    scraper = _build_profile_scraper(mocker)
+    mocker.patch.object(scraper,
+                        'get_text',
+                        new_callable=AsyncMock,
+                        side_effect=asyncio.CancelledError)
+    with pytest.raises(asyncio.CancelledError):
+        await scraper.process(mocker.MagicMock())
+
+
+async def test_process_exception_after_stop_event_set(mocker: MockerFixture,
+                                                      mock_setup_session: AsyncMock) -> None:
+    """An exception raised after ``stop_event`` is already set skips the first-exception path."""
+    scraper = _build_profile_scraper(mocker)
+
+    async def _raise_after_setting_stop(*_args: Any, **kwargs: Any) -> Any:
+        # Workers haven't been able to set stop_event by the time the producer raises, so
+        # mimic a race where the producer raises after some unrelated component already set
+        # ``stop_event`` — e.g. by patching ``asyncio.Event`` to one that's pre-set.
+        msg = 'late'
+        raise RuntimeError(msg)
+
+    mocker.patch.object(scraper,
+                        'get_text',
+                        new_callable=AsyncMock,
+                        side_effect=_raise_after_setting_stop)
+    real_event = asyncio.Event
+    pre_set_calls = {'count': 0}
+
+    def _maybe_pre_set() -> asyncio.Event:
+        pre_set_calls['count'] += 1
+        ev = real_event()
+        if pre_set_calls['count'] == 1:  # the stop_event in process()
+            ev.set()
+        return ev
+
+    mocker.patch('instagram_archiver.profile_scraper.asyncio.Event', side_effect=_maybe_pre_set)
+    # The producer raises but stop_event was already set; the except branch's body skips
+    # appending to first_exception, so the scraper exits cleanly.
+    await scraper.process(mocker.MagicMock())
+
+
+async def test_process_highlights_increments_yt_dlp_state(mocker: MockerFixture,
+                                                          mock_setup_session: AsyncMock) -> None:
+    state = YTDLPState()
+    scraper = _build_profile_scraper(mocker)
+    mocker.patch.object(scraper, 'is_saved', return_value=True)
+    mocker.patch.object(scraper,
+                        'get_json',
+                        new_callable=AsyncMock,
+                        return_value={
+                            'data': {
+                                'user': {
+                                    'edge_owner_to_timeline_media': {
+                                        'edges': []
+                                    },
+                                    'id': '12345',
+                                    'profile_pic_url_hd': 'https://pic'
+                                }
+                            }
+                        })
+    mocker.patch.object(scraper, 'get_text', new_callable=AsyncMock)
+    mocker.patch.object(scraper,
+                        'highlights_tray',
+                        new_callable=AsyncMock,
+                        return_value={'tray': [{
+                            'id': 'f:1'
+                        }, {
+                            'id': 'f:2'
+                        }]})
+    mocker.patch.object(scraper, 'graphql_query', new_callable=AsyncMock, return_value=None)
+    await scraper.process(mocker.MagicMock(), yt_dlp_state=state)
+    assert state.total_urls == 2
+
+
 async def test_process_worker_abort_swallowed(mocker: MockerFixture,
                                               mock_setup_session: AsyncMock) -> None:
     scraper = _build_profile_scraper(mocker)
@@ -495,6 +713,84 @@ def test_saved_scraper_disable_log_short_circuits(mocker: MockerFixture,
     scraper.save_to_log('https://example.com/x/')
     assert scraper.is_saved('https://example.com/x/') is False
     mock_cursor.execute.assert_not_called()
+
+
+async def test_saved_cancelled_without_on_cleanup(mocker: MockerFixture,
+                                                  mock_setup_session: AsyncMock) -> None:
+    _patch_db(mocker, scraper_module='saved_scraper')
+    mocker.patch('instagram_archiver.saved_scraper.chdir')
+    scraper = SavedScraper()
+    scraper.session = mocker.MagicMock()
+    scraper.session.get = AsyncMock()  # type: ignore[method-assign]
+    scraper.session.post = AsyncMock()  # type: ignore[method-assign]
+    mocker.patch.object(scraper,
+                        'get_json',
+                        new_callable=AsyncMock,
+                        side_effect=asyncio.CancelledError)
+    with pytest.raises(asyncio.CancelledError):
+        await scraper.process(mocker.MagicMock())
+
+
+async def test_saved_exception_after_stop_event_set(mocker: MockerFixture,
+                                                    mock_setup_session: AsyncMock) -> None:
+    _patch_db(mocker, scraper_module='saved_scraper')
+    mocker.patch('instagram_archiver.saved_scraper.chdir')
+    scraper = SavedScraper()
+    scraper.session = mocker.MagicMock()
+    scraper.session.get = AsyncMock()  # type: ignore[method-assign]
+    scraper.session.post = AsyncMock()  # type: ignore[method-assign]
+    mocker.patch.object(scraper,
+                        'get_json',
+                        new_callable=AsyncMock,
+                        side_effect=RuntimeError('late'))
+    real_event = asyncio.Event
+    pre_set_calls = {'count': 0}
+
+    def _maybe_pre_set() -> asyncio.Event:
+        pre_set_calls['count'] += 1
+        ev = real_event()
+        if pre_set_calls['count'] == 1:
+            ev.set()
+        return ev
+
+    mocker.patch('instagram_archiver.saved_scraper.asyncio.Event', side_effect=_maybe_pre_set)
+    await scraper.process(mocker.MagicMock())
+
+
+async def test_saved_invokes_on_cleanup_callbacks(mocker: MockerFixture,
+                                                  mock_setup_session: AsyncMock) -> None:
+    _patch_db(mocker, scraper_module='saved_scraper')
+    mocker.patch('instagram_archiver.saved_scraper.chdir')
+    scraper = SavedScraper()
+    scraper.session = mocker.MagicMock()
+    scraper.session.get = AsyncMock()  # type: ignore[method-assign]
+    scraper.session.post = AsyncMock()  # type: ignore[method-assign]
+    mocker.patch.object(scraper, 'get_json', new_callable=AsyncMock, return_value={'items': []})
+    mocker.patch.object(scraper, 'dispatch_edges', new_callable=AsyncMock)
+    cleanups: list[str] = []
+    await scraper.process(mocker.MagicMock(), on_cleanup=cleanups.append)
+    assert 'Queued image worker shutdown sentinel.' in cleanups
+    assert 'Queued comments worker shutdown sentinel.' in cleanups
+    assert 'Queued yt-dlp worker shutdown sentinel.' in cleanups
+    assert 'All worker tasks cleaned up.' in cleanups
+
+
+async def test_saved_producer_cancelled_calls_on_cleanup(mocker: MockerFixture,
+                                                         mock_setup_session: AsyncMock) -> None:
+    _patch_db(mocker, scraper_module='saved_scraper')
+    mocker.patch('instagram_archiver.saved_scraper.chdir')
+    scraper = SavedScraper()
+    scraper.session = mocker.MagicMock()
+    scraper.session.get = AsyncMock()  # type: ignore[method-assign]
+    scraper.session.post = AsyncMock()  # type: ignore[method-assign]
+    mocker.patch.object(scraper,
+                        'get_json',
+                        new_callable=AsyncMock,
+                        side_effect=asyncio.CancelledError)
+    cleanups: list[str] = []
+    with pytest.raises(asyncio.CancelledError):
+        await scraper.process(mocker.MagicMock(), on_cleanup=cleanups.append)
+    assert 'Producer cancellation received.' in cleanups
 
 
 async def test_saved_aexit_closes_log(mocker: MockerFixture, mock_setup_session: AsyncMock) -> None:
