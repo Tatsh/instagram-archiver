@@ -22,7 +22,7 @@ from .saved_scraper import SavedScraper
 from .typing import Stats, YTDLPState
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterable, Mapping
     from types import FrameType
 
     from .typing import BrowserName, OnMessage
@@ -182,9 +182,9 @@ def _register_windows_signal_handler(handled_signal: signal.Signals, on_signal: 
 
 
 def _restore_termination_signal_handlers(
-        loop: asyncio.AbstractEventLoop, registered_loop_signals: list[signal.Signals],
-        registered_windows_signal_handlers: list[signal.Signals],
-        previous_windows_signal_handlers: dict[signal.Signals, Any]) -> None:
+        loop: asyncio.AbstractEventLoop, registered_loop_signals: Iterable[signal.Signals],
+        registered_windows_signal_handlers: Iterable[signal.Signals],
+        previous_windows_signal_handlers: Mapping[signal.Signals, Any]) -> None:
     for handled_signal in registered_loop_signals:
         loop.remove_signal_handler(handled_signal)
     for handled_signal in registered_windows_signal_handlers:
