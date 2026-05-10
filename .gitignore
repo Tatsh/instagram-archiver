@@ -35,4 +35,3 @@ coverage.xml
 htmlcov/
 mypy-report.xml
 node_modules/
-replies.js
