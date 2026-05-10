@@ -4,10 +4,16 @@ from __future__ import annotations
 
 __all__ = ('API_HEADERS', 'BROWSER_CHOICES', 'PAGE_FETCH_HEADERS', 'SHARED_HEADERS', 'USER_AGENT')
 
-USER_AGENT = ('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
-              'Chrome/137.0.0.0 Safari/537.36')
+USER_AGENT = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 '
+              '(KHTML, like Gecko) Chrome/69.0.3497.57 Safari/537.36')
 """
 User agent.
+
+Deliberately a pre-``Sec-CH-UA`` Chrome (69 / 2018). Modern Chrome user-agents make
+Instagram's edge expect matching ``Sec-CH-UA*`` client-hint headers; without them, endpoints
+such as ``/api/v1/media/<pk>/comments/`` return the React app shell (HTML) instead of routing
+to the JSON API. Chrome 69 predates client hints, so the edge skips that check and accepts the
+request on cookies alone.
 
 :meta hide-value:
 """

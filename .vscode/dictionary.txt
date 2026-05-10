@@ -97,6 +97,7 @@ pyproject
 pytest
 pythonhosted
 quic
+referer
 regen
 relayprovider
 ripgreprc

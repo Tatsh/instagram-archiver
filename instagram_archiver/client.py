@@ -216,6 +216,7 @@ class InstagramClient:
             url: str,
             *,
             cast_to: type[T],  # noqa: ARG002
+            headers: Mapping[str, str] | None = None,
             params: Mapping[str, str] | None = None) -> T:
         """
         Get JSON data from a URL.
@@ -226,6 +227,10 @@ class InstagramClient:
             URL to fetch.
         cast_to : type[T]
             Expected type of the decoded JSON body.
+        headers : Mapping[str, str] | None
+            Optional per-call headers. When ``None`` (the default), :py:data:`API_HEADERS` is
+            used. Passing an explicit dict (typically ``API_HEADERS`` plus a ``Referer``) lets
+            callers like :py:meth:`save_comments` mirror the per-post Referer the browser sends.
         params : Mapping[str, str] | None
             Optional query string parameters.
 
@@ -234,7 +239,8 @@ class InstagramClient:
         T
             Response body decoded from JSON.
         """
-        r = await self.session.get(url, params=params, headers=API_HEADERS)
+        request_headers = cast('dict[str, str]', dict(API_HEADERS if headers is None else headers))
+        r = await self.session.get(url, params=params, headers=request_headers)
         r.raise_for_status()
         return cast('T', r.json())
 
@@ -458,14 +464,20 @@ class InstagramClient:
         edge : Edge
             Edge whose comments should be saved.
         """
+        media_pk = edge['node']['pk']
         media_id = edge['node']['id']
-        comment_url = f'https://www.instagram.com/api/v1/media/{media_id}/comments/'
+        shortcode = edge['node'].get('code')
+        comment_url = f'https://www.instagram.com/api/v1/media/{media_pk}/comments/'
         shared_params = {'can_support_threading': 'true'}
+        request_headers: dict[str, str] = dict(API_HEADERS)
+        if shortcode:
+            request_headers['referer'] = f'https://www.instagram.com/p/{shortcode}/'
         try:
             comment_data = await self.get_json(comment_url,
                                                params={
                                                    **shared_params, 'permalink_enabled': 'false'
                                                },
+                                               headers=request_headers,
                                                cast_to=Comments)
         except HTTPError:
             log.exception('Failed to get comments.')
@@ -475,9 +487,13 @@ class InstagramClient:
             try:
                 comment_data = await self.get_json(comment_url,
                                                    params={
-                                                       **shared_params, 'min_id':
-                                                           comment_data['next_min_id']
+                                                       **shared_params,
+                                                       'min_id':
+                                                           comment_data['next_min_id'],
+                                                       'sort_order':
+                                                           'popular',
                                                    },
+                                                   headers=request_headers,
                                                    cast_to=Comments)
             except HTTPError:
                 log.exception('Failed to get comments.')
@@ -485,22 +501,29 @@ class InstagramClient:
             top_comment_data['comments'] = list(top_comment_data['comments']) + list(
                 comment_data['comments'])
         if self.should_save_child_comments:
-            await self._embed_child_comments(media_id, top_comment_data['comments'])
+            await self._embed_child_comments(media_pk,
+                                             top_comment_data['comments'],
+                                             headers=request_headers)
         comments_json = f'{media_id}-comments.json'
         dump_json(comments_json, top_comment_data, mode='w+')
 
-    async def _embed_child_comments(self, media_id: str, comments: Iterable[Mapping[str,
-                                                                                    Any]]) -> None:
+    async def _embed_child_comments(self,
+                                    media_pk: str,
+                                    comments: Iterable[Mapping[str, Any]],
+                                    *,
+                                    headers: Mapping[str, str] | None = None) -> None:
         """
         Replace ``child_comments`` on each parent comment with the full reply set.
 
         Parameters
         ----------
-        media_id : str
-            Media identifier used in the comments URL.
+        media_pk : str
+            Numeric media primary key used in the comments URL.
         comments : Iterable[Mapping[str, Any]]
             Top-level comments to enrich. Mutated in place; each parent with a non-zero
             ``child_comment_count`` gains the fetched replies under ``child_comments``.
+        headers : Mapping[str, str] | None
+            Optional request headers (typically including a per-post ``Referer``).
         """
         for comment in comments:
             if not comment.get('child_comment_count'):
@@ -509,28 +532,34 @@ class InstagramClient:
             if comment_pk is None:
                 log.debug('Skipping reply fetch for comment with no pk/id.')
                 continue
-            replies = await self._fetch_child_comments(media_id, str(comment_pk))
+            replies = await self._fetch_child_comments(media_pk, str(comment_pk), headers=headers)
             if replies is not None:
                 cast('Any', comment)['child_comments'] = replies
 
-    async def _fetch_child_comments(self, media_id: str,
-                                    comment_pk: str) -> list[Mapping[str, Any]] | None:
+    async def _fetch_child_comments(
+            self,
+            media_pk: str,
+            comment_pk: str,
+            *,
+            headers: Mapping[str, str] | None = None) -> list[Mapping[str, Any]] | None:
         """
         Fetch every reply under a top-level comment, paginating with ``min_id``.
 
         Parameters
         ----------
-        media_id : str
-            Media identifier used in the comments URL.
+        media_pk : str
+            Numeric media primary key used in the comments URL.
         comment_pk : str
             Primary key of the parent comment.
+        headers : Mapping[str, str] | None
+            Optional request headers (typically including a per-post ``Referer``).
 
         Returns
         -------
         list[Mapping[str, Any]] | None
             Aggregated replies across all pages, or ``None`` if the first request fails.
         """
-        url = (f'https://www.instagram.com/api/v1/media/{media_id}/comments/'
+        url = (f'https://www.instagram.com/api/v1/media/{media_pk}/comments/'
                f'{comment_pk}/child_comments/')
         params: dict[str, str] = {
             'is_chronological': 'true',
@@ -540,7 +569,10 @@ class InstagramClient:
         replies: list[Mapping[str, Any]] = []
         while True:
             try:
-                page = await self.get_json(url, params=params, cast_to=ChildCommentsPage)
+                page = await self.get_json(url,
+                                           params=params,
+                                           headers=headers,
+                                           cast_to=ChildCommentsPage)
             except HTTPError:
                 log.exception('Failed to get child comments for `%s`.', comment_pk)
                 return replies or None

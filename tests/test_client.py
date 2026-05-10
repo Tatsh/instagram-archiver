@@ -217,7 +217,7 @@ async def test_save_comments(client: MagicMock, mocker: MockerFixture) -> None:
                                         ])
     mock_dump_json = mocker.patch('instagram_archiver.client.dump_json')
 
-    edge = {'node': {'id': '123'}}
+    edge = {'node': {'id': '123', 'pk': '123'}}
     await client.save_comments(edge)
 
     mock_get_json.assert_awaited()
@@ -356,7 +356,7 @@ async def test_save_comments_with_child_comments(client: MagicMock, mocker: Mock
                         ])
     mock_dump_json = mocker.patch('instagram_archiver.client.dump_json')
 
-    await client.save_comments({'node': {'id': '999'}})
+    await client.save_comments({'node': {'id': '999', 'pk': '999'}})
 
     assert parent_with_replies['child_comments'] == [
         {
@@ -403,7 +403,7 @@ async def test_save_comments_child_comments_paginated(client: MagicMock,
                                         ])
     mocker.patch('instagram_archiver.client.dump_json')
 
-    await client.save_comments({'node': {'id': 'mid'}})
+    await client.save_comments({'node': {'id': 'mid', 'pk': 'mid'}})
 
     children = cast('list[dict[str, Any]]', parent['child_comments'])
     assert [c['id'] for c in children] == ['r1', 'r2', 'r3']
@@ -424,7 +424,7 @@ async def test_save_comments_child_comments_disabled(client: MagicMock,
                             'next_min_id': None,
                         })
     mocker.patch('instagram_archiver.client.dump_json')
-    await client.save_comments({'node': {'id': 'm'}})
+    await client.save_comments({'node': {'id': 'm', 'pk': 'm'}})
     assert 'child_comments' not in parent
 
 
@@ -445,7 +445,7 @@ async def test_save_comments_child_comments_http_error(client: MagicMock,
                         ])
     mocker.patch('instagram_archiver.client.dump_json')
     mock_log_exception = mocker.patch('instagram_archiver.client.log.exception')
-    await client.save_comments({'node': {'id': 'mid'}})
+    await client.save_comments({'node': {'id': 'mid', 'pk': 'mid'}})
     assert 'child_comments' not in parent
     mock_log_exception.assert_called_once_with('Failed to get child comments for `%s`.', 'ppk')
 
@@ -475,7 +475,7 @@ async def test_save_comments_child_comments_partial_then_error(client: MagicMock
                         ])
     mocker.patch('instagram_archiver.client.dump_json')
     mocker.patch('instagram_archiver.client.log.exception')
-    await client.save_comments({'node': {'id': 'mid'}})
+    await client.save_comments({'node': {'id': 'mid', 'pk': 'mid'}})
     children = cast('list[dict[str, Any]]', parent['child_comments'])
     assert [c['id'] for c in children] == ['r1']
 
@@ -494,7 +494,7 @@ async def test_save_comments_child_comments_no_pk(client: MagicMock, mocker: Moc
                         })
     mocker.patch('instagram_archiver.client.dump_json')
     mock_log_debug = mocker.patch('instagram_archiver.client.log.debug')
-    await client.save_comments({'node': {'id': 'mid'}})
+    await client.save_comments({'node': {'id': 'mid', 'pk': 'mid'}})
     assert 'child_comments' not in parent
     mock_log_debug.assert_called_once_with('Skipping reply fetch for comment with no pk/id.')
 
@@ -506,7 +506,7 @@ async def test_save_comments_http_error(client: MagicMock, mocker: MockerFixture
                                         side_effect=HTTPError)
     mock_log_exception = mocker.patch('instagram_archiver.client.log.exception')
 
-    edge = {'node': {'id': '123'}}
+    edge = {'node': {'id': '123', 'pk': '123'}}
     await client.save_comments(edge)
 
     mock_get_json.assert_awaited_once_with('https://www.instagram.com/api/v1/media/123/comments/',
@@ -514,6 +514,7 @@ async def test_save_comments_http_error(client: MagicMock, mocker: MockerFixture
                                                'can_support_threading': 'true',
                                                'permalink_enabled': 'false'
                                            },
+                                           headers=mocker.ANY,
                                            cast_to=Comments)
     mock_log_exception.assert_called_once_with('Failed to get comments.')
 
@@ -530,16 +531,56 @@ async def test_save_comments_http_error_page_2(client: MagicMock, mocker: Mocker
     mock_log_exception = mocker.patch('instagram_archiver.client.log.exception')
     mocker.patch('instagram_archiver.client.dump_json')
 
-    edge = {'node': {'id': '123'}}
+    edge = {'node': {'id': '123', 'pk': '123'}}
     await client.save_comments(edge)
 
     mock_get_json.assert_awaited_with('https://www.instagram.com/api/v1/media/123/comments/',
                                       params={
                                           'can_support_threading': 'true',
-                                          'min_id': 'min'
+                                          'min_id': 'min',
+                                          'sort_order': 'popular',
                                       },
+                                      headers=mocker.ANY,
                                       cast_to=Comments)
     mock_log_exception.assert_called_once_with('Failed to get comments.')
+
+
+async def test_save_comments_uses_pk_in_url_and_id_in_filename(client: MagicMock,
+                                                               mocker: MockerFixture) -> None:
+    """The URL uses ``pk`` (bare numeric) and the filename keeps ``id`` (``<pk>_<owner>``)."""
+    mock_get_json = mocker.patch.object(client,
+                                        'get_json',
+                                        new_callable=AsyncMock,
+                                        return_value={
+                                            'comments': [],
+                                            'can_view_more_preview_comments': False,
+                                            'next_min_id': None,
+                                        })
+    mock_dump_json = mocker.patch('instagram_archiver.client.dump_json')
+    edge = {'node': {'id': '3893923910883717076_31696836669', 'pk': '3893923910883717076'}}
+    await client.save_comments(edge)
+    args, _kwargs = mock_get_json.call_args
+    assert args[0] == 'https://www.instagram.com/api/v1/media/3893923910883717076/comments/'
+    mock_dump_json.assert_called_once_with('3893923910883717076_31696836669-comments.json',
+                                           mocker.ANY,
+                                           mode='w+')
+
+
+async def test_save_comments_includes_referer_when_shortcode_present(client: MagicMock,
+                                                                     mocker: MockerFixture) -> None:
+    mock_get_json = mocker.patch.object(client,
+                                        'get_json',
+                                        new_callable=AsyncMock,
+                                        return_value={
+                                            'comments': [],
+                                            'can_view_more_preview_comments': False,
+                                            'next_min_id': None,
+                                        })
+    mocker.patch('instagram_archiver.client.dump_json')
+    edge = {'node': {'id': 'i', 'pk': 'p', 'code': 'DYJ_yqCn6_U'}}
+    await client.save_comments(edge)
+    sent_headers = mock_get_json.call_args.kwargs['headers']
+    assert sent_headers['referer'] == 'https://www.instagram.com/p/DYJ_yqCn6_U/'
 
 
 async def test_save_media_already_saved(client: MagicMock, mocker: MockerFixture) -> None:
