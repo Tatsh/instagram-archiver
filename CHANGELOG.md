@@ -9,6 +9,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-05-10
+
 ### Added
 
 - Image items in stories and highlights are now archived alongside videos. Profile mode fetches
@@ -19,6 +21,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   recursively for every top-level comment that reports having any and embedded into the saved
   per-post `<id>-comments.json` under the parent's `child_comments` key. Implies
   `--include-comments`. Closes the first checkbox of issue #3.
+
+### Fixed
+
+- `--include-comments` no longer crashes the worker with `JSONDecodeError`. Instagram's edge was
+  serving the React app shell (HTML) instead of JSON for two reasons that both needed fixing: the
+  comments URL was being built with the long `<pk>_<owner>` `id` rather than the bare numeric
+  `pk`, and the modern Chrome `User-Agent` was tripping a `User-Agent` ↔ `Sec-CH-UA*`
+  client-hint consistency check in the WAF. The URL now uses `pk`; the saved
+  `<id>-comments.json` filename still uses `id` so existing on-disk archives stay deduplicated.
+  The full `Sec-CH-UA*` family now travels with every request to satisfy the consistency check.
+  Comments pagination also gained `sort_order=popular` and a per-post `Referer` header to match
+  what the browser sends.
 
 ## [0.4.0] - 2026-04-25
 
@@ -126,7 +140,8 @@ Release for testing the publishing process.
 
 - Client logging improvements.
 
-[unreleased]: https://github.com/Tatsh/instagram-archiver/compare/v0.4.0...HEAD
+[unreleased]: https://github.com/Tatsh/instagram-archiver/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/Tatsh/instagram-archiver/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.5...v0.4.0
 [0.3.5]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/Tatsh/instagram-archiver/compare/v0.3.3...v0.3.4
