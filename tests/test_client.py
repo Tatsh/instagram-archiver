@@ -653,6 +653,145 @@ async def test_dispatch_edges_missing_code_parent_missing(client: MagicMock,
     mock_log_exception.assert_called_once_with('Unknown shortcode.')
 
 
+async def test_reel_page_gallery_initial(client: MagicMock, mocker: MockerFixture) -> None:
+    mock_query = mocker.patch.object(client,
+                                     'graphql_query',
+                                     new_callable=AsyncMock,
+                                     return_value={
+                                         'xdt_api__v1__feed__reels_media': {
+                                             'edges': [],
+                                             'page_info': {
+                                                 'end_cursor': None,
+                                                 'has_next_page': False
+                                             }
+                                         }
+                                     })
+    result = await client.reel_page_gallery(['1', '2'])
+    assert result == {'edges': [], 'page_info': {'end_cursor': None, 'has_next_page': False}}
+    args, kwargs = mock_query.call_args
+    variables = args[0]
+    assert variables == {'first': 5, 'initial_reel_id': '1', 'last': None, 'reel_ids': ['1', '2']}
+    assert kwargs['doc_id'] == '26659189347081290'
+
+
+async def test_reel_page_gallery_paginated(client: MagicMock, mocker: MockerFixture) -> None:
+    mock_query = mocker.patch.object(client,
+                                     'graphql_query',
+                                     new_callable=AsyncMock,
+                                     return_value={
+                                         'xdt_api__v1__feed__reels_media': {
+                                             'edges': [],
+                                             'page_info': {
+                                                 'end_cursor': None,
+                                                 'has_next_page': False
+                                             }
+                                         }
+                                     })
+    await client.reel_page_gallery(['1', '2'],
+                                   after='cur',
+                                   first=3,
+                                   initial_reel_id='2',
+                                   is_highlight=False)
+    args, kwargs = mock_query.call_args
+    assert args[0] == {
+        'after': 'cur',
+        'before': None,
+        'first': 3,
+        'initial_reel_id': '2',
+        'is_highlight': False,
+        'last': None,
+        'reel_ids': ['1', '2']
+    }
+    assert kwargs['doc_id'] == '27002830962682635'
+
+
+async def test_reel_page_gallery_no_data(client: MagicMock, mocker: MockerFixture) -> None:
+    mocker.patch.object(client, 'graphql_query', new_callable=AsyncMock, return_value=None)
+    assert await client.reel_page_gallery(['1']) is None
+
+
+async def test_reel_page_gallery_empty_reel_ids(client: MagicMock, mocker: MockerFixture) -> None:
+    mock_query = mocker.patch.object(client, 'graphql_query', new_callable=AsyncMock)
+    assert await client.reel_page_gallery([]) is None
+    mock_query.assert_not_called()
+
+
+async def test_reel_page_gallery_unrecognised_response(client: MagicMock,
+                                                       mocker: MockerFixture) -> None:
+    mocker.patch.object(client,
+                        'graphql_query',
+                        new_callable=AsyncMock,
+                        return_value={'unrelated_key': {
+                            'value': 1
+                        }})
+    mock_log_warning = mocker.patch('instagram_archiver.client.log.warning')
+    assert await client.reel_page_gallery(['1']) is None
+    mock_log_warning.assert_called_once_with(
+        'Reel gallery response did not contain a recognisable connection.')
+
+
+async def test_reel_page_gallery_fallback_key(client: MagicMock, mocker: MockerFixture) -> None:
+    """The connection extractor falls back to any value with edges + page_info."""
+    payload = {'edges': [], 'page_info': {'end_cursor': None, 'has_next_page': False}}
+    mocker.patch.object(client,
+                        'graphql_query',
+                        new_callable=AsyncMock,
+                        return_value={'some_renamed_wrapper': payload})
+    assert await client.reel_page_gallery(['1']) == payload
+
+
+async def test_save_reel_item_image(client: MagicMock, mocker: MockerFixture) -> None:
+    mock_save_image = mocker.patch.object(client, 'save_image_versions2', new_callable=AsyncMock)
+    item = {'id': 'i', 'image_versions2': {'candidates': []}, 'pk': 'pk', 'taken_at': 99}
+    await client.save_reel_item(item)
+    mock_save_image.assert_awaited_once_with(item, 99)
+
+
+async def test_save_reel_item_video_with_queue(client: MagicMock) -> None:
+    state = YTDLPState()
+    queue: asyncio.Queue[str | None] = asyncio.Queue()
+    item = {
+        'id': 'v',
+        'image_versions2': {
+            'candidates': []
+        },
+        'pk': 'video',
+        'taken_at': 1,
+        'video_versions': [{
+            'url': 'https://example.com/v.mp4',
+            'width': 1,
+            'height': 1
+        }]
+    }
+    await client.save_reel_item(item, queue, username='alice', yt_dlp_state=state)
+    assert queue.get_nowait() == 'https://www.instagram.com/stories/alice/video/'
+    assert state.total_urls == 1
+
+
+async def test_save_reel_item_video_no_queue(client: MagicMock, mocker: MockerFixture) -> None:
+    mock_add = mocker.patch.object(client, 'add_video_url')
+    item = {
+        'id': 'v',
+        'image_versions2': {
+            'candidates': []
+        },
+        'pk': 'video',
+        'taken_at': 1,
+        'video_dash_manifest': 'manifest'
+    }
+    await client.save_reel_item(item)
+    mock_add.assert_called_once_with('https://www.instagram.com/stories/_/video/')
+
+
+async def test_save_reel_item_neither(client: MagicMock, mocker: MockerFixture) -> None:
+    mock_log_debug = mocker.patch('instagram_archiver.client.log.debug')
+    mock_save_image = mocker.patch.object(client, 'save_image_versions2', new_callable=AsyncMock)
+    await client.save_reel_item({'id': 'x', 'pk': 'unknown', 'taken_at': 0})
+    mock_save_image.assert_not_called()
+    mock_log_debug.assert_called_once_with('Reel item `%s` has neither image nor video data.',
+                                           'unknown')
+
+
 async def test_aenter_aexit(mocker: MockerFixture) -> None:
     mock_setup = mocker.patch('instagram_archiver.client.setup_session', new_callable=AsyncMock)
     mock_setup.return_value = MagicMock(close=AsyncMock(), headers=MagicMock())

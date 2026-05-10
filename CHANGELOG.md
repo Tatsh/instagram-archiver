@@ -9,6 +9,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Image items in stories and highlights are now archived alongside videos. Profile mode fetches
+  full reel metadata via the `PolarisStoriesV3ReelPageGalleryQuery` GraphQL endpoint, dispatching
+  image items to the media worker and video items to yt-dlp. Closes the second checkbox of issue
+  #3.
+
 ## [0.4.0] - 2026-04-25
 
 ### Removed

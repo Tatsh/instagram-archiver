@@ -94,3 +94,7 @@ everything.
 The default output path is the username under the current working directory.
 
 Videos are saved using yt-dlp and its respective configuration.
+
+In profile mode, both image and video items in the user's highlights and currently-active stories
+are archived. Image story items go through the same media pipeline as posts, while video items
+are handed to yt-dlp.

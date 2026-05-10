@@ -156,6 +156,7 @@ def _build_profile_scraper(mocker: MockerFixture,
     scraper.session = mocker.MagicMock()
     scraper.session.get = AsyncMock(  # type: ignore[method-assign]
         return_value=mocker.MagicMock(content=b'pic'))
+    mocker.patch.object(scraper, 'reel_page_gallery', new_callable=AsyncMock, return_value=None)
     if video_urls:
         scraper.video_urls = video_urls
     return scraper
@@ -235,8 +236,8 @@ async def test_process_already_saved_profile_pic(mocker: MockerFixture,
     mock_log_error.assert_called_once_with('First GraphQL query failed.')
 
 
-async def test_process_highlights_queues_videos(mocker: MockerFixture,
-                                                mock_setup_session: AsyncMock) -> None:
+async def test_process_highlights_dispatches_reel_items(mocker: MockerFixture,
+                                                        mock_setup_session: AsyncMock) -> None:
     mocker.patch('instagram_archiver.profile_scraper.log.error')
     scraper = _build_profile_scraper(mocker)
     mocker.patch.object(scraper,
@@ -263,10 +264,55 @@ async def test_process_highlights_queues_videos(mocker: MockerFixture,
     mocker.patch.object(scraper, 'graphql_query', new_callable=AsyncMock, return_value=None)
     mocker.patch.object(scraper, 'is_saved', return_value=False)
     mocker.patch.object(scraper, 'save_to_log')
+    image_item = {
+        'id': 'img1',
+        'image_versions2': {
+            'candidates': [{
+                'url': 'https://example.com/i.jpg',
+                'width': 1,
+                'height': 1
+            }]
+        },
+        'pk': 'image1',
+        'taken_at': 1
+    }
+    video_item = {
+        'id': 'vid1',
+        'image_versions2': {
+            'candidates': []
+        },
+        'pk': 'video1',
+        'taken_at': 2,
+        'video_versions': [{
+            'url': 'https://example.com/v.mp4',
+            'width': 1,
+            'height': 1
+        }]
+    }
+    mocker.patch.object(scraper,
+                        'reel_page_gallery',
+                        new_callable=AsyncMock,
+                        side_effect=[
+                            {
+                                'edges': [{
+                                    'node': {
+                                        'id': '12345',
+                                        'items': [image_item, video_item]
+                                    }
+                                }],
+                                'page_info': {
+                                    'end_cursor': None,
+                                    'has_next_page': False
+                                }
+                            },
+                            None,
+                        ])
+    mock_save_image = mocker.patch.object(scraper, 'save_image_versions2', new_callable=AsyncMock)
     ydl = mocker.MagicMock()
     ydl.download = AsyncMock(return_value=0)
     await scraper.process(ydl)
-    ydl.download.assert_awaited_with(('https://www.instagram.com/stories/highlights/12345/',))
+    mock_save_image.assert_awaited_once_with(image_item, 1)
+    ydl.download.assert_awaited_with(('https://www.instagram.com/stories/test_user/video1/',))
 
 
 async def test_process_highlights_error(mocker: MockerFixture,
@@ -292,7 +338,37 @@ async def test_process_highlights_error(mocker: MockerFixture,
     mocker.patch.object(scraper, 'graphql_query', new_callable=AsyncMock, return_value=None)
     mocker.patch.object(scraper, 'is_saved', return_value=True)
     await scraper.process(mocker.MagicMock())
-    mock_log_exception.assert_called_once_with('Failed to get highlights data.')
+    mock_log_exception.assert_any_call('Failed to get highlights data.')
+
+
+async def test_process_current_stories_error(mocker: MockerFixture,
+                                             mock_setup_session: AsyncMock) -> None:
+    mock_log_exception = mocker.patch('instagram_archiver.profile_scraper.log.exception')
+    scraper = _build_profile_scraper(mocker)
+    mocker.patch.object(scraper,
+                        'get_json',
+                        new_callable=AsyncMock,
+                        return_value={
+                            'data': {
+                                'user': {
+                                    'edge_owner_to_timeline_media': {
+                                        'edges': []
+                                    },
+                                    'id': '12345',
+                                    'profile_pic_url_hd': 'https://test_url'
+                                }
+                            }
+                        })
+    mocker.patch.object(scraper, 'get_text', new_callable=AsyncMock)
+    mocker.patch.object(scraper,
+                        'highlights_tray',
+                        new_callable=AsyncMock,
+                        return_value={'tray': []})
+    mocker.patch.object(scraper, 'reel_page_gallery', new_callable=AsyncMock, side_effect=HTTPError)
+    mocker.patch.object(scraper, 'graphql_query', new_callable=AsyncMock, return_value=None)
+    mocker.patch.object(scraper, 'is_saved', return_value=True)
+    await scraper.process(mocker.MagicMock())
+    mock_log_exception.assert_any_call('Failed to get current stories.')
 
 
 async def test_process_with_pagination(mocker: MockerFixture,
@@ -574,10 +650,39 @@ async def test_process_highlights_increments_yt_dlp_state(mocker: MockerFixture,
                         new_callable=AsyncMock,
                         return_value={'tray': [{
                             'id': 'f:1'
-                        }, {
-                            'id': 'f:2'
                         }]})
     mocker.patch.object(scraper, 'graphql_query', new_callable=AsyncMock, return_value=None)
+    video_item = {
+        'id': 'vid',
+        'image_versions2': {
+            'candidates': []
+        },
+        'pk': 'video',
+        'taken_at': 0,
+        'video_versions': [{
+            'url': 'https://example.com/v.mp4',
+            'width': 1,
+            'height': 1
+        }]
+    }
+    mocker.patch.object(scraper,
+                        'reel_page_gallery',
+                        new_callable=AsyncMock,
+                        side_effect=[
+                            {
+                                'edges': [{
+                                    'node': {
+                                        'id': '1',
+                                        'items': [video_item, video_item]
+                                    }
+                                }],
+                                'page_info': {
+                                    'end_cursor': None,
+                                    'has_next_page': False
+                                }
+                            },
+                            None,
+                        ])
     await scraper.process(mocker.MagicMock(), yt_dlp_state=state)
     assert state.total_urls == 2
 

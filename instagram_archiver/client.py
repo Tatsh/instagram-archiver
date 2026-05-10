@@ -22,11 +22,14 @@ from .typing import (
     MediaInfo,
     MediaInfoItem,
     MediaInfoItemImageVersions2Candidate,
+    StoryReelItem,
+    XDTStoriesV3ReelPageGalleryConnection,
+    XDTStoriesV3ReelPageGalleryQueryResponse,
 )
 from .utils import dump_json, get_extension, json_dumps_formatted, write_bytes, write_if_new
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Mapping
+    from collections.abc import Iterable, Mapping, Sequence
     from types import TracebackType
     import asyncio
 
@@ -38,6 +41,37 @@ __all__ = ('CSRFTokenNotFound', 'InstagramClient', 'UnexpectedRedirect')
 
 T = TypeVar('T')
 log = logging.getLogger(__name__)
+
+_REEL_PAGE_GALLERY_DOC_ID = '26659189347081290'
+_REEL_PAGE_GALLERY_PAGINATION_DOC_ID = '27002830962682635'
+
+
+def _extract_reel_connection(
+        data: Mapping[str, Any]) -> XDTStoriesV3ReelPageGalleryConnection | None:
+    """
+    Find the reel-gallery connection in a GraphQL ``data`` payload.
+
+    The wrapper key used by Instagram's PolarisStoriesV3 query is volatile, so this helper first
+    looks for the documented ``xdt_api__v1__feed__reels_media`` key and otherwise falls back to
+    the first value in ``data`` that exposes both ``edges`` and ``page_info`` fields.
+
+    Parameters
+    ----------
+    data : Mapping[str, Any]
+        The decoded GraphQL ``data`` mapping.
+
+    Returns
+    -------
+    XDTStoriesV3ReelPageGalleryConnection | None
+        The matching connection, or ``None`` if nothing in ``data`` looks like one.
+    """
+    candidate = data.get('xdt_api__v1__feed__reels_media')
+    if isinstance(candidate, dict) and 'edges' in candidate and 'page_info' in candidate:
+        return cast('XDTStoriesV3ReelPageGalleryConnection', candidate)
+    for value in data.values():
+        if isinstance(value, dict) and 'edges' in value and 'page_info' in value:
+            return cast('XDTStoriesV3ReelPageGalleryConnection', value)
+    return None
 
 
 class CSRFTokenNotFound(RuntimeError):
@@ -262,14 +296,14 @@ class InstagramClient:
             URL to record.
         """
 
-    async def save_image_versions2(self, sub_item: CarouselMedia | MediaInfoItem,
+    async def save_image_versions2(self, sub_item: CarouselMedia | MediaInfoItem | StoryReelItem,
                                    timestamp: int) -> None:
         """
         Save images in the ``image_versions2`` dictionary.
 
         Parameters
         ----------
-        sub_item : CarouselMedia | MediaInfoItem
+        sub_item : CarouselMedia | MediaInfoItem | StoryReelItem
             Source item containing ``image_versions2`` candidates.
         timestamp : int
             Timestamp to apply to the saved file.
@@ -295,6 +329,118 @@ class InstagramClient:
         utime(name, (timestamp, timestamp))
         if r.url is not None:
             self.save_to_log(r.url)
+
+    async def reel_page_gallery(
+            self,
+            reel_ids: Sequence[str],
+            *,
+            after: str | None = None,
+            first: int = 5,
+            initial_reel_id: str | None = None,
+            is_highlight: bool = True) -> XDTStoriesV3ReelPageGalleryConnection | None:
+        """
+        Fetch a page of the PolarisStoriesV3 reel gallery.
+
+        Used to retrieve full story metadata (image and video items) for the supplied reels. The
+        first page uses the ``ReelPageGalleryQuery`` document; subsequent pages (when ``after`` is
+        supplied) use the pagination document.
+
+        Parameters
+        ----------
+        reel_ids : Sequence[str]
+            Numeric reel identifiers (user IDs for current stories or numeric highlight IDs).
+        after : str | None
+            Cursor returned by a previous page, or ``None`` for the first page.
+        first : int
+            Maximum number of reels to return per page.
+        initial_reel_id : str | None
+            Reel that the user "opened first". Defaults to the first entry of ``reel_ids``.
+        is_highlight : bool
+            ``True`` when ``reel_ids`` refer to highlights, ``False`` for current stories.
+
+        Returns
+        -------
+        XDTStoriesV3ReelPageGalleryConnection | None
+            The connection payload, or ``None`` when the request fails or the response shape is
+            unexpected.
+        """
+        ordered_ids = list(reel_ids)
+        if not ordered_ids:
+            return None
+        resolved_initial = initial_reel_id or ordered_ids[0]
+        if after is None:
+            variables: dict[str, Any] = {
+                'first': first,
+                'initial_reel_id': resolved_initial,
+                'last': None,
+                'reel_ids': ordered_ids,
+            }
+            doc_id = _REEL_PAGE_GALLERY_DOC_ID
+        else:
+            variables = {
+                'after': after,
+                'before': None,
+                'first': first,
+                'initial_reel_id': resolved_initial,
+                'is_highlight': is_highlight,
+                'last': None,
+                'reel_ids': ordered_ids,
+            }
+            doc_id = _REEL_PAGE_GALLERY_PAGINATION_DOC_ID
+        data = await self.graphql_query(variables,
+                                        cast_to=XDTStoriesV3ReelPageGalleryQueryResponse,
+                                        doc_id=doc_id)
+        if not data:
+            return None
+        connection = _extract_reel_connection(data)
+        if connection is None:
+            log.warning('Reel gallery response did not contain a recognisable connection.')
+        return connection
+
+    async def save_reel_item(self,
+                             item: StoryReelItem,
+                             video_queue: asyncio.Queue[str | None] | None = None,
+                             *,
+                             username: str | None = None,
+                             yt_dlp_state: YTDLPState | None = None) -> None:
+        """
+        Save a single story item.
+
+        Image-only items are written via :py:meth:`save_image_versions2`; items with a video are
+        routed to ``video_queue`` for the yt-dlp worker (or appended to
+        :py:attr:`video_urls` when no queue is supplied, mirroring the synchronous helper used
+        elsewhere).
+
+        Parameters
+        ----------
+        item : StoryReelItem
+            Story item payload from a reel page gallery response.
+        video_queue : asyncio.Queue[str | None] | None
+            Optional queue receiving permalinks for the yt-dlp worker. When ``None``, video URLs
+            are appended to :py:attr:`video_urls` instead.
+        username : str | None
+            Username of the reel owner. Used to build the ``stories/{username}/{pk}/`` permalink
+            for video items. Falls back to the literal ``"_"`` when not available, which yt-dlp
+            still accepts because it identifies the story by ``pk``.
+        yt_dlp_state : YTDLPState | None
+            Optional yt-dlp progress state whose ``total_urls`` counter is incremented when a
+            video URL is enqueued.
+        """
+        has_video = bool(item.get('video_versions')) or bool(item.get('video_dash_manifest'))
+        if has_video:
+            permalink = (f'https://www.instagram.com/stories/{username or "_"}/'
+                         f'{item["pk"]}/')
+            if video_queue is None:
+                self.add_video_url(permalink)
+            else:
+                await video_queue.put(permalink)
+                if yt_dlp_state is not None:
+                    yt_dlp_state.total_urls += 1
+            return
+        if 'image_versions2' not in item:
+            log.debug('Reel item `%s` has neither image nor video data.', item.get('pk'))
+            return
+        await self.save_image_versions2(item, item['taken_at'])
 
     async def save_comments(self, edge: Edge) -> None:
         """

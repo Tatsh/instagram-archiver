@@ -16,9 +16,11 @@ if TYPE_CHECKING:
 __all__ = ('COMMENTS_PROCESSED', 'IMAGES_PROCESSED', 'POSTS_HANDLED', 'VIDEOS_PROCESSED',
            'YT_DLP_STATUS', 'BrowserName', 'CarouselMedia', 'Comments', 'Edge', 'HasID',
            'HighlightsTray', 'MediaInfo', 'MediaInfoItem', 'MediaInfoItemImageVersions2Candidate',
-           'OnMessage', 'Stats', 'UserInfo', 'WebProfileInfo', 'WebProfileInfoData',
-           'XDTAPIV1FeedUserTimelineGraphQLConnection',
-           'XDTAPIV1FeedUserTimelineGraphQLConnectionContainer', 'XDTMediaDict', 'YTDLPState')
+           'OnMessage', 'Stats', 'StoryReel', 'StoryReelEdge', 'StoryReelItem', 'UserInfo',
+           'WebProfileInfo', 'WebProfileInfoData', 'XDTAPIV1FeedUserTimelineGraphQLConnection',
+           'XDTAPIV1FeedUserTimelineGraphQLConnectionContainer', 'XDTMediaDict',
+           'XDTStoriesV3ReelPageGalleryConnection', 'XDTStoriesV3ReelPageGalleryQueryResponse',
+           'YTDLPState')
 
 OnMessage: TypeAlias = Callable[[str], None]
 """Callback used to report human-readable progress updates."""
@@ -233,6 +235,63 @@ class XDTAPIV1FeedUserTimelineGraphQLConnectionContainer(TypedDict):
 
     xdt_api__v1__feed__user_timeline_graphql_connection: XDTAPIV1FeedUserTimelineGraphQLConnection
     """User timeline data."""
+
+
+class StoryReelItem(TypedDict):
+    """A single story media item inside a reel."""
+
+    code: NotRequired[str]
+    """Optional shortcode of the story item."""
+    id: str
+    """Identifier."""
+    image_versions2: NotRequired[MediaInfoItemImageVersions2]
+    """Image versions, when the item carries a still image."""
+    media_type: NotRequired[int]
+    """Instagram media type (1=image, 2=video, etc)."""
+    pk: str
+    """Primary key."""
+    taken_at: int
+    """Timestamp when the media was taken."""
+    user: NotRequired[HasID]
+    """User who posted the story."""
+    video_dash_manifest: NotRequired[str | None]
+    """Video DASH manifest URL, if available."""
+    video_versions: NotRequired[Sequence[MediaInfoItemVideoVersion]]
+    """Video versions, if the item is a video."""
+
+
+class StoryReel(TypedDict):
+    """A reel (collection of story items belonging to a single user/highlight)."""
+
+    id: str
+    """Reel identifier (numeric user ID for stories, numeric highlight ID for highlights)."""
+    items: Sequence[StoryReelItem]
+    """Story items contained in this reel."""
+    user: NotRequired[HasID]
+    """Owner of the reel."""
+
+
+class StoryReelEdge(TypedDict):
+    """Edge wrapping a :py:class:`StoryReel`."""
+
+    node: StoryReel
+    """Node at this edge."""
+
+
+class XDTStoriesV3ReelPageGalleryConnection(TypedDict):
+    """Connection for the PolarisStoriesV3 reel page gallery query."""
+
+    edges: Sequence[StoryReelEdge]
+    """Edges of the connection."""
+    page_info: PageInfo
+    """Pagination information."""
+
+
+class XDTStoriesV3ReelPageGalleryQueryResponse(TypedDict):
+    """Container for :py:class:`XDTStoriesV3ReelPageGalleryConnection`."""
+
+    xdt_api__v1__feed__reels_media: XDTStoriesV3ReelPageGalleryConnection
+    """Reels media connection payload."""
 
 
 class WebProfileInfoData(TypedDict):

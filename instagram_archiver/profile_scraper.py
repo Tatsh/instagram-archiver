@@ -100,6 +100,31 @@ class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
         self._log_db.close()
         await super().__aexit__(_, __, ___)
 
+    async def _dispatch_reel(self,
+                             reel_ids: list[str],
+                             *,
+                             is_highlight: bool,
+                             username: str,
+                             video_queue: asyncio.Queue[str | None],
+                             yt_dlp_state: YTDLPState | None = None) -> None:
+        after: str | None = None
+        while True:
+            connection = await self.reel_page_gallery(reel_ids,
+                                                      after=after,
+                                                      is_highlight=is_highlight)
+            if connection is None:
+                return
+            for edge in connection['edges']:
+                for item in edge['node']['items']:
+                    await self.save_reel_item(item,
+                                              video_queue,
+                                              username=username,
+                                              yt_dlp_state=yt_dlp_state)
+            page_info = connection['page_info']
+            if not page_info['has_next_page']:
+                return
+            after = page_info['end_cursor']
+
     async def _producer(self,
                         image_queue: asyncio.Queue[Edge | None],
                         comments_queue: asyncio.Queue[Edge | None],
@@ -122,13 +147,25 @@ class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
                     write_bytes('profile_pic.jpg', pic_response.content)
                 self.save_to_log(user_info['profile_pic_url_hd'])
             try:
-                for item in (await self.highlights_tray(user_info['id']))['tray']:
-                    await video_queue.put('https://www.instagram.com/stories/highlights/'
-                                          f'{item["id"].split(":")[-1]}/')
-                    if yt_dlp_state is not None:
-                        yt_dlp_state.total_urls += 1
+                tray = (await self.highlights_tray(user_info['id']))['tray']
             except HTTPError:
                 log.exception('Failed to get highlights data.')
+            else:
+                highlight_ids = [item['id'].split(':')[-1] for item in tray]
+                if highlight_ids:
+                    await self._dispatch_reel(highlight_ids,
+                                              is_highlight=True,
+                                              username=self._username,
+                                              video_queue=video_queue,
+                                              yt_dlp_state=yt_dlp_state)
+            try:
+                await self._dispatch_reel([str(user_info['id'])],
+                                          is_highlight=False,
+                                          username=self._username,
+                                          video_queue=video_queue,
+                                          yt_dlp_state=yt_dlp_state)
+            except HTTPError:
+                log.exception('Failed to get current stories.')
             await self.dispatch_edges(user_info['edge_owner_to_timeline_media']['edges'],
                                       image_queue,
                                       comments_queue,
