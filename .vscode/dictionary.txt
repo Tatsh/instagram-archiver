@@ -1,5 +1,4 @@
 anchore
-Ångström
 anyio
 apng
 appdir
@@ -43,8 +42,8 @@ flathub
 forcelist
 foxundermoon
 functools
-getpid
 genindex
+getpid
 globaltoc
 hoverxref
 htmlcov
@@ -73,8 +72,8 @@ myproject
 mypy
 namedtuples
 niquests
-norecursedirs
 noprogress
+norecursedirs
 notarytool
 npmjs
 numpy
@@ -97,6 +96,7 @@ pypi
 pyproject
 pytest
 pythonhosted
+quic
 regen
 relayprovider
 ripgreprc
@@ -139,3 +139,4 @@ yapf
 yapfignore
 yarnrc
 ytdlp
+Ångström

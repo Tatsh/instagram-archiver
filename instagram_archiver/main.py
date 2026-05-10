@@ -63,6 +63,7 @@ def _build_loggers(*, debug: bool) -> dict[str, dict[str, Any]]:
     return {
         'instagram_archiver': {} if debug else _QUIET,
         'niquests': {},
+        'quic': _QUIET,
         'urllib3': {},
         'urllib3.util.retry': _QUIET,
         'yt_dlp_utils': {} if debug else _QUIET,
