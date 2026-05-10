@@ -36,6 +36,7 @@ class SavedScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
                  browser_profile: str = 'Default',
                  output_dir: str | Path | None = None,
                  *,
+                 child_comments: bool = False,
                  comments: bool = False,
                  disable_log: bool = False,
                  log_file: str | Path | None = None) -> None:
@@ -50,6 +51,8 @@ class SavedScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
             The browser profile to use.
         output_dir : str | Path | None
             The output directory to save the posts to.
+        child_comments : bool
+            Whether to recursively fetch child (reply) comments. Implies ``comments=True``.
         comments : bool
             Whether to save comments or not.
         disable_log : bool
@@ -62,7 +65,8 @@ class SavedScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
         self._output_dir = Path(output_dir or Path.cwd() / '@@saved-posts@@')
         Path(self._output_dir).mkdir(parents=True, exist_ok=True)
         self._log_db = LogDB(Path(log_file or self._output_dir / '.log.db'), disabled=disable_log)
-        self.should_save_comments = comments
+        self.should_save_comments = comments or child_comments
+        self.should_save_child_comments = child_comments
 
     @override
     def save_to_log(self, url: str) -> None:

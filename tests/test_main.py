@@ -170,6 +170,24 @@ def test_main_saved_include_comments(runner: CliRunner, mocker: MockerFixture) -
     assert mock_async.call_args.kwargs['include_comments'] is True
 
 
+def test_main_saved_include_child_comments(runner: CliRunner, mocker: MockerFixture) -> None:
+    mocker.patch('instagram_archiver.main.setup_logging')
+    mocker.patch('instagram_archiver.main.asyncio.run', side_effect=_consume_coro)
+    mock_async = mocker.patch('instagram_archiver.main._async_saved_main', new_callable=AsyncMock)
+    result = runner.invoke(main, ['--saved', '-R'])
+    assert result.exit_code == 0
+    assert mock_async.call_args.kwargs['include_child_comments'] is True
+
+
+def test_main_profile_include_child_comments(runner: CliRunner, mocker: MockerFixture) -> None:
+    mocker.patch('instagram_archiver.main.setup_logging')
+    mocker.patch('instagram_archiver.main.asyncio.run', side_effect=_consume_coro)
+    mock_async = mocker.patch('instagram_archiver.main._async_profile_main', new_callable=AsyncMock)
+    result = runner.invoke(main, ['user', '--include-child-comments'])
+    assert result.exit_code == 0
+    assert mock_async.call_args.kwargs['include_child_comments'] is True
+
+
 def test_main_saved_unsave_flag(runner: CliRunner, mocker: MockerFixture) -> None:
     mocker.patch('instagram_archiver.main.setup_logging')
     mocker.patch('instagram_archiver.main.asyncio.run', side_effect=_consume_coro)

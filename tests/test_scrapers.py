@@ -341,6 +341,57 @@ async def test_process_highlights_error(mocker: MockerFixture,
     mock_log_exception.assert_any_call('Failed to get highlights data.')
 
 
+async def test_process_dispatch_reel_paginates(mocker: MockerFixture,
+                                               mock_setup_session: AsyncMock) -> None:
+    """``_dispatch_reel`` advances ``after`` to ``end_cursor`` when ``has_next_page`` is True."""
+    scraper = _build_profile_scraper(mocker)
+    mocker.patch.object(scraper,
+                        'get_json',
+                        new_callable=AsyncMock,
+                        return_value={
+                            'data': {
+                                'user': {
+                                    'edge_owner_to_timeline_media': {
+                                        'edges': []
+                                    },
+                                    'id': '12345',
+                                    'profile_pic_url_hd': 'https://test_url'
+                                }
+                            }
+                        })
+    mocker.patch.object(scraper, 'get_text', new_callable=AsyncMock)
+    mocker.patch.object(scraper,
+                        'highlights_tray',
+                        new_callable=AsyncMock,
+                        return_value={'tray': [{
+                            'id': 'f:1'
+                        }]})
+    mocker.patch.object(scraper, 'graphql_query', new_callable=AsyncMock, return_value=None)
+    mocker.patch.object(scraper, 'is_saved', return_value=True)
+    mock_reel = mocker.patch.object(scraper,
+                                    'reel_page_gallery',
+                                    new_callable=AsyncMock,
+                                    side_effect=[
+                                        {
+                                            'edges': [],
+                                            'page_info': {
+                                                'end_cursor': 'cur',
+                                                'has_next_page': True
+                                            }
+                                        },
+                                        {
+                                            'edges': [],
+                                            'page_info': {
+                                                'end_cursor': None,
+                                                'has_next_page': False
+                                            }
+                                        },
+                                        None,
+                                    ])
+    await scraper.process(mocker.MagicMock())
+    assert mock_reel.await_args_list[1].kwargs['after'] == 'cur'
+
+
 async def test_process_current_stories_error(mocker: MockerFixture,
                                              mock_setup_session: AsyncMock) -> None:
     mock_log_exception = mocker.patch('instagram_archiver.profile_scraper.log.exception')

@@ -15,6 +15,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   full reel metadata via the `PolarisStoriesV3ReelPageGalleryQuery` GraphQL endpoint, dispatching
   image items to the media worker and video items to yt-dlp. Closes the second checkbox of issue
   #3.
+- `--include-child-comments`/`-R` flag. When passed, child (reply) comments are fetched
+  recursively for every top-level comment that reports having any and embedded into the saved
+  per-post `<id>-comments.json` under the parent's `child_comments` key. Implies
+  `--include-comments`. Closes the first checkbox of issue #3.
 
 ## [0.4.0] - 2026-04-25
 

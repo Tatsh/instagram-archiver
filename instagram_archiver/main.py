@@ -248,10 +248,11 @@ async def _drive_scraper(scraper: ProfileScraper | SavedScraper,
 
 
 async def _async_profile_main(browser: BrowserName, profile: str, username: str, output_dir: Path,
-                              *, debug: bool, include_comments: bool, no_log: bool, quiet: bool,
-                              sleep_time: int) -> None:
+                              *, debug: bool, include_child_comments: bool, include_comments: bool,
+                              no_log: bool, quiet: bool, sleep_time: int) -> None:
     scraper = ProfileScraper(browser=browser,
                              browser_profile=profile,
+                             child_comments=include_child_comments,
                              comments=include_comments,
                              disable_log=no_log,
                              output_dir=output_dir,
@@ -260,11 +261,12 @@ async def _async_profile_main(browser: BrowserName, profile: str, username: str,
 
 
 async def _async_saved_main(browser: BrowserName, profile: str, output_dir: str, *, debug: bool,
-                            include_comments: bool, no_log: bool, quiet: bool, sleep_time: int,
-                            unsave: bool) -> None:
+                            include_child_comments: bool, include_comments: bool, no_log: bool,
+                            quiet: bool, sleep_time: int, unsave: bool) -> None:
     scraper = SavedScraper(browser,
                            profile,
                            output_dir,
+                           child_comments=include_child_comments,
                            comments=include_comments,
                            disable_log=no_log)
 
@@ -298,6 +300,10 @@ async def _async_saved_main(browser: BrowserName, profile: str, output_dir: str,
               '--include-comments',
               is_flag=True,
               help='Also download all comments (extends download time significantly).')
+@click.option('-R',
+              '--include-child-comments',
+              is_flag=True,
+              help='Also recursively download child (reply) comments. Implies --include-comments.')
 @click.option('-s',
               '--saved',
               'saved',
@@ -316,6 +322,7 @@ def main(output_dir: str | None,
          sleep_time: int = 1,
          *,
          debug: bool = False,
+         include_child_comments: bool = False,
          include_comments: bool = False,
          no_log: bool = False,
          quiet: bool = False,
@@ -344,6 +351,7 @@ def main(output_dir: str | None,
                                   profile,
                                   resolved_saved_output_dir,
                                   debug=debug,
+                                  include_child_comments=include_child_comments,
                                   include_comments=include_comments,
                                   no_log=no_log,
                                   quiet=quiet,
@@ -362,6 +370,7 @@ def main(output_dir: str | None,
                                     profile_username,
                                     resolved_profile_output_dir,
                                     debug=debug,
+                                    include_child_comments=include_child_comments,
                                     include_comments=include_comments,
                                     no_log=no_log,
                                     quiet=quiet,

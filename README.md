@@ -60,6 +60,8 @@ Options:
   --no-log                        Ignore log (re-fetch everything).
   -C, --include-comments          Also download all comments (extends download
                                   time significantly).
+  -R, --include-child-comments    Also recursively download child (reply)
+                                  comments. Implies --include-comments.
   -s, --saved                     Archive your saved posts instead of a
                                   profile (mutually exclusive with USERNAME).
   -u, --unsave                    Unsave posts after successful archive (only

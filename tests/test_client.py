@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 from unittest.mock import AsyncMock, MagicMock
 import asyncio
 
@@ -320,6 +320,183 @@ async def test_save_image_versions2_head_request_failure(client: MagicMock,
     mock_is_saved.assert_called_once_with('https://example.com/image')
     client.session.head.assert_awaited_once_with('https://example.com/image')
     client.session.get.assert_not_called()
+
+
+async def test_save_comments_with_child_comments(client: MagicMock, mocker: MockerFixture) -> None:
+    client.should_save_child_comments = True
+    parent_with_replies = {
+        'id': 'p1',
+        'pk': 'p1pk',
+        'child_comment_count': 2,
+    }
+    parent_no_replies = {
+        'id': 'p2',
+        'pk': 'p2pk',
+        'child_comment_count': 0,
+    }
+    mocker.patch.object(client,
+                        'get_json',
+                        new_callable=AsyncMock,
+                        side_effect=[
+                            {
+                                'comments': [parent_with_replies, parent_no_replies],
+                                'can_view_more_preview_comments': False,
+                                'next_min_id': None,
+                            },
+                            {
+                                'child_comments': [{
+                                    'id': 'r1',
+                                    'pk': 'r1pk'
+                                }, {
+                                    'id': 'r2',
+                                    'pk': 'r2pk'
+                                }],
+                                'has_more_head_child_comments': False,
+                            },
+                        ])
+    mock_dump_json = mocker.patch('instagram_archiver.client.dump_json')
+
+    await client.save_comments({'node': {'id': '999'}})
+
+    assert parent_with_replies['child_comments'] == [
+        {
+            'id': 'r1',
+            'pk': 'r1pk'
+        },
+        {
+            'id': 'r2',
+            'pk': 'r2pk'
+        },
+    ]
+    assert 'child_comments' not in parent_no_replies
+    mock_dump_json.assert_called_once_with('999-comments.json', mocker.ANY, mode='w+')
+
+
+async def test_save_comments_child_comments_paginated(client: MagicMock,
+                                                      mocker: MockerFixture) -> None:
+    client.should_save_child_comments = True
+    parent = {'id': 'p', 'pk': 'ppk', 'child_comment_count': 3}
+    mock_get_json = mocker.patch.object(client,
+                                        'get_json',
+                                        new_callable=AsyncMock,
+                                        side_effect=[
+                                            {
+                                                'comments': [parent],
+                                                'can_view_more_preview_comments': False,
+                                                'next_min_id': None,
+                                            },
+                                            {
+                                                'child_comments': [{
+                                                    'id': 'r1'
+                                                }],
+                                                'has_more_head_child_comments': True,
+                                                'next_min_id': 'cursor1',
+                                            },
+                                            {
+                                                'child_comments': [{
+                                                    'id': 'r2'
+                                                }, {
+                                                    'id': 'r3'
+                                                }],
+                                                'has_more_head_child_comments': False,
+                                            },
+                                        ])
+    mocker.patch('instagram_archiver.client.dump_json')
+
+    await client.save_comments({'node': {'id': 'mid'}})
+
+    children = cast('list[dict[str, Any]]', parent['child_comments'])
+    assert [c['id'] for c in children] == ['r1', 'r2', 'r3']
+    paged_call = mock_get_json.await_args_list[2]
+    assert paged_call.kwargs['params']['min_id'] == 'cursor1'
+
+
+async def test_save_comments_child_comments_disabled(client: MagicMock,
+                                                     mocker: MockerFixture) -> None:
+    client.should_save_child_comments = False
+    parent = {'id': 'p', 'pk': 'ppk', 'child_comment_count': 5}
+    mocker.patch.object(client,
+                        'get_json',
+                        new_callable=AsyncMock,
+                        return_value={
+                            'comments': [parent],
+                            'can_view_more_preview_comments': False,
+                            'next_min_id': None,
+                        })
+    mocker.patch('instagram_archiver.client.dump_json')
+    await client.save_comments({'node': {'id': 'm'}})
+    assert 'child_comments' not in parent
+
+
+async def test_save_comments_child_comments_http_error(client: MagicMock,
+                                                       mocker: MockerFixture) -> None:
+    client.should_save_child_comments = True
+    parent = {'id': 'p', 'pk': 'ppk', 'child_comment_count': 1}
+    mocker.patch.object(client,
+                        'get_json',
+                        new_callable=AsyncMock,
+                        side_effect=[
+                            {
+                                'comments': [parent],
+                                'can_view_more_preview_comments': False,
+                                'next_min_id': None,
+                            },
+                            HTTPError,
+                        ])
+    mocker.patch('instagram_archiver.client.dump_json')
+    mock_log_exception = mocker.patch('instagram_archiver.client.log.exception')
+    await client.save_comments({'node': {'id': 'mid'}})
+    assert 'child_comments' not in parent
+    mock_log_exception.assert_called_once_with('Failed to get child comments for `%s`.', 'ppk')
+
+
+async def test_save_comments_child_comments_partial_then_error(client: MagicMock,
+                                                               mocker: MockerFixture) -> None:
+    """When pagination errors after collecting some replies, what we have is still embedded."""
+    client.should_save_child_comments = True
+    parent = {'id': 'p', 'pk': 'ppk', 'child_comment_count': 5}
+    mocker.patch.object(client,
+                        'get_json',
+                        new_callable=AsyncMock,
+                        side_effect=[
+                            {
+                                'comments': [parent],
+                                'can_view_more_preview_comments': False,
+                                'next_min_id': None,
+                            },
+                            {
+                                'child_comments': [{
+                                    'id': 'r1'
+                                }],
+                                'has_more_head_child_comments': True,
+                                'next_min_id': 'cursor1',
+                            },
+                            HTTPError,
+                        ])
+    mocker.patch('instagram_archiver.client.dump_json')
+    mocker.patch('instagram_archiver.client.log.exception')
+    await client.save_comments({'node': {'id': 'mid'}})
+    children = cast('list[dict[str, Any]]', parent['child_comments'])
+    assert [c['id'] for c in children] == ['r1']
+
+
+async def test_save_comments_child_comments_no_pk(client: MagicMock, mocker: MockerFixture) -> None:
+    """Comment with child_comment_count > 0 but no pk/id is skipped with a debug log."""
+    client.should_save_child_comments = True
+    parent: dict[str, Any] = {'child_comment_count': 1}
+    mocker.patch.object(client,
+                        'get_json',
+                        new_callable=AsyncMock,
+                        return_value={
+                            'comments': [parent],
+                            'can_view_more_preview_comments': False,
+                            'next_min_id': None,
+                        })
+    mocker.patch('instagram_archiver.client.dump_json')
+    mock_log_debug = mocker.patch('instagram_archiver.client.log.debug')
+    await client.save_comments({'node': {'id': 'mid'}})
+    assert 'child_comments' not in parent
+    mock_log_debug.assert_called_once_with('Skipping reply fetch for comment with no pk/id.')
 
 
 async def test_save_comments_http_error(client: MagicMock, mocker: MockerFixture) -> None:

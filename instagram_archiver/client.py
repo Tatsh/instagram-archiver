@@ -16,6 +16,7 @@ from .constants import API_HEADERS, SHARED_HEADERS
 from .typing import (
     POSTS_HANDLED,
     CarouselMedia,
+    ChildCommentsPage,
     Comments,
     Edge,
     HighlightsTray,
@@ -101,6 +102,8 @@ class InstagramClient:
         """The niquests :py:class:`~niquests.AsyncSession` used for all HTTP calls."""
         self.failed_urls: set[str] = set()
         """Set of failed URLs."""
+        self.should_save_child_comments: bool = False
+        """Whether to recursively fetch child (reply) comments."""
         self.should_save_comments: bool = False
         """Whether to fetch comments. Subclasses or mixins flip this on."""
         self.video_urls: list[str] = []
@@ -446,12 +449,17 @@ class InstagramClient:
         """
         Save comments for an edge node.
 
+        When :py:attr:`should_save_child_comments` is ``True``, replies are also fetched for every
+        top-level comment that reports having any (``child_comment_count > 0``) and embedded back
+        into the saved JSON under the parent's ``child_comments`` key.
+
         Parameters
         ----------
         edge : Edge
             Edge whose comments should be saved.
         """
-        comment_url = f'https://www.instagram.com/api/v1/media/{edge["node"]["id"]}/comments/'
+        media_id = edge['node']['id']
+        comment_url = f'https://www.instagram.com/api/v1/media/{media_id}/comments/'
         shared_params = {'can_support_threading': 'true'}
         try:
             comment_data = await self.get_json(comment_url,
@@ -476,8 +484,72 @@ class InstagramClient:
                 break
             top_comment_data['comments'] = list(top_comment_data['comments']) + list(
                 comment_data['comments'])
-        comments_json = f'{edge["node"]["id"]}-comments.json'
+        if self.should_save_child_comments:
+            await self._embed_child_comments(media_id, top_comment_data['comments'])
+        comments_json = f'{media_id}-comments.json'
         dump_json(comments_json, top_comment_data, mode='w+')
+
+    async def _embed_child_comments(self, media_id: str, comments: Iterable[Mapping[str,
+                                                                                    Any]]) -> None:
+        """
+        Replace ``child_comments`` on each parent comment with the full reply set.
+
+        Parameters
+        ----------
+        media_id : str
+            Media identifier used in the comments URL.
+        comments : Iterable[Mapping[str, Any]]
+            Top-level comments to enrich. Mutated in place; each parent with a non-zero
+            ``child_comment_count`` gains the fetched replies under ``child_comments``.
+        """
+        for comment in comments:
+            if not comment.get('child_comment_count'):
+                continue
+            comment_pk = comment.get('pk') or comment.get('id')
+            if comment_pk is None:
+                log.debug('Skipping reply fetch for comment with no pk/id.')
+                continue
+            replies = await self._fetch_child_comments(media_id, str(comment_pk))
+            if replies is not None:
+                cast('Any', comment)['child_comments'] = replies
+
+    async def _fetch_child_comments(self, media_id: str,
+                                    comment_pk: str) -> list[Mapping[str, Any]] | None:
+        """
+        Fetch every reply under a top-level comment, paginating with ``min_id``.
+
+        Parameters
+        ----------
+        media_id : str
+            Media identifier used in the comments URL.
+        comment_pk : str
+            Primary key of the parent comment.
+
+        Returns
+        -------
+        list[Mapping[str, Any]] | None
+            Aggregated replies across all pages, or ``None`` if the first request fails.
+        """
+        url = (f'https://www.instagram.com/api/v1/media/{media_id}/comments/'
+               f'{comment_pk}/child_comments/')
+        params: dict[str, str] = {
+            'is_chronological': 'true',
+            'min_id': '',
+            'paging_direction': 'view_more',
+        }
+        replies: list[Mapping[str, Any]] = []
+        while True:
+            try:
+                page = await self.get_json(url, params=params, cast_to=ChildCommentsPage)
+            except HTTPError:
+                log.exception('Failed to get child comments for `%s`.', comment_pk)
+                return replies or None
+            replies.extend(page.get('child_comments') or ())
+            next_min_id = page.get('next_min_id')
+            if not page.get('has_more_head_child_comments') or not next_min_id:
+                break
+            params = {**params, 'min_id': next_min_id}
+        return replies
 
     async def save_media(self, edge: Edge) -> None:
         """

@@ -5,19 +5,20 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal, TypeAlias, TypedDict
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypedDict
 
 from archiver_stats import Category, Stats as _BaseStats, StatusLine
 from typing_extensions import NotRequired
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
 
 __all__ = ('COMMENTS_PROCESSED', 'IMAGES_PROCESSED', 'POSTS_HANDLED', 'VIDEOS_PROCESSED',
-           'YT_DLP_STATUS', 'BrowserName', 'CarouselMedia', 'Comments', 'Edge', 'HasID',
-           'HighlightsTray', 'MediaInfo', 'MediaInfoItem', 'MediaInfoItemImageVersions2Candidate',
-           'OnMessage', 'Stats', 'StoryReel', 'StoryReelEdge', 'StoryReelItem', 'UserInfo',
-           'WebProfileInfo', 'WebProfileInfoData', 'XDTAPIV1FeedUserTimelineGraphQLConnection',
+           'YT_DLP_STATUS', 'BrowserName', 'CarouselMedia', 'ChildCommentsPage', 'Comments', 'Edge',
+           'HasID', 'HighlightsTray', 'MediaInfo', 'MediaInfoItem',
+           'MediaInfoItemImageVersions2Candidate', 'OnMessage', 'Stats', 'StoryReel',
+           'StoryReelEdge', 'StoryReelItem', 'UserInfo', 'WebProfileInfo', 'WebProfileInfoData',
+           'XDTAPIV1FeedUserTimelineGraphQLConnection',
            'XDTAPIV1FeedUserTimelineGraphQLConnectionContainer', 'XDTMediaDict',
            'XDTStoriesV3ReelPageGalleryConnection', 'XDTStoriesV3ReelPageGalleryQueryResponse',
            'YTDLPState')
@@ -185,6 +186,19 @@ class Comments(TypedDict):
     """List of comments."""
     next_min_id: str
     """Next minimum ID for pagination."""
+
+
+class ChildCommentsPage(TypedDict):
+    """One page of replies under a top-level comment."""
+
+    child_comments: Sequence[Mapping[str, Any]]
+    """Replies returned on this page."""
+    has_more_head_child_comments: NotRequired[bool]
+    """Whether more replies exist forward of the current cursor."""
+    has_more_tail_child_comments: NotRequired[bool]
+    """Whether more replies exist behind the current cursor."""
+    next_min_id: NotRequired[str]
+    """Cursor for fetching the next page when paging forward."""
 
 
 class MediaInfo(TypedDict):

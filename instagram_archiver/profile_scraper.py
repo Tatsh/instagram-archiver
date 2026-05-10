@@ -44,6 +44,7 @@ class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
                  disable_log: bool = False,
                  browser: BrowserName = 'chrome',
                  browser_profile: str = 'Default',
+                 child_comments: bool = False,
                  comments: bool = False) -> None:
         """
         Initialise ``ProfileScraper``.
@@ -62,6 +63,8 @@ class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
             The browser to use.
         browser_profile : str
             The browser profile to use.
+        child_comments : bool
+            Whether to recursively fetch child (reply) comments. Implies ``comments=True``.
         comments : bool
             Whether to save comments or not.
         """
@@ -70,7 +73,8 @@ class ProfileScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
         self._output_dir.mkdir(parents=True, exist_ok=True)
         self._log_db = LogDB(Path(log_file or self._output_dir / '.log.db'), disabled=disable_log)
         self._username = username
-        self.should_save_comments = comments
+        self.should_save_comments = comments or child_comments
+        self.should_save_child_comments = child_comments
 
     @override
     def save_to_log(self, url: str) -> None:
