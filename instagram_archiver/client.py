@@ -239,7 +239,7 @@ class InstagramClient:
         T
             Response body decoded from JSON.
         """
-        request_headers = cast('dict[str, str]', dict(API_HEADERS if headers is None else headers))
+        request_headers = dict(API_HEADERS if headers is None else headers)
         r = await self.session.get(url, params=params, headers=request_headers)
         r.raise_for_status()
         return cast('T', r.json())
@@ -382,7 +382,7 @@ class InstagramClient:
                 'first': first,
                 'initial_reel_id': resolved_initial,
                 'last': None,
-                'reel_ids': ordered_ids,
+                'reel_ids': ordered_ids
             }
             doc_id = _REEL_PAGE_GALLERY_DOC_ID
         else:
@@ -393,7 +393,7 @@ class InstagramClient:
                 'initial_reel_id': resolved_initial,
                 'is_highlight': is_highlight,
                 'last': None,
-                'reel_ids': ordered_ids,
+                'reel_ids': ordered_ids
             }
             doc_id = _REEL_PAGE_GALLERY_PAGINATION_DOC_ID
         data = await self.graphql_query(variables,
@@ -487,11 +487,10 @@ class InstagramClient:
             try:
                 comment_data = await self.get_json(comment_url,
                                                    params={
-                                                       **shared_params,
-                                                       'min_id':
+                                                       **shared_params, 'min_id':
                                                            comment_data['next_min_id'],
                                                        'sort_order':
-                                                           'popular',
+                                                           'popular'
                                                    },
                                                    headers=request_headers,
                                                    cast_to=Comments)
@@ -564,7 +563,7 @@ class InstagramClient:
         params: dict[str, str] = {
             'is_chronological': 'true',
             'min_id': '',
-            'paging_direction': 'view_more',
+            'paging_direction': 'view_more'
         }
         replies: list[Mapping[str, Any]] = []
         while True:

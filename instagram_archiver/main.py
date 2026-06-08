@@ -66,7 +66,7 @@ def _build_loggers(*, debug: bool) -> dict[str, dict[str, Any]]:
         'quic': _QUIET,
         'urllib3': {},
         'urllib3.util.retry': _QUIET,
-        'yt_dlp_utils': {} if debug else _QUIET,
+        'yt_dlp_utils': {} if debug else _QUIET
     }
 
 
@@ -277,6 +277,41 @@ async def _async_saved_main(browser: BrowserName, profile: str, output_dir: str,
     await _drive_scraper(scraper, coro_factory, debug=debug, quiet=quiet, sleep_time=sleep_time)
 
 
+def _run_archive(browser: BrowserName, profile: str, output_dir: str | None, username: str | None,
+                 *, debug: bool, include_child_comments: bool, include_comments: bool, no_log: bool,
+                 quiet: bool, saved: bool, sleep_time: int, unsave: bool) -> None:
+    if saved:
+        asyncio.run(
+            _async_saved_main(browser,
+                              profile,
+                              output_dir if output_dir is not None else '.',
+                              debug=debug,
+                              include_child_comments=include_child_comments,
+                              include_comments=include_comments,
+                              no_log=no_log,
+                              quiet=quiet,
+                              sleep_time=sleep_time,
+                              unsave=unsave))
+        return
+    # `username` is non-None here because the caller re-raises ``UsageError`` when both
+    # `--saved` is unset and `username` is missing.
+    profile_username = cast('str', username)
+    resolved_output_dir = (Path(output_dir % {'username': profile_username}) if
+                           (output_dir and '%(username)s' in output_dir) else Path(
+                               output_dir or profile_username))
+    asyncio.run(
+        _async_profile_main(browser,
+                            profile,
+                            profile_username,
+                            resolved_output_dir,
+                            debug=debug,
+                            include_child_comments=include_child_comments,
+                            include_comments=include_comments,
+                            no_log=no_log,
+                            quiet=quiet,
+                            sleep_time=sleep_time))
+
+
 @click.command(context_settings={'help_option_names': ('-h', '--help')})
 @click.option('-o',
               '--output-dir',
@@ -345,37 +380,18 @@ def main(output_dir: str | None,
         raise click.UsageError(msg)
     setup_logging(debug=debug, loggers=cast('Any', _build_loggers(debug=debug)))
     try:
-        if saved:
-            resolved_saved_output_dir = output_dir if output_dir is not None else '.'
-            asyncio.run(
-                _async_saved_main(browser,
-                                  profile,
-                                  resolved_saved_output_dir,
-                                  debug=debug,
-                                  include_child_comments=include_child_comments,
-                                  include_comments=include_comments,
-                                  no_log=no_log,
-                                  quiet=quiet,
-                                  sleep_time=sleep_time,
-                                  unsave=unsave))
-        else:
-            # `username` is non-None here because the validation above re-raises
-            # ``UsageError`` when both `--saved` is unset and `username` is missing.
-            profile_username = cast('str', username)
-            resolved_profile_output_dir = (Path(output_dir % {'username': profile_username}) if
-                                           (output_dir and '%(username)s' in output_dir) else Path(
-                                               output_dir or profile_username))
-            asyncio.run(
-                _async_profile_main(browser,
-                                    profile,
-                                    profile_username,
-                                    resolved_profile_output_dir,
-                                    debug=debug,
-                                    include_child_comments=include_child_comments,
-                                    include_comments=include_comments,
-                                    no_log=no_log,
-                                    quiet=quiet,
-                                    sleep_time=sleep_time))
+        _run_archive(browser,
+                     profile,
+                     output_dir,
+                     username,
+                     debug=debug,
+                     include_child_comments=include_child_comments,
+                     include_comments=include_comments,
+                     no_log=no_log,
+                     quiet=quiet,
+                     saved=saved,
+                     sleep_time=sleep_time,
+                     unsave=unsave)
     except UnexpectedRedirect as e:
         click.echo('Unexpected redirect. Assuming request limit has been reached.', err=True)
         raise click.Abort from e

@@ -304,7 +304,7 @@ def _install_fake_scraper(
     cls = type('_FakeScraper', (_FakeScraper,), {
         'process_impl': process_impl,
         'cookies': cookies,
-        'instances': (),
+        'instances': ()
     })
     mocker.patch(f'instagram_archiver.main.{target}', cls)
     return cls

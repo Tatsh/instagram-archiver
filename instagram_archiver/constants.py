@@ -35,7 +35,7 @@ SHARED_HEADERS = {
     'sec-fetch-mode': 'cors',
     'sec-fetch-site': 'same-origin',
     'sec-gpc': '1',
-    'user-agent': USER_AGENT,
+    'user-agent': USER_AGENT
 }
 """
 Headers to use for requests.

@@ -82,7 +82,7 @@ class LogDB:
             return False
         self._cursor.execute('SELECT COUNT(url) FROM log WHERE url = ?', (clean_url(url),))
         count: int
-        (count,) = self._cursor.fetchone()
+        (count) = self._cursor.fetchone()
         return count == 1
 
     def save(self, url: str) -> None:

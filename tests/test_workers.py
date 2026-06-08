@@ -12,12 +12,7 @@ from instagram_archiver.typing import (
     Stats,
     YTDLPState,
 )
-from instagram_archiver.workers import (
-    WorkerAbort,
-    comments_worker,
-    image_worker,
-    video_worker,
-)
+from instagram_archiver.workers import WorkerAbort, comments_worker, image_worker, video_worker
 import pytest
 
 if TYPE_CHECKING:

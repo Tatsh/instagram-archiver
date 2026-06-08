@@ -292,21 +292,18 @@ async def test_process_highlights_dispatches_reel_items(mocker: MockerFixture,
     mocker.patch.object(scraper,
                         'reel_page_gallery',
                         new_callable=AsyncMock,
-                        side_effect=[
-                            {
-                                'edges': [{
-                                    'node': {
-                                        'id': '12345',
-                                        'items': [image_item, video_item]
-                                    }
-                                }],
-                                'page_info': {
-                                    'end_cursor': None,
-                                    'has_next_page': False
+                        side_effect=[{
+                            'edges': [{
+                                'node': {
+                                    'id': '12345',
+                                    'items': [image_item, video_item]
                                 }
-                            },
-                            None,
-                        ])
+                            }],
+                            'page_info': {
+                                'end_cursor': None,
+                                'has_next_page': False
+                            }
+                        }, None])
     mock_save_image = mocker.patch.object(scraper, 'save_image_versions2', new_callable=AsyncMock)
     ydl = mocker.MagicMock()
     ydl.download = AsyncMock(return_value=0)
@@ -371,23 +368,19 @@ async def test_process_dispatch_reel_paginates(mocker: MockerFixture,
     mock_reel = mocker.patch.object(scraper,
                                     'reel_page_gallery',
                                     new_callable=AsyncMock,
-                                    side_effect=[
-                                        {
-                                            'edges': [],
-                                            'page_info': {
-                                                'end_cursor': 'cur',
-                                                'has_next_page': True
-                                            }
-                                        },
-                                        {
-                                            'edges': [],
-                                            'page_info': {
-                                                'end_cursor': None,
-                                                'has_next_page': False
-                                            }
-                                        },
-                                        None,
-                                    ])
+                                    side_effect=[{
+                                        'edges': [],
+                                        'page_info': {
+                                            'end_cursor': 'cur',
+                                            'has_next_page': True
+                                        }
+                                    }, {
+                                        'edges': [],
+                                        'page_info': {
+                                            'end_cursor': None,
+                                            'has_next_page': False
+                                        }
+                                    }, None])
     await scraper.process(mocker.MagicMock())
     assert mock_reel.await_args_list[1].kwargs['after'] == 'cur'
 
@@ -609,26 +602,23 @@ async def test_process_pagination_completes_via_has_next_page_false(
     mocker.patch.object(scraper,
                         'graphql_query',
                         new_callable=AsyncMock,
-                        side_effect=[
-                            {
-                                'xdt_api__v1__feed__user_timeline_graphql_connection': {
-                                    'edges': [],
-                                    'page_info': {
-                                        'has_next_page': True,
-                                        'end_cursor': 'cur'
-                                    }
+                        side_effect=[{
+                            'xdt_api__v1__feed__user_timeline_graphql_connection': {
+                                'edges': [],
+                                'page_info': {
+                                    'has_next_page': True,
+                                    'end_cursor': 'cur'
                                 }
-                            },
-                            {
-                                'xdt_api__v1__feed__user_timeline_graphql_connection': {
-                                    'edges': [],
-                                    'page_info': {
-                                        'has_next_page': False,
-                                        'end_cursor': None
-                                    }
+                            }
+                        }, {
+                            'xdt_api__v1__feed__user_timeline_graphql_connection': {
+                                'edges': [],
+                                'page_info': {
+                                    'has_next_page': False,
+                                    'end_cursor': None
                                 }
-                            },
-                        ])
+                            }
+                        }])
     await scraper.process(mocker.MagicMock())
 
 
@@ -719,21 +709,18 @@ async def test_process_highlights_increments_yt_dlp_state(mocker: MockerFixture,
     mocker.patch.object(scraper,
                         'reel_page_gallery',
                         new_callable=AsyncMock,
-                        side_effect=[
-                            {
-                                'edges': [{
-                                    'node': {
-                                        'id': '1',
-                                        'items': [video_item, video_item]
-                                    }
-                                }],
-                                'page_info': {
-                                    'end_cursor': None,
-                                    'has_next_page': False
+                        side_effect=[{
+                            'edges': [{
+                                'node': {
+                                    'id': '1',
+                                    'items': [video_item, video_item]
                                 }
-                            },
-                            None,
-                        ])
+                            }],
+                            'page_info': {
+                                'end_cursor': None,
+                                'has_next_page': False
+                            }
+                        }, None])
     await scraper.process(mocker.MagicMock(), yt_dlp_state=state)
     assert state.total_urls == 2
 
