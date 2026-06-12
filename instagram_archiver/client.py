@@ -115,7 +115,9 @@ class InstagramClient:
                                            self._browser_profile,
                                            domains={'instagram.com'},
                                            setup_retry=True)
-        self.session.headers.update(SHARED_HEADERS)
+        # ``CaseInsensitiveDict`` keys are invariant ``str | bytes``, so pass items() to hit the
+        # covariant ``Iterable[tuple[...]]`` overload instead of the ``Mapping`` one.
+        self.session.headers.update(SHARED_HEADERS.items())
 
     def add_video_url(self, url: str) -> None:
         """
@@ -328,8 +330,6 @@ class InstagramClient:
             log.warning('HEAD request failed with status code %s.', r.status_code)
             return
         content_type = r.headers['content-type']
-        if isinstance(content_type, bytes):
-            content_type = content_type.decode()
         ext = get_extension(content_type)
         name = f'{sub_item["id"]}.{ext}'
         body = await self.session.get(best['url'])

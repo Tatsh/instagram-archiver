@@ -120,32 +120,6 @@ async def test_save_image_versions2(client: MagicMock, mocker: MockerFixture) ->
     mock_utime.assert_called_once_with('123.jpg', (1234567890, 1234567890))
 
 
-async def test_save_image_versions2_content_type_bytes(client: MagicMock,
-                                                       mocker: MockerFixture) -> None:
-    mocker.patch.object(client, 'is_saved', return_value=False)
-    mock_get_extension = mocker.patch('instagram_archiver.client.get_extension', return_value='jpg')
-    mocker.patch('instagram_archiver.client.write_bytes')
-    mocker.patch('instagram_archiver.client.utime')
-    head_response = MagicMock(status_code=200,
-                              headers={'content-type': b'image/jpeg'},
-                              url='https://example.com/image')
-    client.session.head.return_value = head_response
-    client.session.get.return_value = MagicMock(content=b'data')
-
-    sub_item = {
-        'id': '321',
-        'image_versions2': {
-            'candidates': [{
-                'url': 'https://example.com/image',
-                'width': 100,
-                'height': 100
-            }]
-        }
-    }
-    await client.save_image_versions2(sub_item, 1234567890)
-    mock_get_extension.assert_called_once_with('image/jpeg')
-
-
 async def test_save_image_versions2_no_content(client: MagicMock, mocker: MockerFixture) -> None:
     mocker.patch.object(client, 'is_saved', return_value=False)
     mocker.patch('instagram_archiver.client.get_extension', return_value='jpg')
