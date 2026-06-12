@@ -1,4 +1,5 @@
 anchore
+Ångström
 anyio
 apng
 appdir
@@ -39,7 +40,6 @@ esbonio
 excinfo
 filevers
 flathub
-forcelist
 foxundermoon
 functools
 genindex
@@ -75,7 +75,6 @@ niquests
 noprogress
 norecursedirs
 notarytool
-npmjs
 numpy
 onefile
 oneline
@@ -84,6 +83,7 @@ pavelzw
 pcode
 pipx
 plistlib
+preapproved
 prodvers
 pycache
 pydantic
@@ -110,7 +110,6 @@ shellformat
 signtool
 snapcore
 snapcraft
-softprops
 soupsieve
 sphinxcontrib
 syft
@@ -125,13 +124,17 @@ tostring
 tryfirst
 ubyte
 udvare
+undraft
+undrafted
 unsaving
 vendored
 venv
 vers
 virtualenv
+winget
 wiswa
 wiswa's
+worktree
 writeplus
 xcrun
 xdtapiv
@@ -140,4 +143,4 @@ yapf
 yapfignore
 yarnrc
 ytdlp
-Ångström
+zizmor

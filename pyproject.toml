@@ -4,11 +4,11 @@ requires = ["hatchling"]
 
 [dependency-groups]
 dev = [
-  "commitizen>=4.13.10",
-  "cz-path>=0.0.6",
-  "mypy>=1.20.1",
-  "ruff==0.15.15",
-  "ty>=0.0.31",
+  "commitizen>=4.16.3",
+  "cz-path>=0.0.7",
+  "mypy>=2.1.0",
+  "ruff==0.15.16",
+  "ty>=0.0.44",
   "yapf>=0.43.0",
 ]
 docs = [
@@ -21,12 +21,12 @@ docs = [
   "sphinx-datatables>=1.0.0",
   "sphinx-immaterial>=0.13.9",
   "sphinx>=9.1.0; python_version >= \"3.13\"",
-  "tomlkit>=0.14.0",
+  "tomlkit>=0.15.0",
 ]
 tests = [
   "coveralls>=4.1.0",
   "mock>=5.2.0",
-  "pytest-asyncio>=1.3.0",
+  "pytest-asyncio>=1.4.0",
   "pytest-cov>=7.1.0",
   "pytest-mock>=3.15.1",
   "pytest>=9.0.3",
@@ -47,12 +47,12 @@ classifiers = [
 dependencies = [
   "anyio>=4.13.0",
   "archiver-stats>=0.0.1",
-  "bascom>=0.1.2",
-  "click>=8.3.2",
-  "niquests>=3.18.6",
+  "bascom>=0.1.3",
+  "click>=8.4.1",
+  "niquests>=3.19.0",
   "rich>=15.0.0",
   "typing-extensions>=4.15.0",
-  "yt-dlp-utils[asyncio]>=0.1.0",
+  "yt-dlp-utils[asyncio]>=0.1.1",
 ]
 description = "Save Instagram content you have access to."
 keywords = ["command line", "instagram"]
@@ -215,6 +215,10 @@ max-statements = 100
 [tool.uv]
 default-groups = "all"
 exclude-newer = "1 week"
+
+[tool.uv.exclude-newer-package]
+archiver-stats = false
+yt-dlp-utils = false
 
 [tool.yapf]
 align_closing_bracket_with_visual_indent = true

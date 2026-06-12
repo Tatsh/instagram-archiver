@@ -1,8 +1,13 @@
 jobs:
   check:
+    permissions:
+      actions: 'read'
+      contents: 'read'
     runs-on: 'ubuntu-latest'
     steps:
-      - uses: 'actions/checkout@v6.0.3'
+      - uses: 'actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10'
+        with:
+          persist-credentials: false
       - env:
           COMMIT_SHA: '${{ github.sha }}'
           GH_TOKEN: '${{ github.token }}'
@@ -10,32 +15,53 @@ jobs:
         name: 'Wait for workflows'
         run: |
           sha="$COMMIT_SHA"
+          required_workflows=('AppImage' 'Flatpak' 'PyInstaller' 'Snap')
+          optional_workflows=('Prettier' 'QA' 'Spelling' 'Tests' 'markdownlint')
+          process_workflow() {
+            local workflow="$1" treat_missing="$2"
+            local run status conclusion
+            run=$(gh run list --workflow "$workflow" --commit "$sha" --json status,conclusion --jq '.[0]') || run=''
+            if [[ -z "$run" || "$run" == 'null' ]]; then
+              if [[ "$treat_missing" == 'pending' ]]; then
+                echo "Required workflow '$workflow' has not registered a run yet; waiting."
+                return 2
+              fi
+              echo "Optional workflow '$workflow' did not run for this commit; skipping."
+              return 0
+            fi
+            status=$(echo "$run" | jq -r '.status') || status=''
+            conclusion=$(echo "$run" | jq -r '.conclusion') || conclusion=''
+            case "$conclusion" in
+              failure|cancelled|timed_out|startup_failure|action_required)
+                echo "::error::Workflow '$workflow' ${conclusion}."
+                return 1
+                ;;
+              success|skipped|neutral)
+                return 0
+                ;;
+              *)
+                if [[ "$status" == 'completed' ]]; then
+                  echo "::error::Workflow '$workflow' completed with unexpected conclusion '${conclusion}'."
+                  return 1
+                fi
+                echo "Workflow '$workflow' still pending (status=${status})."
+                return 2
+                ;;
+            esac
+          }
           for i in $(seq 1 30); do
             all_done=true
-            for workflow in AppImage Flatpak Prettier PyInstaller QA Snap Spelling Tests markdownlint; do
-              run=$(gh run list --workflow "$workflow" --commit "$sha" --json status,conclusion --jq '.[0]')
-              if [[ -z "$run" || "$run" == 'null' ]]; then
-                echo "Workflow '$workflow' did not run for this commit; treating as optional."
-                continue
-              fi
-              status=$(echo "$run" | jq -r '.status')
-              conclusion=$(echo "$run" | jq -r '.conclusion')
-              case "$conclusion" in
-                failure|cancelled|timed_out|startup_failure|action_required)
-                  echo "::error::Workflow '$workflow' ${conclusion}."
-                  exit 1
-                  ;;
-                success|skipped|neutral)
-                  ;;
-                *)
-                  if [[ "$status" == 'completed' ]]; then
-                    echo "::error::Workflow '$workflow' completed with unexpected conclusion '${conclusion}'."
-                    exit 1
-                  fi
-                  echo "Workflow '$workflow' still pending (status=${status})."
-                  all_done=false
-                  ;;
-              esac
+            for workflow in "${required_workflows[@]}"; do
+              rc=0
+              process_workflow "$workflow" pending || rc=$?
+              [[ $rc -eq 1 ]] && exit 1
+              [[ $rc -eq 2 ]] && all_done=false
+            done
+            for workflow in "${optional_workflows[@]}"; do
+              rc=0
+              process_workflow "$workflow" skip || rc=$?
+              [[ $rc -eq 1 ]] && exit 1
+              [[ $rc -eq 2 ]] && all_done=false
             done
             if [[ "$all_done" == 'true' ]]; then
               echo 'All required workflows succeeded.'
@@ -47,29 +73,35 @@ jobs:
           echo '::error::Timed out waiting for workflows.'
           exit 1
   publish:
+    environment: 'release'
     needs:
       - 'check'
+    permissions:
+      contents: 'write'
+      id-token: 'write'
     runs-on: 'ubuntu-latest'
     steps:
-      - uses: 'actions/checkout@v6.0.3'
-      - uses: 'actions/setup-python@v6.2.0'
+      - uses: 'actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10'
+        with:
+          persist-credentials: false
+      - uses: 'actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405'
         with:
           python-version: '3.13'
       - name: 'Install uv'
-        uses: 'astral-sh/setup-uv@v8.2.0'
-      - run: 'uv build'
-      - uses: 'pypa/gh-action-pypi-publish@release/v1'
-      - uses: 'softprops/action-gh-release@v3.0.0'
+        uses: 'astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39'
         with:
-          draft: true
-          files: |
-            dist/*.tar.gz
-            dist/*.whl
+          enable-cache: false
+      - run: 'uv build'
+      - uses: 'pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b'
+      - env:
+          GH_TOKEN: '${{ github.token }}'
+        name: 'Create or update draft release'
+        run: |
+          gh release create "$GITHUB_REF_NAME" --draft --notes '' dist/*.tar.gz dist/*.whl ||
+            gh release upload "$GITHUB_REF_NAME" dist/*.tar.gz dist/*.whl --clobber
 name: 'Publish'
 'on':
   push:
     tags:
       - 'v*'
-permissions:
-  contents: 'write'
-  id-token: 'write'
+permissions: {}

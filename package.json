@@ -1,4 +1,9 @@
 {
+  "_wiswa": {
+    "commandLine": "wiswa -d",
+    "lastRun": "2026-06-12T04:41:02Z",
+    "version": "253303c"
+  },
   "contributors": ["Andrew Udvare <audvare@gmail.com>"],
   "cspell": {
     "cache": {
@@ -70,7 +75,7 @@
     "showFound": true
   },
   "name": "instagram-archiver",
-  "packageManager": "yarn@4.14.1",
+  "packageManager": "yarn@4.16.0",
   "prettier": {
     "endOfLine": "lf",
     "iniSpaceAroundEquals": true,
@@ -95,7 +100,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:Tatsh/instagram-archiver.git"
+    "url": "git+https://github.com/Tatsh/instagram-archiver.git"
   },
   "scripts": {
     "check-formatting": "prettier --check . && uv run yapf --diff --parallel --recursive . && markdownlint-cli2 --config package.json --configPointer /markdownlint-cli2",
