@@ -546,7 +546,7 @@ async def test_process_writes_pic_when_content_present(mocker: MockerFixture,
 async def test_process_skips_pic_when_content_none(mocker: MockerFixture,
                                                    mock_setup_session: AsyncMock) -> None:
     scraper = _build_profile_scraper(mocker)
-    scraper.session.get = AsyncMock(  # type: ignore[method-assign]  # ty: ignore[invalid-assignment]
+    scraper.session.get = AsyncMock(  # type: ignore[method-assign]
         return_value=mocker.MagicMock(content=None))
     mock_write_bytes = mocker.patch('instagram_archiver.profile_scraper.write_bytes')
     mocker.patch.object(scraper,
