@@ -149,7 +149,7 @@ class InstagramClient:
             self,
             variables: Mapping[str, Any],
             *,
-            cast_to: type[T],  # noqa: ARG002
+            cast_to: type[T],  # ruff:ignore[unused-method-argument]
             doc_id: str = '9806959572732215') -> T | None:
         """
         Make a GraphQL query.
@@ -217,7 +217,7 @@ class InstagramClient:
             self,
             url: str,
             *,
-            cast_to: type[T],  # noqa: ARG002
+            cast_to: type[T],  # ruff:ignore[unused-method-argument]
             headers: Mapping[str, str] | None = None,
             params: Mapping[str, str] | None = None) -> T:
         """
@@ -281,7 +281,9 @@ class InstagramClient:
         """Close the underlying session."""
         await self.session.close()
 
-    def is_saved(self, url: str) -> bool:  # pragma: no cover  # noqa: ARG002, PLR6301
+    def is_saved(
+            self, url: str
+    ) -> bool:  # pragma: no cover  # ruff:ignore[unused-method-argument, no-self-use]
         """
         Check if a URL is already saved.
 

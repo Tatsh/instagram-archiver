@@ -368,7 +368,7 @@ def main(output_dir: str | None,
     Archive a profile (USERNAME) or your saved posts (--saved).
 
     Pass exactly one of: a USERNAME positional argument, or ``--saved``/``-s``.
-    """  # noqa: DOC501
+    """  # ruff:ignore[docstring-missing-exception]
     if saved and username is not None:
         msg = 'USERNAME and --saved are mutually exclusive.'
         raise click.UsageError(msg)
