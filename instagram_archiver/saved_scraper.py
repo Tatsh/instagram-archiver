@@ -228,7 +228,7 @@ class SavedScraper(SaveCommentsCheckDisabledMixin, InstagramClient):
                 if on_cleanup is not None:
                     on_cleanup('Producer cancellation received.')
                 raise
-            except Exception as error:  # noqa: BLE001
+            except Exception as error:  # ruff:ignore[blind-except]
                 if not stop_event.is_set():
                     first_exception.append(error)
                     stop_event.set()

@@ -1,6 +1,6 @@
 """Typing helpers."""
 
-# ruff: noqa: D101
+# ruff:file-ignore[undocumented-public-class]
 from __future__ import annotations
 
 from collections.abc import Callable

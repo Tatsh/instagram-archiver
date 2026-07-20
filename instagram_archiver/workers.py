@@ -125,7 +125,7 @@ async def image_worker(image_queue: asyncio.Queue[Edge | None],
                                        stat_key=IMAGES_PROCESSED,
                                        stats=stats):
                 return
-        except Exception as error:  # noqa: BLE001
+        except Exception as error:  # ruff:ignore[blind-except]
             _set_first_exception(first_exception, error, stop_event)
             return
         finally:
@@ -173,7 +173,7 @@ async def comments_worker(comments_queue: asyncio.Queue[Edge | None],
                                        stat_key=COMMENTS_PROCESSED,
                                        stats=stats):
                 return
-        except Exception as error:  # noqa: BLE001
+        except Exception as error:  # ruff:ignore[blind-except]
             _set_first_exception(first_exception, error, stop_event)
             return
         finally:
