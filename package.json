@@ -1,8 +1,8 @@
 {
   "_wiswa": {
     "commandLine": "wiswa -d",
-    "lastRun": "2026-06-12T04:41:02Z",
-    "version": "253303c"
+    "lastRun": "2026-08-05T00:10:45Z",
+    "version": "22472cc"
   },
   "contributors": ["Andrew Udvare <audvare@gmail.com>"],
   "cspell": {
@@ -75,7 +75,7 @@
     "showFound": true
   },
   "name": "instagram-archiver",
-  "packageManager": "yarn@4.16.0",
+  "packageManager": "yarn@4.18.0",
   "prettier": {
     "endOfLine": "lf",
     "iniSpaceAroundEquals": true,

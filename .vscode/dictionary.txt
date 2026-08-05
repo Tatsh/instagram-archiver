@@ -45,6 +45,7 @@ functools
 genindex
 getpid
 globaltoc
+handoff
 hoverxref
 htmlcov
 inrelayprovider
@@ -112,6 +113,7 @@ snapcore
 snapcraft
 soupsieve
 sphinxcontrib
+statusline
 syft
 tatsh
 testpaths

@@ -281,7 +281,10 @@ class InstagramClient:
         """Close the underlying session."""
         await self.session.close()
 
-    def is_saved(self, url: str) -> bool:  # pragma: no cover
+    def is_saved(  # ruff: ignore[no-self-use]
+            self,
+            url: str  # ruff: ignore[unused-method-argument]
+    ) -> bool:  # pragma: no cover
         """
         Check if a URL is already saved.
 
