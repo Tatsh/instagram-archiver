@@ -4,12 +4,13 @@ from typing import TYPE_CHECKING, Any
 from unittest.mock import AsyncMock
 import asyncio
 
+from niquests.exceptions import HTTPError
+import pytest
+
 from instagram_archiver.profile_scraper import ProfileScraper
 from instagram_archiver.saved_scraper import SavedScraper
 from instagram_archiver.typing import YTDLPState
 from instagram_archiver.workers import WorkerAbort
-from niquests.exceptions import HTTPError
-import pytest
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture

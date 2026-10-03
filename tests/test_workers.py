@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING, Any
 from unittest.mock import AsyncMock
 import asyncio
 
+import pytest
+
 from instagram_archiver.typing import (
     COMMENTS_PROCESSED,
     IMAGES_PROCESSED,
@@ -13,7 +15,6 @@ from instagram_archiver.typing import (
     YTDLPState,
 )
 from instagram_archiver.workers import WorkerAbort, comments_worker, image_worker, video_worker
-import pytest
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture

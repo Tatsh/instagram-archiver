@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from instagram_archiver.compat import chdir
 import pytest
+
+from instagram_archiver.compat import chdir
 
 
 def test_chdir_changes_working_directory(tmp_path: Path) -> None:

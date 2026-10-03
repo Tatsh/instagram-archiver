@@ -4,10 +4,11 @@ from typing import TYPE_CHECKING, Any, cast
 from unittest.mock import AsyncMock, MagicMock
 import asyncio
 
-from instagram_archiver.client import CSRFTokenNotFound, InstagramClient, UnexpectedRedirect
-from instagram_archiver.typing import POSTS_HANDLED, Comments, HighlightsTray, Stats, YTDLPState
 from niquests.exceptions import HTTPError, RetryError
 import pytest
+
+from instagram_archiver.client import CSRFTokenNotFound, InstagramClient, UnexpectedRedirect
+from instagram_archiver.typing import POSTS_HANDLED, Comments, HighlightsTray, Stats, YTDLPState
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture

@@ -8,11 +8,12 @@ import asyncio
 import os
 import signal
 
-from instagram_archiver.client import UnexpectedRedirect
-from instagram_archiver.main import main
 from typing_extensions import Self
 import click
 import pytest
+
+from instagram_archiver.client import UnexpectedRedirect
+from instagram_archiver.main import main
 
 if TYPE_CHECKING:
     from collections.abc import Callable

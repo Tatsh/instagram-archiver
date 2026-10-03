@@ -3,6 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 import json
 
+import pytest
+
 from instagram_archiver.utils import (
     JSONFormattedString,
     UnknownMimetypeError,
@@ -13,7 +15,6 @@ from instagram_archiver.utils import (
     write_failed_urls,
     write_if_new,
 )
-import pytest
 
 if TYPE_CHECKING:
     from pathlib import Path
