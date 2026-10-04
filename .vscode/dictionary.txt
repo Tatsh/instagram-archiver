@@ -125,7 +125,6 @@ syft
 tatsh
 testpaths
 toctree
-tomlkit
 tomllib
 tomlq
 tonumber
