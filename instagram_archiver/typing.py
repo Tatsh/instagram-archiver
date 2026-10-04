@@ -5,10 +5,9 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypedDict
+from typing import TYPE_CHECKING, Any, Literal, NotRequired, TypeAlias, TypedDict
 
 from archiver_stats import Category, Stats as _BaseStats, StatusLine
-from typing_extensions import NotRequired
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence

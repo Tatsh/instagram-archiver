@@ -4,12 +4,11 @@ from __future__ import annotations
 
 from http import HTTPStatus
 from os import utime
-from typing import TYPE_CHECKING, Any, TypeVar, cast
+from typing import TYPE_CHECKING, Any, Self, TypeVar, cast
 import json
 import logging
 
 from niquests.exceptions import HTTPError, RetryError
-from typing_extensions import Self
 from yt_dlp_utils.aio import setup_session
 
 from .constants import API_HEADERS, SHARED_HEADERS

@@ -2,13 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Self
 from unittest.mock import AsyncMock
 import asyncio
 import os
 import signal
 
-from typing_extensions import Self
 import click
 import pytest
 

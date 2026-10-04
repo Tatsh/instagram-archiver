@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Self, cast
 import asyncio
 import logging
 
-from typing_extensions import Self, override
+from typing_extensions import override
 
 from .client import InstagramClient
 from .compat import chdir
