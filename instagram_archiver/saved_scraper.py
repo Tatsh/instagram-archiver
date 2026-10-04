@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import chdir
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Self, cast
 import asyncio
@@ -10,7 +11,6 @@ import logging
 from typing_extensions import override
 
 from .client import InstagramClient
-from .compat import chdir
 from .constants import API_HEADERS, PAGE_FETCH_HEADERS
 from .dedup import LogDB
 from .utils import SaveCommentsCheckDisabledMixin

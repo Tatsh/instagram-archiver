@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import chdir
 from pathlib import Path
 from typing import TYPE_CHECKING, Self
 import asyncio
@@ -11,7 +12,6 @@ from niquests.exceptions import HTTPError
 from typing_extensions import override
 
 from .client import InstagramClient
-from .compat import chdir
 from .dedup import LogDB
 from .typing import (
     BrowserName,
