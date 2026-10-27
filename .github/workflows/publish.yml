@@ -98,7 +98,7 @@ jobs:
         with:
           enable-cache: false
       - run: 'uv build'
-      - uses: 'pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33'
+      - uses: 'pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086'
       - if: "github.ref_type == 'tag'"
         name: 'Upload release assets'
         uses: 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
