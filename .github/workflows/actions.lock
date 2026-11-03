@@ -7,13 +7,13 @@ workflows:
         - 'actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6'
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333'
-        - 'actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97'
+        - 'actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0'
         - 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
         - 'anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c'
-        - 'astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884'
+        - 'astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e'
     '.github/workflows/codeql.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'github/codeql-action@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee'
+        - 'github/codeql-action@9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
     '.github/workflows/flatpak.yml':
         - 'actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6'
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
@@ -29,24 +29,24 @@ workflows:
     '.github/workflows/publish.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333'
-        - 'actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97'
+        - 'actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0'
         - 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
-        - 'astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884'
+        - 'astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e'
         - 'pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086'
     '.github/workflows/pyinstaller.yml':
         - 'actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6'
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333'
-        - 'actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97'
+        - 'actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0'
         - 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
         - 'anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c'
-        - 'astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884'
+        - 'astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e'
     '.github/workflows/qa.yml':
         - 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97'
+        - 'actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0'
         - 'astral-sh/ruff-action@278981a28ce3188b1e39527901f38254bf3aac89'
-        - 'astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884'
+        - 'astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e'
     '.github/workflows/release.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
     '.github/workflows/snap.yml':
@@ -60,8 +60,8 @@ workflows:
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
     '.github/workflows/tests.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97'
-        - 'astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884'
+        - 'actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0'
+        - 'astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e'
         - 'coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329'
         - 'pavelzw/pytest-action@510c5e90c360a185039bea56ce8b3e7e51a16507'
 dependencies:
@@ -85,9 +85,9 @@ dependencies:
         commit: 'sha1-9000827ccba6bdab643e8b6fd33ac0654aef8333'
         owner_id: 44036562
         repo_id: 192626254
-    'actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97':
-        ref: 'v7.0.0'
-        commit: 'sha1-5fda3b95a4ea91299a34e894583c3862153e4b97'
+    'actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0':
+        ref: 'v7.1.0'
+        commit: 'sha1-6d4fd22b20465ccc0f7354476588e8df7c9ca0e0'
         owner_id: 44036562
         repo_id: 192625525
     'actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405':
@@ -110,9 +110,9 @@ dependencies:
         commit: 'sha1-278981a28ce3188b1e39527901f38254bf3aac89'
         owner_id: 115962839
         repo_id: 865075538
-    'astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884':
-        ref: 'v10.3.0'
-        commit: 'sha1-1c37ad07a6a961277cf70c0d37d6f313000f5884'
+    'astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e':
+        ref: 'v10.3.2'
+        commit: 'sha1-07a047e608db84b3d8c06cd9a7c7dcc9c355c18e'
         owner_id: 115962839
         repo_id: 846733598
     'coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329':
@@ -125,9 +125,9 @@ dependencies:
         commit: 'sha1-79327416609af08178ad73b352877e51450790b3'
         owner_id: 19473042
         repo_id: 211923252
-    'github/codeql-action@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee':
-        ref: 'v4.39.0'
-        commit: 'sha1-6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee'
+    'github/codeql-action@9b3254085494b55a0f7c4c2b3d2d52cc712ce370':
+        ref: 'v4.39.1'
+        commit: 'sha1-9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
         owner_id: 9919
         repo_id: 259445878
     'pavelzw/pytest-action@510c5e90c360a185039bea56ce8b3e7e51a16507':
