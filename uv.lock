@@ -659,11 +659,11 @@ wheels = [
 
 [[package]]
 name = "click"
-version = "8.5.0"
+version = "8.5.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/c7/0e/7fa0ef50764b67090eca4114772a2abf8b6148198475e54c660b97caeee6/click-8.5.0.tar.gz", hash = "sha256:ba0d2089de75ea0310e2dde03160e6ca10009947fb95a182f9b54021bb272e34", size = 382235, upload-time = "2026-08-26T13:33:14.56Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/45/37/edbf1b0707709013c0cf2e8317e03d97ed29bf4cac709fe328904ae92a38/click-8.5.1.tar.gz", hash = "sha256:9bbfada76703fd1d784b83eea012e3e8c6a001a876543ef104fa56aaaeb072b4", size = 399151, upload-time = "2026-11-06T17:37:01.021Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/58/50/6c0d534c5f134586a8e1ba4e330569e32f057e33372ae556463212fb4cd3/click-8.5.0-py3-none-any.whl", hash = "sha256:255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360", size = 125251, upload-time = "2026-08-26T13:33:12.928Z" },
+    { url = "https://files.pythonhosted.org/packages/31/7d/164b7ffc8624fe9efb4221bf9af485d5c1e41b9ae118045d2b6dc5457d8b/click-8.5.1-py3-none-any.whl", hash = "sha256:8bb5376d2006950386f8c6427613334a2acadc5f559cb80e638d00b4df957e37", size = 126163, upload-time = "2026-11-06T17:36:59.287Z" },
 ]
 
 [[package]]
@@ -1636,16 +1636,16 @@ wheels = [
 
 [[package]]
 name = "niquests"
-version = "3.21.2"
+version = "3.21.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "charset-normalizer" },
     { name = "urllib3-future" },
     { name = "wassima", marker = "sys_platform != 'emscripten'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1c/2a/e368ec88a02c6bfc56c031ba6da9dd8099ad998fb818c28b687bee74c91a/niquests-3.21.2.tar.gz", hash = "sha256:586d6b9475c9018a42f19f1e4688077b8158101cbf40673c63d2c1a096cc7665", size = 1094494, upload-time = "2026-09-23T06:23:46.681Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0b/e1/e73e2cdb3374e7b442d708de6f87555f00faa4fdb3e347d5ae6df66d472a/niquests-3.21.3.tar.gz", hash = "sha256:6fd476cd2612da6690df6162bb4f314970695bc32ccb68033208d390bb1ac679", size = 1103048, upload-time = "2026-11-09T07:05:00.389Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/65/51/eb07449eb9e7ecae4350b5a40bfcb002d6d26d58cf2cfd2f928ae7c2f559/niquests-3.21.2-py3-none-any.whl", hash = "sha256:73e52614a712ee2f4d410bdd29789ca6a4ed031f8961410156e395d42b091208", size = 229060, upload-time = "2026-09-23T06:23:44.056Z" },
+    { url = "https://files.pythonhosted.org/packages/54/72/4a0ba16f82c2d66854480079f5d6eee25be14025e171a2c25566d0c82db2/niquests-3.21.3-py3-none-any.whl", hash = "sha256:fce4988339389965418ab4ef94f7f246dba648cbeffa90cca33f801b882d3d7a", size = 229403, upload-time = "2026-11-09T07:04:58.352Z" },
 ]
 
 [[package]]
