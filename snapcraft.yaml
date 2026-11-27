@@ -20,7 +20,8 @@ parts:
     plugin: 'python'
     python-packages:
       - '.'
-    source: '.'
+    source: 'https://github.com/Tatsh/instagram-archiver.git'
+    source-tag: 'v0.4.1'
     stage-packages: []
 platforms:
   amd64:
